@@ -1,0 +1,10 @@
+RefreshDto:
+  type: object
+  required:
+    - refreshToken
+  properties:
+    refreshToken:
+      type: string
+      description: Valid refresh token
+  example:
+    refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...

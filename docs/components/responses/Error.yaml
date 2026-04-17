@@ -1,0 +1,11 @@
+Error:
+  description: Error response
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          message:
+            type: string
+          statusCode:
+            type: integer

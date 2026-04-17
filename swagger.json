@@ -1,0 +1,579 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "E-Shop API",
+    "version": "1.0.0",
+    "description": "Backend API for E-Shop project"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              },
+              "example": {
+                "email": "john@example.com",
+                "password": "secret123",
+                "name": "John Doe",
+                "phone": "+1234567890"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponse"
+                },
+                "example": {
+                  "message": "User registered successfully",
+                  "user": {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "email": "john@example.com",
+                    "name": "John Doe",
+                    "role": "USER",
+                    "phone": "+1234567890",
+                    "profileImage": null,
+                    "emailVerified": false,
+                    "isActive": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Validation failed",
+                  "statusCode": 400
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "User with this email already exists",
+                  "statusCode": 409
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Login with email and password",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              },
+              "example": {
+                "email": "john@example.com",
+                "password": "secret123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                },
+                "example": {
+                  "user": {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "email": "john@example.com",
+                    "name": "John Doe",
+                    "role": "USER",
+                    "phone": "+1234567890",
+                    "profileImage": "https://example.com/image.jpg",
+                    "emailVerified": true,
+                    "isActive": true
+                  },
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.example",
+                  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.refresh"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Invalid email or password",
+                  "statusCode": 401
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "summary": "Refresh access token",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshDto"
+              },
+              "example": {
+                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.refresh"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                },
+                "example": {
+                  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYzMDB9.new"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Invalid or expired refresh token",
+                  "statusCode": 401
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/google": {
+      "get": {
+        "summary": "Initiate Google OAuth flow",
+        "tags": ["Auth"],
+        "responses": {
+          "302": {
+            "description": "Redirects to Google consent screen"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/google/callback": {
+      "get": {
+        "summary": "Google OAuth callback",
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "OAuth authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthCallbackResponse"
+                },
+                "example": {
+                  "message": "Login successful",
+                  "user": {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "email": "john@example.com",
+                    "name": "John Doe",
+                    "role": "USER",
+                    "phone": null,
+                    "profileImage": "https://lh3.googleusercontent.com/a/ABC123",
+                    "emailVerified": true,
+                    "isActive": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Google authentication failed",
+                  "statusCode": 401
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/facebook": {
+      "get": {
+        "summary": "Initiate Facebook OAuth flow",
+        "tags": ["Auth"],
+        "responses": {
+          "302": {
+            "description": "Redirects to Facebook consent screen"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/facebook/callback": {
+      "get": {
+        "summary": "Facebook OAuth callback",
+        "tags": ["Auth"],
+        "responses": {
+          "200": {
+            "description": "OAuth authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthCallbackResponse"
+                },
+                "example": {
+                  "message": "Login successful",
+                  "user": {
+                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                    "email": "john@example.com",
+                    "name": "John Doe",
+                    "role": "USER",
+                    "phone": null,
+                    "profileImage": "https://graph.facebook.com/v12.0/123456789/picture",
+                    "emailVerified": true,
+                    "isActive": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "message": "Facebook authentication failed",
+                  "statusCode": 401
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code"
+          }
+        },
+        "example": {
+          "message": "An error occurred",
+          "statusCode": 500
+        }
+      },
+      "LoginDto": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password"
+          }
+        },
+        "example": {
+          "email": "john@example.com",
+          "password": "secret123"
+        }
+      },
+      "RegisterDto": {
+        "type": "object",
+        "required": ["email", "password", "name"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "description": "User password (min 6 characters)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "description": "User's full name"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Optional phone number"
+          },
+          "profileImage": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional profile image URL"
+          }
+        },
+        "example": {
+          "email": "john@example.com",
+          "password": "secret123",
+          "name": "John Doe",
+          "phone": "+1234567890",
+          "profileImage": "https://example.com/image.jpg"
+        }
+      },
+      "RefreshDto": {
+        "type": "object",
+        "required": ["refreshToken"],
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Valid refresh token"
+          }
+        },
+        "example": {
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.refresh"
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email address"
+          },
+          "name": {
+            "type": "string",
+            "description": "User full name"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["USER", "ADMIN", "DELIVERY"],
+            "description": "User role"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Phone number"
+          },
+          "profileImage": {
+            "type": "string",
+            "format": "uri",
+            "description": "Profile image URL"
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether email is verified"
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether account is active"
+          }
+        },
+        "example": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "email": "john@example.com",
+          "name": "John Doe",
+          "role": "USER",
+          "phone": "+1234567890",
+          "profileImage": "https://example.com/image.jpg",
+          "emailVerified": true,
+          "isActive": true
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "JWT refresh token"
+          }
+        },
+        "example": {
+          "user": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "email": "john@example.com",
+            "name": "John Doe",
+            "role": "USER",
+            "phone": "+1234567890",
+            "profileImage": "https://example.com/image.jpg",
+            "emailVerified": true,
+            "isActive": true
+          },
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.example",
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.refresh"
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "example": {
+          "message": "User registered successfully",
+          "user": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "email": "john@example.com",
+            "name": "John Doe",
+            "role": "USER",
+            "phone": "+1234567890",
+            "profileImage": null,
+            "emailVerified": false,
+            "isActive": true
+          }
+        }
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "New JWT access token"
+          }
+        },
+        "example": {
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYzMDB9.new"
+        }
+      },
+      "OAuthCallbackResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "example": {
+          "message": "Login successful",
+          "user": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "email": "john@example.com",
+            "name": "John Doe",
+            "role": "USER",
+            "phone": null,
+            "profileImage": "https://example.com/image.jpg",
+            "emailVerified": true,
+            "isActive": true
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints"
+    },
+    {
+      "name": "Cart",
+      "description": "Shopping cart endpoints (not implemented)"
+    },
+    {
+      "name": "Categories",
+      "description": "Category management (not implemented)"
+    },
+    {
+      "name": "Products",
+      "description": "Product management (not implemented)"
+    },
+    {
+      "name": "Orders",
+      "description": "Order management (not implemented)"
+    },
+    {
+      "name": "Coupons",
+      "description": "Coupon management (not implemented)"
+    }
+  ]
+}
