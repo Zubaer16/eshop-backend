@@ -3,7 +3,7 @@ import passport from 'passport';
 import swaggerUi from 'swagger-ui-express';
 import { container } from './container';
 import { errorHandler } from './shared/middlewares/error.middleware';
-import { swaggerSpec } from './docs';
+import { swaggerSpec } from '../swagger';
 
 const app = express();
 
