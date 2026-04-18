@@ -1,7 +1,7 @@
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import passport from 'passport';
-import { envConfig } from '../../config/env';
+import { envConfig } from '../../../config/env';
 import { AuthProvider } from '@prisma/client';
 import { OAuthService } from '../../modules/auth/oauth.service';
 
