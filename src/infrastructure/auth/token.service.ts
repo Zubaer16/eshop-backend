@@ -1,4 +1,4 @@
-import { envConfig } from '../../../config/env';
+import { envConfig } from '../../config/env';
 import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
 
 const accessTokenOptions: SignOptions = {

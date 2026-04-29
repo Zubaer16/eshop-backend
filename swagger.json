@@ -525,10 +525,18 @@
           },
           "user": {
             "$ref": "#/components/schemas/User"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "JWT refresh token"
           }
         },
         "example": {
-          "message": "Login successful",
+          "message": "OAuth authentication successful",
           "user": {
             "id": "550e8400-e29b-41d4-a716-446655440000",
             "email": "john@example.com",
@@ -538,7 +546,9 @@
             "profileImage": "https://example.com/image.jpg",
             "emailVerified": true,
             "isActive": true
-          }
+          },
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.example",
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjltLTRkMWQtYTcxNi00NDY2NTU0NDAwMDAiLCJpYXQiOjE3MDY1MTYwMDAsImV4cCI6MTcwNjUxNjMwMH0.refresh"
         }
       }
     },

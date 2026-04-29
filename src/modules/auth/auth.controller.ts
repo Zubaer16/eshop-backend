@@ -57,9 +57,24 @@ export class AuthController {
   }
 
   oauthSuccess(req: Request, res: Response) {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const accessToken = TokenService.generateAccessToken(user.id, user.role);
+    const refreshToken = TokenService.generateRefreshToken(user.id);
+
     res.status(200).json({
       message: 'OAuth authentication successful',
-      user: req.user,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+      },
+      accessToken,
+      refreshToken,
     });
   }
 }

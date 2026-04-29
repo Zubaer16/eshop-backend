@@ -3,7 +3,7 @@ import passport from 'passport';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
-import logger from '../config/logger';
+import logger from './config/logger';
 import { container } from './container';
 import { errorHandler } from './shared/middlewares/error.middleware';
 
