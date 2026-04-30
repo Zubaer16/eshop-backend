@@ -57,7 +57,7 @@ export class AuthController {
   }
 
   oauthSuccess(req: Request, res: Response) {
-    const user = req.user;
+    const user = req.user as { id: string; role: string; email: string; name?: string } | undefined;
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }

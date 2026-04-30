@@ -19,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './components/schemas/RegisterDto.yaml'
+              $ref: '#/components/schemas/RegisterDto'
       responses:
         '201':
           description: User registered successfully
@@ -31,23 +31,19 @@ paths:
                   message:
                     type: string
                   user:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        format: uuid
-                      email:
-                        type: string
-                      role:
-                        type: string
+                    $ref: '#/components/schemas/User'
         '400':
-          $ref: './components/schemas/Error.yaml'
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '409':
           description: User already exists
           content:
             application/json:
               schema:
-                $ref: './components/schemas/Error.yaml'
+                $ref: '#/components/schemas/Error'
 
   /api/v1/auth/login:
     post:
@@ -59,20 +55,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './components/schemas/LoginDto.yaml'
+              $ref: '#/components/schemas/LoginDto'
       responses:
         '200':
           description: Login successful
           content:
             application/json:
               schema:
-                $ref: './components/schemas/TokenResponse.yaml'
+                $ref: '#/components/schemas/TokenResponse'
         '401':
           description: Invalid credentials
           content:
             application/json:
               schema:
-                $ref: './components/schemas/Error.yaml'
+                $ref: '#/components/schemas/Error'
 
   /api/v1/auth/refresh:
     post:
@@ -84,7 +80,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './components/schemas/RefreshDto.yaml'
+              $ref: '#/components/schemas/RefreshDto'
       responses:
         '200':
           description: Token refreshed successfully
@@ -100,7 +96,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './components/schemas/Error.yaml'
+                $ref: '#/components/schemas/Error'
 
   /api/v1/auth/google:
     get:
@@ -127,13 +123,13 @@ paths:
                   message:
                     type: string
                   user:
-                    $ref: './components/schemas/User.yaml'
+                    $ref: '#/components/schemas/User'
         '401':
           description: Authentication failed
           content:
             application/json:
               schema:
-                $ref: './components/schemas/Error.yaml'
+                $ref: '#/components/schemas/Error'
 
   /api/v1/auth/facebook:
     get:
@@ -160,32 +156,104 @@ paths:
                   message:
                     type: string
                   user:
-                    $ref: './components/schemas/User.yaml'
+                    $ref: '#/components/schemas/User'
         '401':
           description: Authentication failed
           content:
             application/json:
               schema:
-                $ref: './components/schemas/Error.yaml'
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
     Error:
-      $ref: './components/schemas/Error.yaml'
+      type: object
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+
     User:
-      $ref: './components/schemas/User.yaml'
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [USER, ADMIN, DELIVERY]
+        phone:
+          type: string
+        profileImage:
+          type: string
+          format: uri
+        emailVerified:
+          type: boolean
+        isActive:
+          type: boolean
+
     RegisterDto:
-      $ref: './components/schemas/RegisterDto.yaml'
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        name:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+        profileImage:
+          type: string
+          format: uri
+
     LoginDto:
-      $ref: './components/schemas/LoginDto.yaml'
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
     RefreshDto:
-      $ref: './components/schemas/RefreshDto.yaml'
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+
     TokenResponse:
-      $ref: './components/schemas/TokenResponse.yaml'
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
 
   securitySchemes:
     bearerAuth:
-      $ref: './components/security/bearerAuth.yaml'
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
 tags:
   - name: Auth
