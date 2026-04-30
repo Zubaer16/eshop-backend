@@ -294,7 +294,7 @@ export const setupSwaggerUI = (app: Application): void => {
     },
   }));
   
-  logger.info('Swagger UI loaded at /api-docs');
+     logger.info('Swagger is running on http://localhost:3000/api-docs');
 };
 
 export const getSwaggerSpec = (): object => {
