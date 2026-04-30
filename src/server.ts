@@ -1,8 +1,8 @@
 import app from './app';
-import { config } from './config';
+import { envConfig } from './config/env';
 import logger from './config/logger';
 
-const PORT = config.env.PORT;
+const PORT = envConfig.PORT;
 
 app.listen(PORT, () => {
   logger.info(`Server running on http://localhost:${PORT}`);

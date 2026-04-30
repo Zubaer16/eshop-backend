@@ -131,39 +131,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /api/v1/auth/facebook:
-    get:
-      summary: Initiate Facebook OAuth flow
-      tags:
-        - Auth
-      responses:
-        '302':
-          description: Redirects to Facebook consent screen
-
-  /api/v1/auth/facebook/callback:
-    get:
-      summary: Facebook OAuth callback
-      tags:
-        - Auth
-      responses:
-        '200':
-          description: OAuth authentication successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user:
-                    $ref: '#/components/schemas/User'
-        '401':
-          description: Authentication failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
 components:
   schemas:
     Error:

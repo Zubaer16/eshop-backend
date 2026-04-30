@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { reloadSwaggerSpec } from './swagger-generator';
 import { Application } from 'express';
+import logger from './logger';
 
 let watcher: fs.FSWatcher | null = null;
 let currentSpec: object;
@@ -29,7 +30,7 @@ export const startSwaggerWatcher = (app: Application): void => {
     try {
       fs.watch(filePath, (eventType) => {
         if (eventType === 'change') {
-          console.log(`[Swagger Watcher] File changed: ${filePath}`);
+          logger.info(`[Swagger Watcher] File changed: ${filePath}`);
           currentSpec = reloadSwaggerSpec();
           
           const originalSend = (app as any).response.json;
@@ -39,7 +40,7 @@ export const startSwaggerWatcher = (app: Application): void => {
         }
       });
     } catch (e) {
-      console.error(`Error watching ${filePath}:`, e);
+      logger.error(`Error watching ${filePath}: ${String(e)}`);
     }
   };
   
@@ -81,8 +82,6 @@ export const startSwaggerWatcher = (app: Application): void => {
   };
   
   watchPatterns.forEach(processPath);
-  
-  console.log('[Swagger Watcher] Watching for changes in validators and docs...');
 };
 
 export const stopSwaggerWatcher = (): void => {

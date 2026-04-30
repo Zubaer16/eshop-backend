@@ -25,7 +25,7 @@ The system is designed with the following core domains:
 
 ### Prerequisites
 
-- Node.js v25.9.0 (as specified in `.nvmrc`)
+- Node.js v20+ (as specified in `.nvmrc`)
 - PostgreSQL database
 
 ### Installation
@@ -42,19 +42,35 @@ The system is designed with the following core domains:
    ```
 
 3. **Environment Configuration**
-   Create a `.env` file in the root directory and add your database connection string:
+   Create a `.env` file in the root directory with:
    ```env
    DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
+   PORT=3000
+   NODE_ENV=development
+   JWT_ACCESS_SECRET=your_access_secret
+   JWT_REFRESH_SECRET=your_refresh_secret
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
    ```
 
 4. **Database Setup**
    ```bash
-   # Run migrations to set up the schema
    npx prisma migrate dev
-
-   # Generate the Prisma Client
    npx prisma generate
    ```
+
+5. **Run the application**
+   ```bash
+   npm run dev
+   ```
+
+### Available Scripts
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm run typecheck` - Run TypeScript type checking
+- `npm run swagger:build` - Generate bundled OpenAPI spec
 
 ## 📂 Project Structure
 

@@ -1,11 +1,11 @@
 import swaggerJsdoc from 'swagger-jsdoc';
-import logger from './logger';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import { ZodSchema, z } from 'zod';
 import { Application } from 'express';
 import yaml from 'js-yaml';
+import logger from './logger';
 
 const getTypeName = (schema: ZodSchema<unknown>): string => {
   return (schema as any)._def?.typeName || (schema as any).constructor?.name || 'unknown';
@@ -137,7 +137,7 @@ const convertZodToSwagger = (schema: ZodSchema<unknown>, visited = new Set()): o
     
     return {};
   } catch (e) {
-    console.error('Error converting schema:', e);
+    logger.error(`Error converting schema: ${String(e)}`);
     return {};
   }
 };
@@ -230,9 +230,8 @@ export const generateSwaggerSpec = (): object => {
       if (yamlSpec.paths) {
         paths = yamlSpec.paths;
       }
-      console.log('[Swagger] Loaded additional specs from docs/openapi.yaml');
-    } catch (e) {
-      console.error('[Swagger] Error loading openapi.yaml:', e);
+      } catch (e) {
+      logger.error(`[Swagger] Error loading openapi.yaml: ${String(e)}`);
     }
   }
   
