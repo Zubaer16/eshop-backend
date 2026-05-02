@@ -12,13 +12,14 @@ const getTypeName = (schema: ZodSchema<unknown>): string => {
 };
 
 const convertZodToSwagger = (schema: ZodSchema<unknown>, visited = new Set()): object => {
-  if (visited.has(schema)) return {};
+  if (visited.has(schema)) return { $ref: '#/components/schemas/CircularReference' };
   visited.add(schema);
-  
+
   const typeName = getTypeName(schema);
   const def = (schema as any)._def;
-  
+
   try {
+    // Handle primitive types
     if (typeName === 'ZodString') {
       const result: any = { type: 'string' };
       if (def.checks) {
@@ -29,62 +30,92 @@ const convertZodToSwagger = (schema: ZodSchema<unknown>, visited = new Set()): o
           if (check.kind === 'email') result.format = 'email';
           if (check.kind === 'uuid') result.format = 'uuid';
           if (check.kind === 'url') result.format = 'uri';
+          if (check.kind === 'cuid') result.format = 'cuid';
+          if (check.kind === 'cuid2') result.format = 'cuid2';
+          if (check.kind === 'datetime') result.format = 'date-time';
+          if (check.kind === 'date') result.format = 'date';
         }
       }
       return result;
     }
-    
-    if (typeName === 'ZodNumber' || typeName === 'ZodInt') {
+
+    if (typeName === 'ZodNumber') {
       const result: any = { type: 'number' };
       if (def.checks) {
         for (const check of def.checks) {
           if (check.kind === 'min') result.minimum = check.value;
           if (check.kind === 'max') result.maximum = check.value;
+          if (check.kind === 'int') result.type = 'integer';
         }
       }
       return result;
     }
-    
+
+    if (typeName === 'ZodBigInt') {
+      return { type: 'integer', format: 'int64' };
+    }
+
     if (typeName === 'ZodBoolean') {
       return { type: 'boolean' };
     }
-    
+
     if (typeName === 'ZodDate') {
       return { type: 'string', format: 'date-time' };
     }
-    
+
+    if (typeName === 'ZodUndefined') {
+      return { type: 'string', nullable: true };
+    }
+
+    if (typeName === 'ZodNull') {
+      return { nullable: true };
+    }
+
+    if (typeName === 'ZodVoid') {
+      return {};
+    }
+
+    // Handle objects
     if (typeName === 'ZodObject') {
       const properties: Record<string, object> = {};
       const required: string[] = [];
       const shape = (schema as any).shape;
-      
+
       if (shape) {
         for (const [key, value] of Object.entries(shape)) {
-          const valTypeName = getTypeName(value as ZodSchema<unknown>);
-          const isOptional = valTypeName === 'ZodOptional' || valTypeName === 'ZodNullable' || valTypeName === 'ZodDefault';
-          
           properties[key] = convertZodToSwagger(value as ZodSchema<unknown>, visited);
-          
-          if (!isOptional) {
+          if (!isPropertyOptional(value as ZodSchema<unknown>)) {
             required.push(key);
           }
         }
       }
-      
+
       return {
         type: 'object',
         properties,
         required: required.length > 0 ? required : undefined,
       };
     }
-    
+
+    // Handle arrays and tuples
     if (typeName === 'ZodArray') {
       return {
         type: 'array',
         items: convertZodToSwagger(def.innerType as ZodSchema<unknown>, visited),
       };
     }
-    
+
+    if (typeName === 'ZodTuple') {
+      const items = def.items?.map((item: any) => convertZodToSwagger(item, visited)) || [];
+      return {
+        type: 'array',
+        items: items.length === 1 ? items[0] : { oneOf: items },
+        minItems: items.length,
+        maxItems: items.length,
+      };
+    }
+
+    // Handle optionals and nullables
     if (typeName === 'ZodOptional' || typeName === 'ZodNullable' || typeName === 'ZodDefault') {
       const inner = def.innerType || def.inner;
       const result = convertZodToSwagger(inner as ZodSchema<unknown>, visited);
@@ -93,40 +124,71 @@ const convertZodToSwagger = (schema: ZodSchema<unknown>, visited = new Set()): o
       }
       return result;
     }
-    
+
+    // Handle enums and literals
     if (typeName === 'ZodEnum') {
       return { type: 'string', enum: def.values };
     }
-    
+
     if (typeName === 'ZodNativeEnum') {
       return { type: 'string', enum: Object.values(def.values) };
     }
-    
+
     if (typeName === 'ZodLiteral') {
-      return { type: typeof def.value === 'string' ? 'string' : typeof def.value, enum: [def.value] };
+      const valueType = typeof def.value;
+      const result: any = { enum: [def.value] };
+      if (valueType === 'string') result.type = 'string';
+      else if (valueType === 'number') result.type = 'number';
+      else if (valueType === 'boolean') result.type = 'boolean';
+      return result;
     }
-    
-    if (typeName === 'ZodUnion' || typeName === 'ZodDiscriminatedUnion') {
-      const options = def.options ? def.options : [def];
+
+    // Handle unions and intersections
+    if (typeName === 'ZodUnion') {
+      const options = def.options?.map((opt: any) => convertZodToSwagger(opt, visited)) || [];
       return {
-        oneOf: options.map((opt: any) => convertZodToSwagger(opt as ZodSchema<unknown>, visited)),
+        oneOf: options,
       };
     }
-    
+
+    if (typeName === 'ZodDiscriminatedUnion') {
+      const options = def.options?.map((opt: any) => convertZodToSwagger(opt, visited)) || [];
+      // For discriminated unions, try to identify the discriminator
+      const discriminator = def.discriminator;
+      if (discriminator) {
+        return {
+          oneOf: options,
+          discriminator: { propertyName: discriminator },
+        };
+      }
+      return {
+        oneOf: options,
+      };
+    }
+
+    if (typeName === 'ZodIntersection') {
+      const left = convertZodToSwagger(def.left, visited);
+      const right = convertZodToSwagger(def.right, visited);
+      return {
+        allOf: [left, right],
+      };
+    }
+
+    // Handle records and maps
     if (typeName === 'ZodRecord') {
       return {
         type: 'object',
         additionalProperties: convertZodToSwagger(def.valueType as ZodSchema<unknown>, visited),
       };
     }
-    
+
     if (typeName === 'ZodMap') {
       return {
         type: 'object',
         additionalProperties: convertZodToSwagger(def.valueType as ZodSchema<unknown>, visited),
       };
     }
-    
+
     if (typeName === 'ZodSet') {
       return {
         type: 'array',
@@ -134,12 +196,65 @@ const convertZodToSwagger = (schema: ZodSchema<unknown>, visited = new Set()): o
         uniqueItems: true,
       };
     }
-    
-    return {};
+
+    // Handle effects and transforms
+    if (typeName === 'ZodEffects' || typeName === 'ZodTransform') {
+      const inner = def.schema || def.innerType || def.innerTypeDef;
+      if (inner) {
+        return convertZodToSwagger(inner as ZodSchema<unknown>, visited);
+      }
+      // If we can't get the inner schema, return a generic object
+      return { type: 'object' };
+    }
+
+    // Handle lazy schemas (for recursive types)
+    if (typeName === 'ZodLazy') {
+      const getter = def.getter;
+      if (getter) {
+        try {
+          const lazySchema = getter();
+          return convertZodToSwagger(lazySchema, visited);
+        } catch (e) {
+          return { type: 'object' };
+        }
+      }
+      return { type: 'object' };
+    }
+
+    // Handle preprocess
+    if (typeName === 'ZodPreprocess') {
+      const inner = def.schema;
+      if (inner) {
+        return convertZodToSwagger(inner as ZodSchema<unknown>, visited);
+      }
+      return { type: 'object' };
+    }
+
+    // Handle promise (return the inner type)
+    if (typeName === 'ZodPromise') {
+      const inner = def.type;
+      if (inner) {
+        return convertZodToSwagger(inner as ZodSchema<unknown>, visited);
+      }
+      return { type: 'object' };
+    }
+
+    // Fallback for unknown types
+    logger.warn(`Unknown Zod type: ${typeName}`);
+    return { type: 'object' };
   } catch (e) {
-    logger.error(`Error converting schema: ${String(e)}`);
-    return {};
+    logger.error(`Error converting schema ${typeName}: ${String(e)}`);
+    return { type: 'object' };
   }
+};
+
+// Helper function to determine if a property is optional
+const isPropertyOptional = (schema: ZodSchema<unknown>): boolean => {
+  const typeName = getTypeName(schema);
+  return typeName === 'ZodOptional' ||
+         typeName === 'ZodNullable' ||
+         typeName === 'ZodDefault' ||
+         (typeName === 'ZodUnion' && (schema as any)._def.options?.some((opt: any) => getTypeName(opt) === 'ZodUndefined'));
 };
 
 const extractModuleName = (filePath: string): string => {
@@ -227,10 +342,10 @@ export const generateSwaggerSpec = (): object => {
       if (yamlSpec.components?.schemas) {
         components.schemas = { ...components.schemas, ...yamlSpec.components.schemas };
       }
-      if (yamlSpec.paths) {
-        paths = yamlSpec.paths;
-      }
-      } catch (e) {
+       if (yamlSpec.paths) {
+         paths = yamlSpec.paths;
+       }
+     } catch (e) {
       logger.error(`[Swagger] Error loading openapi.yaml: ${String(e)}`);
     }
   }
