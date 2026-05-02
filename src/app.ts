@@ -21,6 +21,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 app.use('/api/v1/auth', container.authRouter);
+app.use('/api/v1/products', container.productRouter);
 app.use(errorHandler);
 
 export default app;

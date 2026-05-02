@@ -1,8 +1,7 @@
-import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
-import { ZodSchema, z } from 'zod';
+import { ZodSchema } from 'zod';
 import { Application } from 'express';
 import yaml from 'js-yaml';
 import logger from './logger';
@@ -212,11 +211,11 @@ const convertZodToSwagger = (schema: ZodSchema<unknown>, visited = new Set()): o
       const getter = def.getter;
       if (getter) {
         try {
-          const lazySchema = getter();
-          return convertZodToSwagger(lazySchema, visited);
-        } catch (e) {
-          return { type: 'object' };
-        }
+const lazySchema = getter();
+           return convertZodToSwagger(lazySchema, visited);
+         } catch {
+           return { type: 'object' };
+         }
       }
       return { type: 'object' };
     }
@@ -266,11 +265,6 @@ const extractModuleName = (filePath: string): string => {
   return 'common';
 };
 
-const extractSchemaName = (schema: ZodSchema<unknown>): string => {
-  const typeName = getTypeName(schema);
-  return typeName.replace('Zod', '');
-};
-
 const loadValidators = (): Record<string, Record<string, { schema: ZodSchema<unknown>, name: string }>> => {
   const schemas: Record<string, Record<string, { schema: ZodSchema<unknown>, name: string }>> = {};
   
@@ -288,7 +282,7 @@ const loadValidators = (): Record<string, Record<string, { schema: ZodSchema<unk
           loadFile(fullPath);
         }
       }
-    } catch (e) {}
+    } catch { /* empty */ }
   };
   
   const loadFile = (filePath: string) => {
@@ -323,7 +317,7 @@ export const generateSwaggerSpec = (): object => {
   const components: Record<string, Record<string, object>> = { schemas: {} };
   let paths: Record<string, object> = {};
   
-  for (const [moduleName, schemas] of Object.entries(modules)) {
+  for (const [, schemas] of Object.entries(modules)) {
     for (const [schemaName, { name }] of Object.entries(schemas)) {
       const swaggerSchema = convertZodToSwagger(schemas[schemaName].schema);
       const finalName = name.replace(/Schema$/i, '').replace(/Dto$/i, '');
