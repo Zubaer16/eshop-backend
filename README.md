@@ -14,7 +14,7 @@ A robust backend system for an e-commerce platform, managing users, product cata
 
 The system is designed with the following core domains:
 
-- **User Management**: Role-based access control (`USER`, `ADMIN`, `DELIVERY`) and multi-provider authentication (Credentials, Google, Facebook).
+- **User Management**: Role-based access control (`USER`, `ADMIN`, `DELIVERY`) and multi-provider authentication (Credentials, Google).
 - **Product Catalog**: Hierarchical organization of products into categories, featuring sale pricing, stock tracking, and multi-image support.
 - **Shopping Cart**: Persistent cart system linked to users for seamless shopping experiences.
 - **Coupon Engine**: A sophisticated discount system supporting percentages or fixed amounts applied to specific orders, categories, or products, with validity periods and usage limits.
@@ -70,7 +70,17 @@ The system is designed with the following core domains:
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm run typecheck` - Run TypeScript type checking
+- `npm run lint` - Run ESLint
 - `npm run swagger:build` - Generate bundled OpenAPI spec
+
+## 🔗 API Documentation
+
+Once the server is running, visit: http://localhost:3000/api-docs
+
+Endpoints display roles in their summary:
+- `(PUBLIC)` - Accessible without authentication
+- `(ADMIN)` - Admin only
+- `(USER, ADMIN, DELIVERY)` - Authenticated users with specified roles
 
 ## 📂 Project Structure
 
