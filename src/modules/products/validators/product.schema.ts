@@ -35,13 +35,16 @@ export const productIdSchema = z.object({
 export const productQuerySchema = z.object({
   categoryId: z.string().uuid().optional(),
   search: z.string().optional(),
-  minPrice: z.coerce.number().optional(),
-  maxPrice: z.coerce.number().optional(),
-  inStock: z.coerce.boolean().optional(),
-  onSale: z.coerce.boolean().optional(),
+  minPrice: z.coerce.number().min(0).optional(),
+  maxPrice: z.coerce.number().min(0).optional(),
+  inStock: z.enum(['true', 'false']).optional().transform(v => v === undefined ? undefined : v === 'true'),
+  onSale: z.enum(['true', 'false']).optional().transform(v => v === undefined ? undefined : v === 'true'),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
-});
+}).refine(
+  (data) => data.minPrice === undefined || data.maxPrice === undefined || data.minPrice <= data.maxPrice,
+  { message: 'minPrice must be less than or equal to maxPrice', path: ['minPrice'] }
+);
 
 export const createSchema = createProductSchema;
 export const updateSchema = updateProductSchema;

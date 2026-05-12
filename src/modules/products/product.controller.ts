@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { ProductService } from './product.service';
-import { createSchema, updateSchema, listSchema } from './validators/product.schema';
+import { createSchema, updateSchema, listSchema, productIdSchema } from './validators/product.schema';
 import { ZodError } from 'zod';
 import { AppError } from '@/shared/errors/app-error';
 
@@ -35,21 +35,24 @@ export class ProductController {
 
   async findById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-      const product = await this.productService.findById(id as string);
+      const { id } = productIdSchema.parse(req.params as Record<string, string>);
+      const product = await this.productService.findById(id);
       if (!product) {
         return next(new AppError('Product not found', 404));
       }
       res.status(200).json(product);
     } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
+      }
       next(error);
     }
   }
 
   async findBySlug(req: Request, res: Response, next: NextFunction) {
     try {
-      const { slug } = req.params;
-      const product = await this.productService.findBySlug(slug as string);
+      const { slug } = req.params as Record<string, string>;
+      const product = await this.productService.findBySlug(slug);
       if (!product) {
         return next(new AppError('Product not found', 404));
       }
@@ -61,9 +64,9 @@ export class ProductController {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const { id } = productIdSchema.parse(req.params as Record<string, string>);
       const validatedData = updateSchema.parse(req.body);
-      const product = await this.productService.update(id as string, validatedData);
+      const product = await this.productService.update(id, validatedData);
       res.status(200).json(product);
     } catch (error) {
       if (error instanceof ZodError) {
@@ -75,10 +78,13 @@ export class ProductController {
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-      await this.productService.delete(id as string);
+      const { id } = productIdSchema.parse(req.params as Record<string, string>);
+      await this.productService.delete(id);
       res.status(204).send();
     } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
+      }
       next(error);
     }
   }

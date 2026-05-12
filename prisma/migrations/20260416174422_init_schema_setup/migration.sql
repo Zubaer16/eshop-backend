@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN', 'DELIVERY');
 
 -- CreateEnum
-CREATE TYPE "AuthProvider" AS ENUM ('CREDENTIALS', 'GOOGLE', 'FACEBOOK');
+CREATE TYPE "AuthProvider" AS ENUM ('CREDENTIALS', 'GOOGLE');
 
 -- CreateEnum
 CREATE TYPE "CouponAppliesTo" AS ENUM ('ORDER', 'CATEGORY', 'PRODUCT');

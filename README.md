@@ -4,7 +4,7 @@ A robust backend system for an e-commerce platform, managing users, product cata
 
 ## 🚀 Tech Stack
 
-- **Runtime:** Node.js (TypeScript)
+- **Runtime:** Node.js 20.20.0 LTS (TypeScript)
 - **Framework:** Express (v5.2.1)
 - **ORM:** Prisma (v7.7.0)
 - **Database:** PostgreSQL
@@ -25,7 +25,7 @@ The system is designed with the following core domains:
 
 ### Prerequisites
 
-- Node.js v20+ (as specified in `.nvmrc`)
+- Node.js v20.20.0 / v20+ (as specified in `.nvmrc`)
 - PostgreSQL database
 
 ### Installation
@@ -71,11 +71,16 @@ The system is designed with the following core domains:
 - `npm run build` - Compile TypeScript to JavaScript
 - `npm run typecheck` - Run TypeScript type checking
 - `npm run lint` - Run ESLint
-- `npm run swagger:build` - Generate bundled OpenAPI spec
+- `npm run swagger:generate` - Generate swagger.json from code-first OpenAPI registry
 
 ## 🔗 API Documentation
 
 Once the server is running, visit: http://localhost:3000/api-docs
+
+- Swagger UI is served at `/api-docs`
+- OpenAPI JSON is served at `/swagger.json`
+- `swagger.json` can be regenerated with `npm run swagger:generate`
+- OpenAPI source of truth is `src/config/openapi-registry.ts` using Zod schemas
 
 Endpoints display roles in their summary:
 - `(PUBLIC)` - Accessible without authentication
@@ -85,5 +90,4 @@ Endpoints display roles in their summary:
 ## 📂 Project Structure
 
 - `prisma/schema.prisma`: Database models and relations.
-- `prisma.config.ts`: Prisma configuration.
 - `src/`: Source code for the application.

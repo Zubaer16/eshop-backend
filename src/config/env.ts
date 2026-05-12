@@ -11,9 +11,19 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
   JWT_ACCESS_EXPIRATION: z.string().min(1).default('15m'),
   JWT_REFRESH_EXPIRATION: z.string().min(1).default('7d'),
-  GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required'),
-  GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET is required'),
-  GOOGLE_CALLBACK_URL: z.string().url('GOOGLE_CALLBACK_URL must be a valid URL'),
+  GOOGLE_CLIENT_ID: z.string().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().default(''),
+  GOOGLE_CALLBACK_URL: z.string().default('http://localhost:3000/api/v1/auth/google/callback'),
 });
 
 export const envConfig = envSchema.parse(process.env);
+
+if (envConfig.NODE_ENV === 'production') {
+  const oauthMissing = !envConfig.GOOGLE_CLIENT_ID || !envConfig.GOOGLE_CLIENT_SECRET;
+  if (oauthMissing) {
+    throw new Error(
+      'GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required in production for Google OAuth. ' +
+      'Set them in .env or disable Google OAuth routes.'
+    );
+  }
+}

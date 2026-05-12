@@ -9,6 +9,12 @@ const refreshTokenOptions: SignOptions = {
   expiresIn: envConfig.JWT_REFRESH_EXPIRATION as SignOptions['expiresIn'],
 };
 
+// NOTE: Refresh tokens are stateless JWT tokens.
+// There is no blacklist, session store, or revocation mechanism.
+// A compromised refresh token remains valid until it expires.
+// If refresh token revocation is needed, integrate Redis or a token blacklist table.
+// See: docs/ARCHITECTURE.md (if exists) for auth architecture decisions.
+
 export class TokenService {
   static generateAccessToken(userId: string, role: string): string {
     return jwt.sign(

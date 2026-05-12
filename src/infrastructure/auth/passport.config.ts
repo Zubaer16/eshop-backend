@@ -2,6 +2,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import passport from 'passport';
 import { envConfig } from '../../config/env';
 import { OAuthService } from '../../modules/auth/oauth.service';
+import logger from '../../config/logger';
 
 let isPassportConfigured = false;
 
@@ -10,12 +11,18 @@ export const configurePassport = (oauthService: OAuthService) => {
     return passport;
   }
 
+  if (!envConfig.GOOGLE_CLIENT_ID || !envConfig.GOOGLE_CLIENT_SECRET) {
+    logger.warn('Google OAuth not configured - skipping passport strategy setup');
+    isPassportConfigured = true;
+    return passport;
+  }
+
   passport.use(
     new GoogleStrategy(
       {
-        clientID: envConfig.GOOGLE_CLIENT_ID as string,
-        clientSecret: envConfig.GOOGLE_CLIENT_SECRET as string,
-        callbackURL: envConfig.GOOGLE_CALLBACK_URL as string,
+        clientID: envConfig.GOOGLE_CLIENT_ID,
+        clientSecret: envConfig.GOOGLE_CLIENT_SECRET,
+        callbackURL: envConfig.GOOGLE_CALLBACK_URL,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
