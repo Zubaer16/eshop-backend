@@ -1,0 +1,328 @@
+openapi: 3.0.3
+
+info:
+  title: E-Shop API
+  version: 1.0.0
+  description: Backend API for E-Shop project
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Products
+    description: Product management endpoints
+
+paths:
+  /auth/register:
+    $ref: './paths/auth.yaml#/register'
+  /auth/login:
+    $ref: './paths/auth.yaml#/login'
+  /auth/refresh:
+    $ref: './paths/auth.yaml#/refresh'
+  /auth/oauth/{provider}:
+    $ref: './paths/auth.yaml#/oauth'
+  /products:
+    $ref: './paths/products.yaml#/products'
+  /products/{id}:
+    $ref: './paths/products.yaml#/productById'
+  /products/slug/{slug}:
+    $ref: './paths/products.yaml#/productBySlug'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: './components/security/bearerAuth.yaml'
+  schemas:
+    Provider:
+      type: string
+      enum: [google]
+      description: OAuth provider name
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        statusCode:
+          type: integer
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            email:
+              type: string
+              format: email
+            role:
+              type: string
+              enum: [USER, ADMIN, DELIVERY]
+    TokenResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+    OAuthResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [USER, ADMIN, DELIVERY]
+        name:
+          type: string
+          nullable: true
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        originalPrice:
+          type: number
+        salePrice:
+          type: number
+          nullable: true
+        stock:
+          type: integer
+        categoryId:
+          type: string
+          format: uuid
+        isOnSale:
+          type: boolean
+        saleStartDate:
+          type: string
+          format: date-time
+          nullable: true
+        saleEndDate:
+          type: string
+          format: date-time
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PaginatedProducts:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+    CreateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        originalPrice:
+          type: number
+          minimum: 0
+        salePrice:
+          type: number
+          minimum: 0
+        stock:
+          type: integer
+          minimum: 0
+        categoryId:
+          type: string
+          format: uuid
+        isOnSale:
+          type: boolean
+        saleStartDate:
+          type: string
+          format: date-time
+        saleEndDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        originalPrice:
+          type: number
+          minimum: 0
+        salePrice:
+          type: number
+          minimum: 0
+        stock:
+          type: integer
+          minimum: 0
+        categoryId:
+          type: string
+          format: uuid
+        isOnSale:
+          type: boolean
+        saleStartDate:
+          type: string
+          format: date-time
+        saleEndDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        name:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+        profileImage:
+          type: string
+          format: uri
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    OAuthLoginRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Authorization code from OAuth provider
+        codeVerifier:
+          type: string
+          description: PKCE code verifier
+        redirectUri:
+          type: string
+          format: uri
+          description: Redirect URI
+        idToken:
+          type: string
+          description: OAuth id_token
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    SearchParam:
+      name: search
+      in: query
+      schema:
+        type: string
+    CategoryIdParam:
+      name: categoryId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    MinPriceParam:
+      name: minPrice
+      in: query
+      schema:
+        type: number
+        minimum: 0
+    MaxPriceParam:
+      name: maxPrice
+      in: query
+      schema:
+        type: number
+        minimum: 0
+    InStockParam:
+      name: inStock
+      in: query
+      schema:
+        type: string
+        enum: [true, false]
+    OnSaleParam:
+      name: onSale
+      in: query
+      schema:
+        type: string
+        enum: [true, false]

@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+
+extendZodWithOpenApi(z);
 
 export const createProductSchema = z.object({
   name: z.string().min(1).max(255),
@@ -12,7 +15,7 @@ export const createProductSchema = z.object({
   saleStartDate: z.string().datetime().optional(),
   saleEndDate: z.string().datetime().optional(),
   isActive: z.boolean().optional(),
-});
+}).openapi('CreateProductRequest');
 
 export const updateProductSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -26,7 +29,7 @@ export const updateProductSchema = z.object({
   saleStartDate: z.string().datetime().optional(),
   saleEndDate: z.string().datetime().optional(),
   isActive: z.boolean().optional(),
-});
+}).openapi('UpdateProductRequest');
 
 export const productIdSchema = z.object({
   id: z.string().uuid(),

@@ -44,3 +44,18 @@ export interface OAuthProfile {
   emails?: { value: string }[];
   photos?: { value: string }[];
 }
+
+export interface GoogleOAuthProfile {
+  sub: string;
+  email: string;
+  emailVerified: boolean;
+  name?: string;
+  picture?: string;
+}
+
+export interface OAuthLoginDto {
+  code?: string;
+  codeVerifier?: string;
+  redirectUri?: string;
+  idToken?: string;
+}

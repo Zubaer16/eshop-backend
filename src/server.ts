@@ -7,6 +7,7 @@ const PORT = envConfig.PORT;
 
 const server = app.listen(PORT, () => {
   logger.info(`Server running on http://localhost:${PORT}`);
+  logger.info('Server started successfully');
 });
 
 async function gracefulShutdown(signal: string) {

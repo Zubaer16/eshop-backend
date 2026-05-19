@@ -1,4 +1,4 @@
-import { IProductRepository } from './product.repository';
+import { IProductRepository } from './interfaces/product.repository.interface';
 import { CreateProductDto, UpdateProductDto, ProductWithRelations, PaginatedProducts, ProductListQuery } from './dtos/product.dto';
 
 export class ProductService {

@@ -1,6 +1,5 @@
 import express from 'express';
-import passport from 'passport';
-import { setupSwaggerUI } from './config/openapi';
+import { setupSwagger } from './config/swagger';
 import { container } from './container';
 import { errorHandler } from './shared/middlewares/error.middleware';
 import logger from './config/logger';
@@ -12,7 +11,6 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-app.use(passport.initialize());
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -23,10 +21,11 @@ app.use((req, res, next) => {
   next();
 });
 
-setupSwaggerUI(app);
+setupSwagger(app);
 
 app.use('/api/v1/auth', container.authRouter);
 app.use('/api/v1/products', container.productRouter);
+app.use(container.notFoundHandler);
 app.use(errorHandler);
 
 export default app;

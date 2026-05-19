@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { TokenService } from '../../infrastructure/auth/token.service';
-import { registerSchema, loginSchema, refreshSchema } from './validators/auth.schema';
+import { registerSchema, loginSchema, refreshSchema, oauthSchema } from './validators/auth.schema';
 import { ZodError } from 'zod';
 import { AppError } from '@/shared/errors/app-error';
 
@@ -48,6 +48,21 @@ export class AuthController {
       const accessToken = TokenService.generateAccessToken(user.id, user.role);
 
       res.status(200).json({ accessToken });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
+      }
+      next(error);
+    }
+  }
+
+  async oauthLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const provider = req.params.provider as string;
+      const validatedData = oauthSchema.body.parse(req.body);
+      
+      const result = await this.authService.oauthLogin(provider, validatedData);
+      res.status(200).json(result);
     } catch (error) {
       if (error instanceof ZodError) {
         return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));

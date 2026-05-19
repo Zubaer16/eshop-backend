@@ -1,0 +1,117 @@
+register:
+  post:
+    summary: Register a new user (PUBLIC)
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterRequest'
+    responses:
+      '201':
+        description: User registered successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '409':
+        description: User already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+login:
+  post:
+    summary: Login with email and password (PUBLIC)
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+    responses:
+      '200':
+        description: Login successful
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenResponse'
+      '401':
+        description: Invalid credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+refresh:
+  post:
+    summary: Refresh access token (PUBLIC)
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefreshRequest'
+    responses:
+      '200':
+        description: Token refreshed successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshResponse'
+      '401':
+        description: Invalid refresh token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+oauth:
+  post:
+    summary: OAuth login with id_token or authorization code (PUBLIC)
+    tags:
+      - Auth
+    parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Provider'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuthLoginRequest'
+    responses:
+      '200':
+        description: OAuth authentication successful
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Authentication failed
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

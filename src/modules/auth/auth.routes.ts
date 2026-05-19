@@ -21,6 +21,10 @@ export const createAuthRouter = (authController: AuthController) => {
   router.post('/login', authLimiter, (req, res, next) => authController.login(req, res, next));
   router.post('/refresh', authLimiter, (req, res, next) => authController.refresh(req, res, next));
 
+  // OAuth with id_token/code (yl-seoul-backend style)
+  router.post('/oauth/:provider', authLimiter, (req, res, next) => authController.oauthLogin(req, res, next));
+
+  // Legacy passport OAuth (optional, for backward compatibility)
   const googleConfigured = !!(envConfig.GOOGLE_CLIENT_ID && envConfig.GOOGLE_CLIENT_SECRET);
 
   if (googleConfigured) {

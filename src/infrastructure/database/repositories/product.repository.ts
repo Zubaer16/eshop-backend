@@ -1,15 +1,7 @@
 import { PrismaClient, Product } from '@prisma/client';
-import { CreateProductDto, UpdateProductDto, ProductListQuery, ProductWithRelations } from './dtos/product.dto';
-
-export interface IProductRepository {
-  create(data: CreateProductDto): Promise<Product>;
-  findById(id: string): Promise<ProductWithRelations | null>;
-  findBySlug(slug: string): Promise<ProductWithRelations | null>;
-  findAll(query: ProductListQuery): Promise<{ products: ProductWithRelations[]; total: number }>;
-  update(id: string, data: UpdateProductDto): Promise<Product>;
-  delete(id: string): Promise<void>;
-  findByCategory(categoryId: string): Promise<Product[]>;
-}
+import { CreateProductDto, UpdateProductDto, ProductListQuery, ProductWithRelations } from '@/modules/products/dtos/product.dto';
+import { IProductRepository } from '@/modules/products/interfaces/product.repository.interface';
+import { Prisma } from '@prisma/client';
 
 export class ProductRepository implements IProductRepository {
   constructor(private prisma: PrismaClient) {}
@@ -35,7 +27,7 @@ export class ProductRepository implements IProductRepository {
   async findAll(query: ProductListQuery): Promise<{ products: ProductWithRelations[]; total: number }> {
     const { categoryId, search, minPrice, maxPrice, inStock, onSale, page, limit } = query;
 
-    const where: any = {};
+    const where: Prisma.ProductWhereInput = {};
 
     if (categoryId) where.categoryId = categoryId;
     if (search) {

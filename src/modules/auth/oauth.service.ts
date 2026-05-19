@@ -1,6 +1,6 @@
-import { User } from '@prisma/client';
+import { User, AuthProvider } from '@prisma/client';
 import { OAuthProfile } from './dtos/auth.dto';
-import { IAuthRepository } from './auth.repository';
+import { IAuthRepository } from './interfaces/auth.repository.interface';
 import { AppError } from '@/shared/errors/app-error';
 
 export class OAuthService {
@@ -9,7 +9,7 @@ export class OAuthService {
   async findOrCreateUser(profile: OAuthProfile, provider: string): Promise<User> {
     const providerUserId = profile.id;
 
-    const existingProviderUser = await this.authRepository.findUserByProvider(provider as any, providerUserId);
+    const existingProviderUser = await this.authRepository.findUserByProvider(provider as AuthProvider, providerUserId);
     if (existingProviderUser) {
       return existingProviderUser;
     }
@@ -21,10 +21,10 @@ export class OAuthService {
 
     const userByEmail = await this.authRepository.findUserByEmail(email);
     if (userByEmail) {
-      await this.authRepository.linkProvider(userByEmail.id, provider as any, providerUserId);
+      await this.authRepository.linkProvider(userByEmail.id, provider as AuthProvider, providerUserId);
       return userByEmail;
     }
 
-    return this.authRepository.createOAuthUser(profile, provider as any, email);
+    return this.authRepository.createOAuthUser(profile, provider as AuthProvider, email);
   }
 }
