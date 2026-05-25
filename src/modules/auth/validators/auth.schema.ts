@@ -20,17 +20,20 @@ export const refreshSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
 }).openapi('RefreshRequest');
 
+export const oauthLoginBodySchema = z.object({
+  code: z.string().min(1).optional(),
+  codeVerifier: z.string().min(1).optional(),
+  redirectUri: z.string().url().optional(),
+  idToken: z.string().min(1).optional(),
+}).refine((data) => data.code || data.idToken, {
+  message: 'code or idToken is required',
+}).openapi('OAuthLoginRequest');
+
 export const oauthSchema = {
-  body: z.object({
-    code: z.string().min(1).optional(),
-    codeVerifier: z.string().min(1).optional(),
-    redirectUri: z.string().url().optional(),
-    idToken: z.string().min(1).optional(),
-  }).refine((data) => data.code || data.idToken, {
-    message: 'code or idToken is required',
-  }),
+  body: oauthLoginBodySchema,
 };
 
 export type RegisterDto = z.infer<typeof registerSchema>;
 export type LoginDto = z.infer<typeof loginSchema>;
 export type RefreshDto = z.infer<typeof refreshSchema>;
+export type OAuthLoginBodyDto = z.infer<typeof oauthLoginBodySchema>;

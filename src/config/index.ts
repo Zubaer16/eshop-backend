@@ -1,8 +1,5 @@
-import dotenv from 'dotenv';
 import { envConfig } from './env';
 import { constants } from './constants';
-
-dotenv.config();
 
 export const config = {
   env: envConfig,

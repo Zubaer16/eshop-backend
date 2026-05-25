@@ -1,5 +1,5 @@
 # 📁 EShop Backend - Combined Source (For LLM Use)
-Generated: 2026-05-25T16:51:16.615Z
+Generated: 2026-05-25T17:23:36.594Z
 Project: EShop Backend
 
 =========================================
@@ -13,7 +13,8 @@ Project: EShop Backend
 │   ├── paths
 │   │   ├── auth.yaml
 │   │   └── products.yaml
-│   └── openapi.yaml
+│   ├── openapi.yaml
+│   └── SWAGGER_ANALYSIS.md
 ├── prisma
 │   ├── migrations
 │   │   ├── 20260416174422_init_schema_setup
@@ -89,6 +90,7 @@ Project: EShop Backend
 ├── .gitignore
 ├── .nvmrc
 ├── AGENTS.md
+├── ARCHITECTURE.md
 ├── eslint.config.js
 ├── package.json
 ├── prisma.config.ts
@@ -129,7 +131,7 @@ GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
 ============================================================
 ===== FILE START: AGENTS.md
 Type: Documentation
-Size: 0.98 KB
+Size: 3.05 KB
 ============================================================
 
 # AGENTS.md
@@ -137,39 +139,496 @@ Size: 0.98 KB
 ## Project Setup
 
 1. Install dependencies: `npm install`
-2. Set up environment: Copy `.env.example` to `.env` and fill in values
-3. Run migrations: `npx prisma migrate dev`
-4. Start dev server: `npm run dev`
+2. Create environment file: copy `.env.example` to `.env`
+3. Generate Prisma Client: `npx prisma generate`
+4. Run migrations when needed: `npx prisma migrate dev`
+5. Start dev server: `npm run dev`
 
-## Code Standards
+## Verification Commands
 
-- TypeScript strict mode enabled
-- Use Zod for validation
-- Use path alias `@/*` for src imports
-- Follow existing module structure: `src/modules/{module}/{module}.controller.ts`
+Run these after code, docs, Prisma, or structure changes:
 
-## Available Scripts
+```bash
+npx prisma generate
+npm run typecheck
+npm run build
+npm run dev
+```
 
-- `npm run dev` - Development with hot reload
-- `npm run build` - Compile TypeScript
-- `npm run typecheck` - Run TypeScript type check
-- `npm run lint` - Run ESLint
+Smoke-test:
 
-## Architecture
+```txt
+GET http://localhost:3000/health
+GET http://localhost:3000/
+GET http://localhost:3000/api-docs
+```
 
-- **Controller**: Handles HTTP requests/responses
-- **Service**: Business logic
-- **Repository**: Database operations (Prisma)
-- **DTOs**: Data transfer objects
-- **Validators**: Zod schemas for validation
+## Architecture Rules
+
+The project uses a layered Express backend structure with manual dependency wiring.
+
+```txt
+src/modules/*          Domain modules
+src/infrastructure/*  Database/OAuth/external adapters
+src/shared/*          Errors, middleware, OpenAPI registry, utilities
+src/routes/index.ts   Centralized API routing
+src/container.ts      Manual composition root
+src/app.ts            Express app configuration
+src/server.ts         Startup lifecycle and graceful shutdown
+```
+
+## Coding Standards
+
+- TypeScript strict mode is enabled.
+- Use path alias `@/*` for `src/*` imports where practical.
+- Use Zod for request validation.
+- Use route-level `validate(...)` middleware as the single validation source.
+- Do not duplicate `schema.parse(...)` inside controllers.
+- Keep controllers thin.
+- Put business logic in services.
+- Put Prisma queries in repositories.
+- Use `AppError` subclasses for expected HTTP errors.
+- Use the shared global error handler for error responses.
+- Use Pino logger from `src/config/logger.ts`.
+
+## Module Pattern
+
+New modules should follow this pattern:
+
+```txt
+src/modules/{module}/
+  dtos/
+  interfaces/
+  validators/
+    {module}.schema.ts
+    responses.ts
+  {module}.controller.ts
+  {module}.routes.ts
+  {module}.service.ts
+```
+
+Database implementation should be placed under:
+
+```txt
+src/infrastructure/database/repositories/{module}.repository.ts
+```
+
+Then wire the module in:
+
+```txt
+src/container.ts
+src/routes/index.ts
+```
+
+## API Response Format
+
+Success:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Error:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Error message"
+  }
+}
+```
+
+## Documentation Rules
+
+Documentation uses a mixed static + generated flow:
+
+```txt
+docs/openapi.yaml
+docs/paths/*.yaml
+docs/components/**/*.yaml
+src/shared/openapi/registry.ts
+src/modules/*/validators/*.schema.ts
+src/modules/*/validators/responses.ts
+```
+
+When endpoint behavior changes:
+
+1. Update the route/controller/service code.
+2. Update Zod request schemas.
+3. Update `validators/responses.ts` if response shape changes.
+4. Update `docs/paths/*.yaml` examples and response refs.
+5. Update `docs/openapi.yaml` shared schemas if static schemas are affected.
+6. Run `npm run typecheck` and `npm run build`.
 
 ## Security
 
-- JWT tokens with separate access/refresh secrets
-- Rate limiting on auth endpoints
-- Helmet for security headers
-- CORS enabled
-- No hardcoded secrets in code
+- No hardcoded secrets.
+- JWT secrets must come from environment variables.
+- Product management mutation routes must remain admin-only.
+- Public auth routes should keep rate limiting.
+- CORS configuration should remain config-driven.
+- Authenticated routes should use `authenticate` and role guards.
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: ARCHITECTURE.md
+Type: Documentation
+Size: 5.87 KB
+============================================================
+
+# EShop Backend Architecture
+
+This document describes the project structure, code flow, and documentation flow for the EShop backend.
+
+The codebase uses a layered Express architecture. Dependency wiring is done manually in `src/container.ts`.
+
+## Goals
+
+- Keep modules isolated by business domain.
+- Keep controllers thin.
+- Keep validation at the route layer.
+- Keep business rules in services.
+- Keep database access in repositories.
+- Keep cross-cutting concerns in `shared`.
+- Keep startup/shutdown logic in `server.ts`.
+- Keep API docs synchronized with actual response envelopes.
+
+## Folder Layers
+
+```txt
+src/
+  config/
+  infrastructure/
+  modules/
+  routes/
+  shared/
+  types/
+  app.ts
+  container.ts
+  server.ts
+```
+
+## Layer Responsibilities
+
+### `src/config`
+
+Configuration and application-level setup helpers.
+
+```txt
+constants.ts    API prefix and project constants
+env.ts          Environment variable validation
+index.ts        Config object aggregation
+logger.ts       Pino logger
+swagger.ts      Swagger/OpenAPI setup
+```
+
+### `src/modules`
+
+Domain-level feature modules.
+
+Current modules:
+
+```txt
+auth/
+products/
+```
+
+A module owns:
+
+```txt
+dtos/           TypeScript request/response/domain DTOs
+interfaces/    Ports/contracts, usually repository interfaces
+validators/    Zod request and response schemas
+controller.ts  HTTP request/response translation
+routes.ts      Express routes, validation, auth/RBAC middleware
+service.ts     Business logic
+```
+
+### `src/infrastructure`
+
+Adapters and external-facing implementations.
+
+Current adapters:
+
+```txt
+auth/token.service.ts
+database/prisma.client.ts
+database/db.ts
+database/repositories/*.repository.ts
+oauth/google.oauth.ts
+```
+
+Repository implementations live in infrastructure because Prisma is an external database adapter.
+
+### `src/shared`
+
+Cross-cutting application concerns.
+
+```txt
+errors/         AppError and global error handler
+middlewares/    Auth, RBAC, CORS, Helmet, validation, request logging
+openapi/        Zod/OpenAPI registry
+utils/          Shared helpers
+```
+
+### `src/routes`
+
+Central API route mounting.
+
+```txt
+src/routes/index.ts
+```
+
+This file mounts module routers under their module-level path:
+
+```txt
+/auth
+/products
+```
+
+`app.ts` mounts the centralized router under `config.constants.API_PREFIX`, currently:
+
+```txt
+/api/v1
+```
+
+### `src/container.ts`
+
+Manual composition root.
+
+This file wires:
+
+```txt
+Prisma client
+  -> repositories
+  -> services
+  -> controllers
+  -> routers
+```
+
+### `src/app.ts`
+
+Express app configuration.
+
+Responsibilities:
+
+- Disable `x-powered-by`
+- Register request ID middleware
+- Register request logger
+- Register security middleware
+- Register JSON/body parsing
+- Register Swagger UI
+- Register health/root routes
+- Mount `/api/v1`
+- Register not-found and global error handlers
+
+### `src/server.ts`
+
+Startup lifecycle.
+
+Responsibilities:
+
+- Log startup
+- Connect database
+- Create Express app
+- Start HTTP server
+- Register graceful shutdown handlers
+- Handle uncaught exceptions and unhandled rejections
+
+Expected startup log order:
+
+```txt
+Starting EShop Backend...
+Database connection established
+🚀 Swagger UI available at: http://localhost:3000/api-docs
+Express app configured
+Server listening on port 3000
+Environment: development
+EShop Backend started successfully
+```
+
+## Request Flow
+
+```txt
+HTTP Request
+  -> requestIdMiddleware
+  -> requestLoggerMiddleware
+  -> helmet/cors/body parser
+  -> src/routes/index.ts
+  -> module routes
+  -> validate(...)
+  -> authenticate / authorize when needed
+  -> controller
+  -> service
+  -> repository
+  -> Prisma
+  -> PostgreSQL
+```
+
+## Validation Flow
+
+Validation should happen once at the route layer.
+
+Correct:
+
+```ts
+router.post('/login', validate(loginSchema), controller.login)
+```
+
+Controller then uses typed request data:
+
+```ts
+const result = await this.authService.login(req.body as LoginDto)
+```
+
+Avoid:
+
+```ts
+const data = loginSchema.parse(req.body)
+```
+
+inside controllers, because it duplicates route-level validation.
+
+## Error Flow
+
+Expected HTTP/domain errors should use `AppError` or subclasses:
+
+```txt
+UnauthorizedError
+ForbiddenError
+ConflictError
+NotFoundError
+```
+
+Unhandled errors go to `globalErrorHandler`.
+
+Response format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Error message"
+  }
+}
+```
+
+## Response Format
+
+All JSON success responses should use:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Examples:
+
+```json
+{
+  "success": true,
+  "data": {
+    "accessToken": "..."
+  }
+}
+```
+
+```json
+{
+  "success": true,
+  "data": {
+    "product": {}
+  }
+}
+```
+
+Delete endpoints can return `204 No Content`.
+
+## Documentation Flow
+
+See `docs/SWAGGER_ANALYSIS.md` for full details.
+
+Short version:
+
+```txt
+docs/openapi.yaml
+  -> docs/paths/*.yaml
+  -> docs/components/**/*.yaml
+  -> src/shared/openapi/registry.ts
+  -> validators/*.schema.ts
+  -> validators/responses.ts
+```
+
+Docs must match actual controller responses.
+
+## Adding a New Module
+
+Example: `categories`
+
+1. Create module folder:
+
+```txt
+src/modules/categories/
+  dtos/
+  interfaces/
+  validators/
+    category.schema.ts
+    responses.ts
+  category.controller.ts
+  category.routes.ts
+  category.service.ts
+```
+
+2. Create repository interface:
+
+```txt
+src/modules/categories/interfaces/category.repository.interface.ts
+```
+
+3. Create Prisma repository:
+
+```txt
+src/infrastructure/database/repositories/category.repository.ts
+```
+
+4. Wire it in `src/container.ts`.
+
+5. Mount it in `src/routes/index.ts`.
+
+6. Add OpenAPI path docs:
+
+```txt
+docs/paths/categories.yaml
+```
+
+7. Reference the path file from `docs/openapi.yaml`.
+
+8. Run:
+
+```bash
+npx prisma generate
+npm run typecheck
+npm run build
+```
+
+## What Not To Do
+
+- Do not put Prisma queries directly inside controllers.
+- Do not duplicate Zod parsing inside controllers.
+- Do not mount module routes directly in `app.ts`.
+- Do not add fake startup logs for services that do not exist.
+- Do not document response shapes that differ from actual controller output.
+
 
 ===== END FILE =====
 
@@ -598,12 +1057,13 @@ components:
 ============================================================
 ===== FILE START: docs\paths\auth.yaml
 Type: Source File
-Size: 3.36 KB
+Size: 6.93 KB
 ============================================================
 
 register:
   post:
     summary: Register a new user (PUBLIC)
+    description: Creates a new user account using email, password, and profile information. Returns the created user summary inside the standard response envelope.
     tags:
       - Auth
     requestBody:
@@ -612,6 +1072,12 @@ register:
         application/json:
           schema:
             $ref: '#/components/schemas/RegisterRequest'
+          example:
+            email: user@example.com
+            password: secret123
+            name: Jane Doe
+            phone: "+8801700000000"
+            profileImage: "https://example.com/avatar.png"
     responses:
       '201':
         description: User registered successfully
@@ -619,22 +1085,39 @@ register:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterResponse'
+            example:
+              success: true
+              data:
+                message: User registered successfully
+                user:
+                  id: "4b7f2a97-3d7e-4f6c-96e5-c9152c7d2f64"
+                  email: user@example.com
+                  role: USER
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid email format
       '409':
         description: User already exists
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: User already exists
 
 login:
   post:
     summary: Login with email and password (PUBLIC)
+    description: Authenticates a user and returns access and refresh tokens inside the standard response envelope.
     tags:
       - Auth
     requestBody:
@@ -643,6 +1126,9 @@ login:
         application/json:
           schema:
             $ref: '#/components/schemas/LoginRequest'
+          example:
+            email: user@example.com
+            password: secret123
     responses:
       '200':
         description: Login successful
@@ -650,22 +1136,41 @@ login:
           application/json:
             schema:
               $ref: '#/components/schemas/TokenResponse'
+            example:
+              success: true
+              data:
+                user:
+                  id: "4b7f2a97-3d7e-4f6c-96e5-c9152c7d2f64"
+                  email: user@example.com
+                  role: USER
+                  name: Jane Doe
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Password is required
       '401':
         description: Invalid credentials
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid credentials
 
 refresh:
   post:
     summary: Refresh access token (PUBLIC)
+    description: Validates a refresh token and returns a new access token.
     tags:
       - Auth
     requestBody:
@@ -674,6 +1179,8 @@ refresh:
         application/json:
           schema:
             $ref: '#/components/schemas/RefreshRequest'
+          example:
+            refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     responses:
       '200':
         description: Token refreshed successfully
@@ -681,36 +1188,62 @@ refresh:
           application/json:
             schema:
               $ref: '#/components/schemas/RefreshResponse'
+            example:
+              success: true
+              data:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Refresh token is required
       '401':
         description: Invalid refresh token
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid refresh token
 
 oauth:
   post:
     summary: OAuth login with id_token or authorization code (PUBLIC)
+    description: Authenticates a user using Google OAuth. The request must include either an idToken or an authorization code.
     tags:
       - Auth
     parameters:
       - name: provider
         in: path
         required: true
+        description: OAuth provider name.
         schema:
           $ref: '#/components/schemas/Provider'
+        example: google
     requestBody:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuthLoginRequest'
+          examples:
+            idToken:
+              summary: Login using Google id_token
+              value:
+                idToken: "google-id-token"
+            authorizationCode:
+              summary: Login using OAuth authorization code
+              value:
+                code: "google-auth-code"
+                codeVerifier: "pkce-code-verifier"
+                redirectUri: "http://localhost:3000/api/v1/auth/google/callback"
     responses:
       '200':
         description: OAuth authentication successful
@@ -718,24 +1251,46 @@ oauth:
           application/json:
             schema:
               $ref: '#/components/schemas/TokenResponse'
+            example:
+              success: true
+              data:
+                user:
+                  id: "4b7f2a97-3d7e-4f6c-96e5-c9152c7d2f64"
+                  email: user@example.com
+                  role: USER
+                  name: Jane Doe
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: code or idToken is required
       '401':
         description: Authentication failed
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid Google id_token
       '503':
         description: OAuth provider is not configured
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Google OAuth is not configured
 
 
 ===== END FILE =====
@@ -745,12 +1300,13 @@ oauth:
 ============================================================
 ===== FILE START: docs\paths\products.yaml
 Type: Source File
-Size: 5.98 KB
+Size: 13.26 KB
 ============================================================
 
 products:
   get:
     summary: Get all products (USER, ADMIN, DELIVERY)
+    description: Returns a paginated product list. Supports search, category, price, stock, and sale filters.
     tags:
       - Products
     security:
@@ -771,21 +1327,52 @@ products:
           application/json:
             schema:
               $ref: '#/components/schemas/PaginatedProductsResponse'
+            example:
+              success: true
+              data:
+                products:
+                  - id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                    name: Wireless Mouse
+                    slug: wireless-mouse
+                    description: Ergonomic wireless mouse
+                    originalPrice: 1200
+                    salePrice: 999
+                    stock: 25
+                    categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                    isOnSale: true
+                    saleStartDate: "2026-05-01T00:00:00.000Z"
+                    saleEndDate: "2026-06-01T00:00:00.000Z"
+                    isActive: true
+                    createdAt: "2026-05-25T10:00:00.000Z"
+                    updatedAt: "2026-05-25T10:00:00.000Z"
+                total: 1
+                page: 1
+                limit: 10
+                totalPages: 1
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: minPrice must be less than or equal to maxPrice
       '401':
         description: Unauthorized
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
 
   post:
     summary: Create a new product (ADMIN)
+    description: Creates a new product. Requires an authenticated admin user.
     tags:
       - Products
     security:
@@ -796,6 +1383,18 @@ products:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateProductRequest'
+          example:
+            name: Wireless Mouse
+            slug: wireless-mouse
+            description: Ergonomic wireless mouse
+            originalPrice: 1200
+            salePrice: 999
+            stock: 25
+            categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+            isOnSale: true
+            saleStartDate: "2026-05-01T00:00:00.000Z"
+            saleEndDate: "2026-06-01T00:00:00.000Z"
+            isActive: true
     responses:
       '201':
         description: Product created successfully
@@ -803,28 +1402,59 @@ products:
           application/json:
             schema:
               $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 999
+                  stock: 25
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:00:00.000Z"
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid product payload
       '401':
         description: Unauthorized
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '403':
         description: Forbidden - Admin only
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: "Forbidden: Insufficient permissions"
 
 productById:
   get:
     summary: Get product by ID (USER, ADMIN, DELIVERY)
+    description: Returns a single product by UUID.
     tags:
       - Products
     security:
@@ -833,9 +1463,11 @@ productById:
       - name: id
         in: path
         required: true
+        description: Product UUID.
         schema:
           type: string
           format: uuid
+        example: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
     responses:
       '200':
         description: Product retrieved successfully
@@ -843,27 +1475,58 @@ productById:
           application/json:
             schema:
               $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 999
+                  stock: 25
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:00:00.000Z"
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid uuid
       '401':
         description: Unauthorized
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '404':
         description: Product not found
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found
 
   patch:
     summary: Update a product (ADMIN)
+    description: Updates an existing product. Requires an authenticated admin user.
     tags:
       - Products
     security:
@@ -872,15 +1535,21 @@ productById:
       - name: id
         in: path
         required: true
+        description: Product UUID.
         schema:
           type: string
           format: uuid
+        example: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
     requestBody:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateProductRequest'
+          example:
+            salePrice: 899
+            stock: 30
+            isOnSale: true
     responses:
       '200':
         description: Product updated successfully
@@ -888,33 +1557,68 @@ productById:
           application/json:
             schema:
               $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 899
+                  stock: 30
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:15:00.000Z"
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid product payload
       '401':
         description: Unauthorized
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '403':
         description: Forbidden - Admin only
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: "Forbidden: Insufficient permissions"
       '404':
         description: Product not found
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found
 
   delete:
     summary: Delete a product (ADMIN)
+    description: Deletes a product by UUID. Requires an authenticated admin user.
     tags:
       - Products
     security:
@@ -923,9 +1627,11 @@ productById:
       - name: id
         in: path
         required: true
+        description: Product UUID.
         schema:
           type: string
           format: uuid
+        example: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
     responses:
       '204':
         description: Product deleted successfully (no content)
@@ -935,28 +1641,45 @@ productById:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid uuid
       '401':
         description: Unauthorized
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '403':
         description: Forbidden - Admin only
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: "Forbidden: Insufficient permissions"
       '404':
         description: Product not found
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found
 
 productBySlug:
   get:
     summary: Get product by slug (USER, ADMIN, DELIVERY)
+    description: Returns a single product by slug.
     tags:
       - Products
     security:
@@ -965,8 +1688,10 @@ productBySlug:
       - name: slug
         in: path
         required: true
+        description: Product slug.
         schema:
           type: string
+        example: wireless-mouse
     responses:
       '200':
         description: Product retrieved successfully
@@ -974,18 +1699,309 @@ productBySlug:
           application/json:
             schema:
               $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 999
+                  stock: 25
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:00:00.000Z"
       '401':
         description: Unauthorized
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '404':
         description: Product not found
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: docs\SWAGGER_ANALYSIS.md
+Type: Documentation
+Size: 4.27 KB
+============================================================
+
+# Swagger / OpenAPI Documentation Flow
+
+This project uses a mixed static + Zod-generated OpenAPI flow.
+
+The goal is to keep Swagger useful for humans while keeping request/response schemas close to the code.
+
+## Current Runtime Flow
+
+Swagger UI is mounted in:
+
+```txt
+src/config/swagger.ts
+```
+
+It loads:
+
+```txt
+docs/openapi.yaml
+```
+
+Then resolves local file references like:
+
+```yaml
+$ref: './paths/auth.yaml#/register'
+$ref: './components/security/bearerAuth.yaml'
+```
+
+It also merges schemas generated from Zod/OpenAPI registrations found under:
+
+```txt
+src/modules/*/validators/*.ts
+```
+
+The registry code lives in:
+
+```txt
+src/shared/openapi/registry.ts
+```
+
+## Main Files
+
+```txt
+docs/openapi.yaml
+docs/paths/auth.yaml
+docs/paths/products.yaml
+docs/components/security/bearerAuth.yaml
+src/shared/openapi/registry.ts
+src/modules/auth/validators/auth.schema.ts
+src/modules/auth/validators/responses.ts
+src/modules/products/validators/product.schema.ts
+src/modules/products/validators/responses.ts
+```
+
+## Source of Truth
+
+### Endpoint paths
+
+Source of truth:
+
+```txt
+docs/paths/*.yaml
+```
+
+These files document endpoint summaries, descriptions, parameters, request bodies, response refs, examples, and security.
+
+### Request schemas
+
+Source of truth:
+
+```txt
+src/modules/*/validators/*.schema.ts
+```
+
+These are Zod schemas used by route-level `validate(...)` middleware.
+
+### Response schemas
+
+Source of truth:
+
+```txt
+src/modules/*/validators/responses.ts
+```
+
+These describe the response envelope:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Static fallback schemas also exist in:
+
+```txt
+docs/openapi.yaml
+```
+
+These should stay aligned with Zod response schemas.
+
+### Security scheme
+
+Source of truth:
+
+```txt
+docs/components/security/bearerAuth.yaml
+```
+
+## Response Envelope
+
+All documented JSON success responses should use:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+All documented JSON error responses should use:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Error message"
+  }
+}
+```
+
+Delete endpoints can return:
+
+```txt
+204 No Content
+```
+
+## Endpoint Documentation Pattern
+
+Each endpoint should include:
+
+- `summary`
+- `description`
+- `tags`
+- `security`, if authenticated
+- `parameters`, if path/query params exist
+- `requestBody`, if needed
+- `responses`
+- realistic request/response examples
+
+Example:
+
+```yaml
+login:
+  post:
+    summary: Login with email and password (PUBLIC)
+    description: Authenticates a user and returns access and refresh tokens.
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+          example:
+            email: user@example.com
+            password: secret123
+    responses:
+      '200':
+        description: Login successful
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenResponse'
+```
+
+## Adding New Endpoint Docs
+
+1. Add or update the module route in code.
+2. Add request validation schema in `src/modules/{module}/validators/{module}.schema.ts`.
+3. Add response schema in `src/modules/{module}/validators/responses.ts`.
+4. Add path documentation in `docs/paths/{module}.yaml`.
+5. Add `$ref` in `docs/openapi.yaml`.
+6. Check Swagger UI:
+
+```txt
+http://localhost:3000/api-docs
+```
+
+7. Run:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+## Common Mistakes
+
+### Mistake: documenting direct response objects
+
+Wrong:
+
+```json
+{
+  "accessToken": "..."
+}
+```
+
+Correct:
+
+```json
+{
+  "success": true,
+  "data": {
+    "accessToken": "..."
+  }
+}
+```
+
+### Mistake: forgetting auth security
+
+Product routes require bearer auth. Mutation routes require admin role in code, so documentation should mention admin in summary/description.
+
+### Mistake: updating docs but not Zod schemas
+
+If request body validation changes, update the Zod schema first, then docs.
+
+### Mistake: adding fake generated docs step
+
+There is no required Swagger generation script in the current package. Swagger is assembled at runtime by `src/config/swagger.ts`.
+
+## Verification
+
+After documentation changes:
+
+```bash
+npm run typecheck
+npm run build
+npm run dev
+```
+
+Then open:
+
+```txt
+http://localhost:3000/api-docs
+```
+
+Check:
+
+- Schemas are visible.
+- Path refs resolve.
+- Examples render.
+- Response envelopes match actual API output.
 
 
 ===== END FILE =====
@@ -1432,102 +2448,296 @@ model Payment {
 ============================================================
 ===== FILE START: README.md
 Type: Documentation
-Size: 3.16 KB
+Size: 5.63 KB
 ============================================================
 
 # eshop-backend
 
-A robust backend system for an e-commerce platform, managing users, product catalogs, shopping carts, complex coupon systems, and order processing with integrated payment tracking.
+A TypeScript + Express backend for an e-commerce platform. The project manages authentication, product catalog APIs, shopping/cart-related database models, coupons, orders, and payments using PostgreSQL and Prisma.
 
-## 🚀 Tech Stack
+## Tech Stack
 
-- **Runtime:** Node.js 20.20.0 LTS (TypeScript)
-- **Framework:** Express (v5.2.1)
-- **ORM:** Prisma (v7.7.0)
-- **Database:** PostgreSQL
-- **Language:** TypeScript (v6.0.2)
+- Runtime: Node.js 20+
+- Language: TypeScript
+- Framework: Express
+- ORM: Prisma
+- Database: PostgreSQL
+- Validation: Zod
+- API Docs: Swagger UI + OpenAPI YAML + Zod OpenAPI registry
+- Logging: Pino
 
-## 📦 Domain Overview
+## Domain Overview
 
-The system is designed with the following core domains:
+Current implemented modules:
 
-- **User Management**: Role-based access control (`USER`, `ADMIN`, `DELIVERY`) and multi-provider authentication (Credentials, Google).
-- **Product Catalog**: Hierarchical organization of products into categories, featuring sale pricing, stock tracking, and multi-image support.
-- **Shopping Cart**: Persistent cart system linked to users for seamless shopping experiences.
-- **Coupon Engine**: A sophisticated discount system supporting percentages or fixed amounts applied to specific orders, categories, or products, with validity periods and usage limits.
-- **Order Lifecycle**: Tracks orders from placement through shipping and delivery, including detailed itemization.
-- **Payment Integration**: Support for multiple payment gateways including SSLCOMMERZ, Stripe, COD, Bkash, and Nagad.
+- **Auth**: Email/password auth, refresh token validation, Google OAuth support, JWT access/refresh tokens.
+- **Products**: Product listing, product detail, product creation/update/delete with role-based access.
 
-## 🛠️ Getting Started
+The Prisma schema also includes broader e-commerce models for users, categories, product images, cart, coupons, orders, and payments.
 
-### Prerequisites
+## Project Structure
 
-- Node.js v20.20.0 / v20+ (as specified in `.nvmrc`)
-- PostgreSQL database
+```txt
+src/
+  config/
+    constants.ts
+    env.ts
+    index.ts
+    logger.ts
+    swagger.ts
 
-### Installation
+  infrastructure/
+    auth/
+    database/
+      repositories/
+      db.ts
+      prisma.client.ts
+    oauth/
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd eshop-backend
-   ```
+  modules/
+    auth/
+      dtos/
+      interfaces/
+      validators/
+        auth.schema.ts
+        responses.ts
+      auth.controller.ts
+      auth.routes.ts
+      auth.service.ts
+      oauth.service.ts
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+    products/
+      dtos/
+      interfaces/
+      validators/
+        product.schema.ts
+        responses.ts
+      product.controller.ts
+      product.routes.ts
+      product.service.ts
 
-3. **Environment Configuration**
-   Create a `.env` file in the root directory with:
-   ```env
-   DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
-   PORT=3000
-   NODE_ENV=development
-   JWT_ACCESS_SECRET=your_access_secret
-   JWT_REFRESH_SECRET=your_refresh_secret
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
-   ```
+  routes/
+    index.ts
 
-4. **Database Setup**
-   ```bash
-   npx prisma migrate dev
-   npx prisma generate
-   ```
+  shared/
+    errors/
+    middlewares/
+    openapi/
+    utils/
 
-5. **Run the application**
-   ```bash
-   npm run dev
-   ```
+  types/
+    express.d.ts
 
-### Available Scripts
+  app.ts
+  container.ts
+  server.ts
+```
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm run typecheck` - Run TypeScript type checking
-- `npm run lint` - Run ESLint
-- `npm run swagger:generate` - Generate swagger.json from code-first OpenAPI registry
+## Architecture
 
-## 🔗 API Documentation
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full architecture and coding flow.
 
-Once the server is running, visit: http://localhost:3000/api-docs
+High-level request flow:
 
-- Swagger UI is served at `/api-docs`
-- OpenAPI JSON is served at `/swagger.json`
-- `swagger.json` can be regenerated with `npm run swagger:generate`
-- OpenAPI source of truth is `src/config/openapi-registry.ts` using Zod schemas
+```txt
+HTTP Request
+  -> app middleware
+  -> src/routes/index.ts
+  -> module route
+  -> validate(...) middleware
+  -> auth/RBAC middleware when needed
+  -> controller
+  -> service
+  -> repository
+  -> Prisma/PostgreSQL
+```
 
-Endpoints display roles in their summary:
-- `(PUBLIC)` - Accessible without authentication
-- `(ADMIN)` - Admin only
-- `(USER, ADMIN, DELIVERY)` - Authenticated users with specified roles
+## API Response Format
 
-## 📂 Project Structure
+Successful responses use this envelope:
 
-- `prisma/schema.prisma`: Database models and relations.
-- `src/`: Source code for the application.
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Error responses use:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Error message"
+  }
+}
+```
+
+## API Documentation
+
+Swagger UI is available after the server starts:
+
+```txt
+http://localhost:3000/api-docs
+```
+
+The documentation flow is:
+
+```txt
+docs/openapi.yaml
+  -> docs/paths/*.yaml
+  -> docs/components/**/*.yaml
+  -> src/shared/openapi/registry.ts
+  -> src/modules/*/validators/*.ts
+```
+
+Notes:
+
+- Static path docs live in `docs/paths`.
+- Shared OpenAPI components live in `docs/components`.
+- Zod request schemas live in `src/modules/*/validators/*.schema.ts`.
+- Zod response schemas live in `src/modules/*/validators/responses.ts`.
+- The runtime Swagger setup merges static YAML docs with Zod/OpenAPI schemas.
+- No separate Swagger generation step is required in the current setup.
+
+See [`docs/SWAGGER_ANALYSIS.md`](./docs/SWAGGER_ANALYSIS.md) for the detailed documentation flow.
+
+## Setup
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Update the values in `.env`:
+
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
+PORT=3000
+NODE_ENV=development
+
+JWT_ACCESS_SECRET=your_access_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
+```
+
+### 3. Run Prisma
+
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+Use `npx prisma migrate dev` only when applying migrations in development. If the database is already migrated, `npx prisma generate` is usually enough after pulling code.
+
+### 4. Run development server
+
+```bash
+npm run dev
+```
+
+Expected startup log pattern:
+
+```txt
+INFO: Starting EShop Backend...
+INFO: Database connection established
+INFO: 🚀 Swagger UI available at: http://localhost:3000/api-docs
+INFO: Express app configured
+INFO: Server listening on port 3000
+INFO: Environment: development
+INFO: EShop Backend started successfully
+```
+
+## Available Scripts
+
+```bash
+npm run dev        # Start development server with tsx watch
+npm run build      # Compile TypeScript and copy docs into dist/docs
+npm run start      # Run compiled server
+npm run typecheck  # TypeScript type check only
+npm run lint       # ESLint
+npm run test       # Placeholder test command
+```
+
+## Verification Checklist
+
+After changing backend structure, docs, or schemas:
+
+```bash
+npx prisma generate
+npm run typecheck
+npm run build
+npm run dev
+```
+
+Then check:
+
+```txt
+GET http://localhost:3000/health
+GET http://localhost:3000/
+GET http://localhost:3000/api-docs
+```
+
+## Current Endpoints
+
+Base API prefix:
+
+```txt
+/api/v1
+```
+
+Auth:
+
+```txt
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/oauth/:provider
+GET  /api/v1/auth/google
+GET  /api/v1/auth/google/callback
+```
+
+Products:
+
+```txt
+GET    /api/v1/products
+POST   /api/v1/products
+GET    /api/v1/products/:id
+GET    /api/v1/products/slug/:slug
+PATCH  /api/v1/products/:id
+DELETE /api/v1/products/:id
+```
+
+## Development Rules
+
+- Keep validation in route-level `validate(...)` middleware.
+- Controllers should not re-parse with Zod.
+- Controllers should only translate HTTP request/response.
+- Services should contain business logic.
+- Repositories should contain Prisma/database operations.
+- New modules should follow the existing `auth` and `products` folder pattern.
+- Keep API docs in sync with actual `{ success, data }` response envelopes.
 
 
 ===== END FILE =====
@@ -1594,7 +2804,7 @@ export const createApp = () => {
   return app;
 };
 
-export default createApp();
+export default createApp;
 
 
 ===== END FILE =====
@@ -1621,13 +2831,13 @@ export const constants = {
 ============================================================
 ===== FILE START: src\config\env.ts
 Type: Config File
-Size: 1.13 KB
+Size: 1.15 KB
 ============================================================
 
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
@@ -1662,14 +2872,11 @@ if (envConfig.NODE_ENV === 'production') {
 ============================================================
 ===== FILE START: src\config\index.ts
 Type: Config File
-Size: 0.60 KB
+Size: 0.56 KB
 ============================================================
 
-import dotenv from 'dotenv';
 import { envConfig } from './env';
 import { constants } from './constants';
-
-dotenv.config();
 
 export const config = {
   env: envConfig,
@@ -3743,17 +4950,34 @@ export const requestIdMiddleware = (
 ============================================================
 ===== FILE START: src\shared\middlewares\request-logger.middleware.ts
 Type: Shared Utilities
-Size: 0.52 KB
+Size: 0.85 KB
 ============================================================
 
 import { NextFunction, Request, Response } from 'express';
 import logger from '../../config/logger';
+
+const ignoredLogPaths = [
+  '/api-docs',
+  '/api-docs/',
+  '/swagger-ui',
+  '/favicon.ico',
+];
+
+const shouldSkipRequestLog = (path: string) => {
+  return ignoredLogPaths.some((ignoredPath) =>
+    path === ignoredPath || path.startsWith(`${ignoredPath}/`),
+  );
+};
 
 export const requestLoggerMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+  if (shouldSkipRequestLog(req.originalUrl)) {
+    return next();
+  }
+
   const startedAt = Date.now();
 
   res.on('finish', () => {

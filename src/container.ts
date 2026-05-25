@@ -27,8 +27,7 @@ const productController = new ProductController(productService);
 const authRouter = createAuthRouter(authController);
 const productRouter = createProductRouter(productController);
 
-// Manual composition root.
-// This intentionally avoids tsyringe while keeping the same YL-style layering:
+// Manual composition root:
 // infrastructure -> services -> controllers -> routers.
 export const container = {
   prisma,

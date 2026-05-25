@@ -71,7 +71,18 @@ Source of truth:
 src/modules/*/validators/*.schema.ts
 ```
 
-These are Zod schemas used by route-level `validate(...)` middleware.
+These are Zod schemas used by route-level `validate(...)` middleware and registered with `.openapi(...)`.
+
+Current generated request schemas include:
+
+```txt
+RegisterRequest
+LoginRequest
+RefreshRequest
+OAuthLoginRequest
+CreateProductRequest
+UpdateProductRequest
+```
 
 ### Response schemas
 
@@ -90,13 +101,35 @@ These describe the response envelope:
 }
 ```
 
-Static fallback schemas also exist in:
+Current generated response schemas include:
+
+```txt
+AuthUserResponse
+RegisterResponse
+TokenResponse
+RefreshResponse
+OAuthResponse
+ProductCategory
+ProductImage
+Product
+ProductResponse
+PaginatedProductsResponse
+```
+
+### Static schemas
+
+Only schemas that are not owned by a module should stay static in:
 
 ```txt
 docs/openapi.yaml
 ```
 
-These should stay aligned with Zod response schemas.
+Current static schemas:
+
+```txt
+Provider
+Error
+```
 
 ### Security scheme
 
@@ -132,6 +165,23 @@ Delete endpoints can return:
 
 ```txt
 204 No Content
+```
+
+## Product Schema Notes
+
+Product repositories include related data for some reads:
+
+```txt
+category
+images
+```
+
+So the `Product` schema documents both the base product fields and optional relation fields.
+
+Product price fields are backed by Prisma Decimal. Until the API adds a response mapper that normalizes Decimal values into one fixed JSON shape, price fields are documented as:
+
+```txt
+number | string
 ```
 
 ## Endpoint Documentation Pattern
@@ -217,6 +267,23 @@ Correct:
 }
 ```
 
+### Mistake: keeping duplicate schema sources
+
+Avoid defining the same request/response schema in both:
+
+```txt
+docs/openapi.yaml
+src/modules/*/validators/*.ts
+```
+
+The preferred flow is:
+
+```txt
+module request/response schemas -> Zod .openapi(...) -> generated OpenAPI schemas
+```
+
+Keep only cross-cutting schemas such as `Error` and `Provider` in static YAML.
+
 ### Mistake: forgetting auth security
 
 Product routes require bearer auth. Mutation routes require admin role in code, so documentation should mention admin in summary/description.
@@ -251,3 +318,5 @@ Check:
 - Path refs resolve.
 - Examples render.
 - Response envelopes match actual API output.
+- `OAuthLoginRequest` appears under schemas.
+- `Product` includes optional `category` and `images`.
