@@ -8,27 +8,43 @@ import { ProductController } from './modules/products/product.controller';
 import { ProductRepository } from './infrastructure/database/repositories/product.repository';
 import { createProductRouter } from './modules/products/product.routes';
 import { ProductService } from './modules/products/product.service';
-import { notFoundHandler } from './shared/middlewares/error.middleware';
+import { notFoundHandler } from './shared/errors/global-handler';
 
+// Infrastructure adapters
 const authRepository = new AuthRepository(prisma);
-
-const authService = new AuthService(authRepository);
-const authController = new AuthController(authService);
-const oauthService = new OAuthService(authRepository);
-
 const productRepository = new ProductRepository(prisma);
+
+// Domain services
+const authService = new AuthService(authRepository);
+const oauthService = new OAuthService(authRepository);
 const productService = new ProductService(productRepository);
+
+// HTTP controllers
+const authController = new AuthController(authService);
 const productController = new ProductController(productService);
 
+// HTTP routers
+const authRouter = createAuthRouter(authController);
+const productRouter = createProductRouter(productController);
+
+// Manual composition root.
+// This intentionally avoids tsyringe while keeping the same YL-style layering:
+// infrastructure -> services -> controllers -> routers.
 export const container = {
+  prisma,
+
   authRepository,
-  authService,
-  authController,
-  oauthService,
-  authRouter: createAuthRouter(authController),
   productRepository,
+
+  authService,
+  oauthService,
   productService,
+
+  authController,
   productController,
-  productRouter: createProductRouter(productController),
+
+  authRouter,
+  productRouter,
+
   notFoundHandler,
 };

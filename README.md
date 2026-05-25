@@ -1,93 +1,287 @@
 # eshop-backend
 
-A robust backend system for an e-commerce platform, managing users, product catalogs, shopping carts, complex coupon systems, and order processing with integrated payment tracking.
+A TypeScript + Express backend for an e-commerce platform. The project manages authentication, product catalog APIs, shopping/cart-related database models, coupons, orders, and payments using PostgreSQL and Prisma.
 
-## 🚀 Tech Stack
+## Tech Stack
 
-- **Runtime:** Node.js 20.20.0 LTS (TypeScript)
-- **Framework:** Express (v5.2.1)
-- **ORM:** Prisma (v7.7.0)
-- **Database:** PostgreSQL
-- **Language:** TypeScript (v6.0.2)
+- Runtime: Node.js 20+
+- Language: TypeScript
+- Framework: Express
+- ORM: Prisma
+- Database: PostgreSQL
+- Validation: Zod
+- API Docs: Swagger UI + OpenAPI YAML + Zod OpenAPI registry
+- Logging: Pino
 
-## 📦 Domain Overview
+## Domain Overview
 
-The system is designed with the following core domains:
+Current implemented modules:
 
-- **User Management**: Role-based access control (`USER`, `ADMIN`, `DELIVERY`) and multi-provider authentication (Credentials, Google).
-- **Product Catalog**: Hierarchical organization of products into categories, featuring sale pricing, stock tracking, and multi-image support.
-- **Shopping Cart**: Persistent cart system linked to users for seamless shopping experiences.
-- **Coupon Engine**: A sophisticated discount system supporting percentages or fixed amounts applied to specific orders, categories, or products, with validity periods and usage limits.
-- **Order Lifecycle**: Tracks orders from placement through shipping and delivery, including detailed itemization.
-- **Payment Integration**: Support for multiple payment gateways including SSLCOMMERZ, Stripe, COD, Bkash, and Nagad.
+- **Auth**: Email/password auth, refresh token validation, Google OAuth support, JWT access/refresh tokens.
+- **Products**: Product listing, product detail, product creation/update/delete with role-based access.
 
-## 🛠️ Getting Started
+The Prisma schema also includes broader e-commerce models for users, categories, product images, cart, coupons, orders, and payments.
 
-### Prerequisites
+## Project Structure
 
-- Node.js v20.20.0 / v20+ (as specified in `.nvmrc`)
-- PostgreSQL database
+```txt
+src/
+  config/
+    constants.ts
+    env.ts
+    index.ts
+    logger.ts
+    swagger.ts
 
-### Installation
+  infrastructure/
+    auth/
+    database/
+      repositories/
+      db.ts
+      prisma.client.ts
+    oauth/
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd eshop-backend
-   ```
+  modules/
+    auth/
+      dtos/
+      interfaces/
+      validators/
+        auth.schema.ts
+        responses.ts
+      auth.controller.ts
+      auth.routes.ts
+      auth.service.ts
+      oauth.service.ts
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+    products/
+      dtos/
+      interfaces/
+      validators/
+        product.schema.ts
+        responses.ts
+      product.controller.ts
+      product.routes.ts
+      product.service.ts
 
-3. **Environment Configuration**
-   Create a `.env` file in the root directory with:
-   ```env
-   DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
-   PORT=3000
-   NODE_ENV=development
-   JWT_ACCESS_SECRET=your_access_secret
-   JWT_REFRESH_SECRET=your_refresh_secret
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
-   ```
+  routes/
+    index.ts
 
-4. **Database Setup**
-   ```bash
-   npx prisma migrate dev
-   npx prisma generate
-   ```
+  shared/
+    errors/
+    middlewares/
+    openapi/
+    utils/
 
-5. **Run the application**
-   ```bash
-   npm run dev
-   ```
+  types/
+    express.d.ts
 
-### Available Scripts
+  app.ts
+  container.ts
+  server.ts
+```
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm run typecheck` - Run TypeScript type checking
-- `npm run lint` - Run ESLint
-- `npm run swagger:generate` - Generate swagger.json from code-first OpenAPI registry
+## Architecture
 
-## 🔗 API Documentation
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full architecture and coding flow.
 
-Once the server is running, visit: http://localhost:3000/api-docs
+High-level request flow:
 
-- Swagger UI is served at `/api-docs`
-- OpenAPI JSON is served at `/swagger.json`
-- `swagger.json` can be regenerated with `npm run swagger:generate`
-- OpenAPI source of truth is `src/config/openapi-registry.ts` using Zod schemas
+```txt
+HTTP Request
+  -> app middleware
+  -> src/routes/index.ts
+  -> module route
+  -> validate(...) middleware
+  -> auth/RBAC middleware when needed
+  -> controller
+  -> service
+  -> repository
+  -> Prisma/PostgreSQL
+```
 
-Endpoints display roles in their summary:
-- `(PUBLIC)` - Accessible without authentication
-- `(ADMIN)` - Admin only
-- `(USER, ADMIN, DELIVERY)` - Authenticated users with specified roles
+## API Response Format
 
-## 📂 Project Structure
+Successful responses use this envelope:
 
-- `prisma/schema.prisma`: Database models and relations.
-- `src/`: Source code for the application.
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Error responses use:
+
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Error message"
+  }
+}
+```
+
+## API Documentation
+
+Swagger UI is available after the server starts:
+
+```txt
+http://localhost:3000/api-docs
+```
+
+The documentation flow is:
+
+```txt
+docs/openapi.yaml
+  -> docs/paths/*.yaml
+  -> docs/components/**/*.yaml
+  -> src/shared/openapi/registry.ts
+  -> src/modules/*/validators/*.ts
+```
+
+Notes:
+
+- Static path docs live in `docs/paths`.
+- Shared OpenAPI components live in `docs/components`.
+- Zod request schemas live in `src/modules/*/validators/*.schema.ts`.
+- Zod response schemas live in `src/modules/*/validators/responses.ts`.
+- The runtime Swagger setup merges static YAML docs with Zod/OpenAPI schemas.
+- No separate Swagger generation step is required in the current setup.
+
+See [`docs/SWAGGER_ANALYSIS.md`](./docs/SWAGGER_ANALYSIS.md) for the detailed documentation flow.
+
+## Setup
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Update the values in `.env`:
+
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
+PORT=3000
+NODE_ENV=development
+
+JWT_ACCESS_SECRET=your_access_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
+```
+
+### 3. Run Prisma
+
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+Use `npx prisma migrate dev` only when applying migrations in development. If the database is already migrated, `npx prisma generate` is usually enough after pulling code.
+
+### 4. Run development server
+
+```bash
+npm run dev
+```
+
+Expected startup log pattern:
+
+```txt
+INFO: Starting EShop Backend...
+INFO: Database connection established
+INFO: 🚀 Swagger UI available at: http://localhost:3000/api-docs
+INFO: Express app configured
+INFO: Server listening on port 3000
+INFO: Environment: development
+INFO: EShop Backend started successfully
+```
+
+## Available Scripts
+
+```bash
+npm run dev        # Start development server with tsx watch
+npm run build      # Compile TypeScript and copy docs into dist/docs
+npm run start      # Run compiled server
+npm run typecheck  # TypeScript type check only
+npm run lint       # ESLint
+npm run test       # Placeholder test command
+```
+
+## Verification Checklist
+
+After changing backend structure, docs, or schemas:
+
+```bash
+npx prisma generate
+npm run typecheck
+npm run build
+npm run dev
+```
+
+Then check:
+
+```txt
+GET http://localhost:3000/health
+GET http://localhost:3000/
+GET http://localhost:3000/api-docs
+```
+
+## Current Endpoints
+
+Base API prefix:
+
+```txt
+/api/v1
+```
+
+Auth:
+
+```txt
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/oauth/:provider
+GET  /api/v1/auth/google
+GET  /api/v1/auth/google/callback
+```
+
+Products:
+
+```txt
+GET    /api/v1/products
+POST   /api/v1/products
+GET    /api/v1/products/:id
+GET    /api/v1/products/slug/:slug
+PATCH  /api/v1/products/:id
+DELETE /api/v1/products/:id
+```
+
+## Development Rules
+
+- Keep validation in route-level `validate(...)` middleware.
+- Controllers should not re-parse with Zod.
+- Controllers should only translate HTTP request/response.
+- Services should contain business logic.
+- Repositories should contain Prisma/database operations.
+- New modules should follow the existing `auth` and `products` folder pattern.
+- Keep API docs in sync with actual `{ success, data }` response envelopes.

@@ -1,31 +1,55 @@
 import express from 'express';
 import { setupSwagger } from './config/swagger';
-import { container } from './container';
-import { errorHandler } from './shared/middlewares/error.middleware';
-import logger from './config/logger';
-import helmet from 'helmet';
-import cors from 'cors';
+import { config } from './config';
+import { buildApiRouter } from './routes';
+import { helmetMiddleware } from './shared/middlewares/helmet';
+import { corsMiddleware } from './shared/middlewares/cors';
+import { requestIdMiddleware } from './shared/middlewares/request-id.middleware';
+import { requestLoggerMiddleware } from './shared/middlewares/request-logger.middleware';
+import { globalErrorHandler, notFoundHandler } from './shared/errors/global-handler';
 
-const app = express();
+export const createApp = () => {
+  const app = express();
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+  app.disable('x-powered-by');
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    logger.info({ method: req.method, url: req.originalUrl, status: res.statusCode, duration }, 'request');
+  app.use(requestIdMiddleware);
+  app.use(requestLoggerMiddleware);
+  app.use(helmetMiddleware());
+  app.use(corsMiddleware());
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true }));
+
+  setupSwagger(app);
+
+  app.get('/health', (_req, res) => {
+    res.status(200).json({
+      success: true,
+      data: {
+        status: 'ok',
+        service: 'eshop-backend',
+        timestamp: new Date().toISOString(),
+      },
+    });
   });
-  next();
-});
 
-setupSwagger(app);
+  app.get('/', (_req, res) => {
+    res.status(200).json({
+      success: true,
+      data: {
+        message: 'EShop Backend API',
+        docs: '/api-docs',
+        health: '/health',
+      },
+    });
+  });
 
-app.use('/api/v1/auth', container.authRouter);
-app.use('/api/v1/products', container.productRouter);
-app.use(container.notFoundHandler);
-app.use(errorHandler);
+  app.use(config.constants.API_PREFIX, buildApiRouter());
 
-export default app;
+  app.use(notFoundHandler);
+  app.use(globalErrorHandler);
+
+  return app;
+};
+
+export default createApp();

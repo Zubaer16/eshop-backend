@@ -1,6 +1,7 @@
 products:
   get:
     summary: Get all products (USER, ADMIN, DELIVERY)
+    description: Returns a paginated product list. Supports search, category, price, stock, and sale filters.
     tags:
       - Products
     security:
@@ -20,12 +21,53 @@ products:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PaginatedProducts'
+              $ref: '#/components/schemas/PaginatedProductsResponse'
+            example:
+              success: true
+              data:
+                products:
+                  - id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                    name: Wireless Mouse
+                    slug: wireless-mouse
+                    description: Ergonomic wireless mouse
+                    originalPrice: 1200
+                    salePrice: 999
+                    stock: 25
+                    categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                    isOnSale: true
+                    saleStartDate: "2026-05-01T00:00:00.000Z"
+                    saleEndDate: "2026-06-01T00:00:00.000Z"
+                    isActive: true
+                    createdAt: "2026-05-25T10:00:00.000Z"
+                    updatedAt: "2026-05-25T10:00:00.000Z"
+                total: 1
+                page: 1
+                limit: 10
+                totalPages: 1
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: minPrice must be less than or equal to maxPrice
       '401':
         description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
 
   post:
     summary: Create a new product (ADMIN)
+    description: Creates a new product. Requires an authenticated admin user.
     tags:
       - Products
     security:
@@ -36,21 +78,78 @@ products:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateProductRequest'
+          example:
+            name: Wireless Mouse
+            slug: wireless-mouse
+            description: Ergonomic wireless mouse
+            originalPrice: 1200
+            salePrice: 999
+            stock: 25
+            categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+            isOnSale: true
+            saleStartDate: "2026-05-01T00:00:00.000Z"
+            saleEndDate: "2026-06-01T00:00:00.000Z"
+            isActive: true
     responses:
       '201':
         description: Product created successfully
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 999
+                  stock: 25
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:00:00.000Z"
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid product payload
       '401':
         description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '403':
         description: Forbidden - Admin only
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: "Forbidden: Insufficient permissions"
 
 productById:
   get:
     summary: Get product by ID (USER, ADMIN, DELIVERY)
+    description: Returns a single product by UUID.
     tags:
       - Products
     security:
@@ -59,21 +158,70 @@ productById:
       - name: id
         in: path
         required: true
+        description: Product UUID.
         schema:
           type: string
           format: uuid
+        example: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
     responses:
       '200':
         description: Product retrieved successfully
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 999
+                  stock: 25
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:00:00.000Z"
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid uuid
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '404':
         description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found
 
   patch:
     summary: Update a product (ADMIN)
+    description: Updates an existing product. Requires an authenticated admin user.
     tags:
       - Products
     security:
@@ -82,31 +230,90 @@ productById:
       - name: id
         in: path
         required: true
+        description: Product UUID.
         schema:
           type: string
           format: uuid
+        example: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
     requestBody:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/UpdateProductRequest'
+          example:
+            salePrice: 899
+            stock: 30
+            isOnSale: true
     responses:
       '200':
         description: Product updated successfully
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 899
+                  stock: 30
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:15:00.000Z"
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid product payload
       '401':
         description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '403':
         description: Forbidden - Admin only
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: "Forbidden: Insufficient permissions"
       '404':
         description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found
 
   delete:
     summary: Delete a product (ADMIN)
+    description: Deletes a product by UUID. Requires an authenticated admin user.
     tags:
       - Products
     security:
@@ -115,22 +322,59 @@ productById:
       - name: id
         in: path
         required: true
+        description: Product UUID.
         schema:
           type: string
           format: uuid
+        example: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
     responses:
       '204':
         description: Product deleted successfully (no content)
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid uuid
       '401':
         description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '403':
         description: Forbidden - Admin only
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: "Forbidden: Insufficient permissions"
       '404':
         description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found
 
 productBySlug:
   get:
     summary: Get product by slug (USER, ADMIN, DELIVERY)
+    description: Returns a single product by slug.
     tags:
       - Products
     security:
@@ -139,14 +383,52 @@ productBySlug:
       - name: slug
         in: path
         required: true
+        description: Product slug.
         schema:
           type: string
+        example: wireless-mouse
     responses:
       '200':
         description: Product retrieved successfully
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Product'
+              $ref: '#/components/schemas/ProductResponse'
+            example:
+              success: true
+              data:
+                product:
+                  id: "8a3a4fcb-8e02-4c29-bc5f-b34d23d740c1"
+                  name: Wireless Mouse
+                  slug: wireless-mouse
+                  description: Ergonomic wireless mouse
+                  originalPrice: 1200
+                  salePrice: 999
+                  stock: 25
+                  categoryId: "57dbb6b5-2dfd-4f9e-a8a2-b25f807a9447"
+                  isOnSale: true
+                  saleStartDate: "2026-05-01T00:00:00.000Z"
+                  saleEndDate: "2026-06-01T00:00:00.000Z"
+                  isActive: true
+                  createdAt: "2026-05-25T10:00:00.000Z"
+                  updatedAt: "2026-05-25T10:00:00.000Z"
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Authentication token is missing
       '404':
         description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Product not found

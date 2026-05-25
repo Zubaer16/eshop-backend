@@ -1,57 +1,48 @@
 import { NextFunction, Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { TokenService } from '../../infrastructure/auth/token.service';
-import { registerSchema, loginSchema, refreshSchema, oauthSchema } from './validators/auth.schema';
-import { ZodError } from 'zod';
-import { AppError } from '@/shared/errors/app-error';
+import { OAuthLoginDto, RegisterDto, LoginDto } from './dtos/auth.dto';
 
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const validatedData = registerSchema.parse(req.body);
-      const user = await this.authService.register(validatedData);
+      const user = await this.authService.register(req.body as RegisterDto);
+
       res.status(201).json({
-        message: 'User registered successfully',
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
+        success: true,
+        data: {
+          message: 'User registered successfully',
+          user: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          },
         },
       });
     } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
       next(error);
     }
   }
 
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const validatedData = loginSchema.parse(req.body);
-      const result = await this.authService.login(validatedData);
-      res.status(200).json(result);
+      const result = await this.authService.login(req.body as LoginDto);
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
       next(error);
     }
   }
 
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
-      const validatedData = refreshSchema.parse(req.body);
-      const user = await this.authService.validateRefreshToken(validatedData.refreshToken);
+      const { refreshToken } = req.body as { refreshToken: string };
+      const user = await this.authService.validateRefreshToken(refreshToken);
       const accessToken = TokenService.generateAccessToken(user.id, user.role);
 
-      res.status(200).json({ accessToken });
+      res.status(200).json({ success: true, data: { accessToken } });
     } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
       next(error);
     }
   }
@@ -59,14 +50,13 @@ export class AuthController {
   async oauthLogin(req: Request, res: Response, next: NextFunction) {
     try {
       const provider = req.params.provider as string;
-      const validatedData = oauthSchema.body.parse(req.body);
-      
-      const result = await this.authService.oauthLogin(provider, validatedData);
-      res.status(200).json(result);
+      const result = await this.authService.oauthLogin(
+        provider,
+        req.body as OAuthLoginDto,
+      );
+
+      res.status(200).json({ success: true, data: result });
     } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
       next(error);
     }
   }
@@ -74,22 +64,28 @@ export class AuthController {
   oauthSuccess(req: Request, res: Response) {
     const user = req.user as { id: string; role: string; email: string; name?: string } | undefined;
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      return res.status(401).json({
+        success: false,
+        error: { message: 'User not found' },
+      });
     }
 
     const accessToken = TokenService.generateAccessToken(user.id, user.role);
     const refreshToken = TokenService.generateRefreshToken(user.id);
 
     res.status(200).json({
-      message: 'OAuth authentication successful',
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: user.name,
+      success: true,
+      data: {
+        message: 'OAuth authentication successful',
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          name: user.name,
+        },
+        accessToken,
+        refreshToken,
       },
-      accessToken,
-      refreshToken,
     });
   }
 }

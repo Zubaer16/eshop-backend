@@ -174,5 +174,5 @@ export const setupSwagger = (app: Express): void => {
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(finalSpec));
 
-  logger.info('Swagger UI available at: http://localhost:3000/api-docs');
+  logger.info('🚀 Swagger UI available at: http://localhost:3000/api-docs');
 };

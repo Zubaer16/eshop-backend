@@ -1,6 +1,7 @@
 register:
   post:
     summary: Register a new user (PUBLIC)
+    description: Creates a new user account using email, password, and profile information. Returns the created user summary inside the standard response envelope.
     tags:
       - Auth
     requestBody:
@@ -9,6 +10,12 @@ register:
         application/json:
           schema:
             $ref: '#/components/schemas/RegisterRequest'
+          example:
+            email: user@example.com
+            password: secret123
+            name: Jane Doe
+            phone: "+8801700000000"
+            profileImage: "https://example.com/avatar.png"
     responses:
       '201':
         description: User registered successfully
@@ -16,22 +23,39 @@ register:
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterResponse'
+            example:
+              success: true
+              data:
+                message: User registered successfully
+                user:
+                  id: "4b7f2a97-3d7e-4f6c-96e5-c9152c7d2f64"
+                  email: user@example.com
+                  role: USER
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid email format
       '409':
         description: User already exists
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: User already exists
 
 login:
   post:
     summary: Login with email and password (PUBLIC)
+    description: Authenticates a user and returns access and refresh tokens inside the standard response envelope.
     tags:
       - Auth
     requestBody:
@@ -40,6 +64,9 @@ login:
         application/json:
           schema:
             $ref: '#/components/schemas/LoginRequest'
+          example:
+            email: user@example.com
+            password: secret123
     responses:
       '200':
         description: Login successful
@@ -47,16 +74,41 @@ login:
           application/json:
             schema:
               $ref: '#/components/schemas/TokenResponse'
+            example:
+              success: true
+              data:
+                user:
+                  id: "4b7f2a97-3d7e-4f6c-96e5-c9152c7d2f64"
+                  email: user@example.com
+                  role: USER
+                  name: Jane Doe
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Password is required
       '401':
         description: Invalid credentials
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid credentials
 
 refresh:
   post:
     summary: Refresh access token (PUBLIC)
+    description: Validates a refresh token and returns a new access token.
     tags:
       - Auth
     requestBody:
@@ -65,6 +117,8 @@ refresh:
         application/json:
           schema:
             $ref: '#/components/schemas/RefreshRequest'
+          example:
+            refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     responses:
       '200':
         description: Token refreshed successfully
@@ -72,30 +126,62 @@ refresh:
           application/json:
             schema:
               $ref: '#/components/schemas/RefreshResponse'
+            example:
+              success: true
+              data:
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Refresh token is required
       '401':
         description: Invalid refresh token
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid refresh token
 
 oauth:
   post:
     summary: OAuth login with id_token or authorization code (PUBLIC)
+    description: Authenticates a user using Google OAuth. The request must include either an idToken or an authorization code.
     tags:
       - Auth
     parameters:
       - name: provider
         in: path
         required: true
+        description: OAuth provider name.
         schema:
           $ref: '#/components/schemas/Provider'
+        example: google
     requestBody:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/OAuthLoginRequest'
+          examples:
+            idToken:
+              summary: Login using Google id_token
+              value:
+                idToken: "google-id-token"
+            authorizationCode:
+              summary: Login using OAuth authorization code
+              value:
+                code: "google-auth-code"
+                codeVerifier: "pkce-code-verifier"
+                redirectUri: "http://localhost:3000/api/v1/auth/google/callback"
     responses:
       '200':
         description: OAuth authentication successful
@@ -103,15 +189,43 @@ oauth:
           application/json:
             schema:
               $ref: '#/components/schemas/TokenResponse'
+            example:
+              success: true
+              data:
+                user:
+                  id: "4b7f2a97-3d7e-4f6c-96e5-c9152c7d2f64"
+                  email: user@example.com
+                  role: USER
+                  name: Jane Doe
+                accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
       '400':
         description: Validation error
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: code or idToken is required
       '401':
         description: Authentication failed
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Invalid Google id_token
+      '503':
+        description: OAuth provider is not configured
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              success: false
+              error:
+                message: Google OAuth is not configured

@@ -1,13 +1,19 @@
 # 📁 EShop Backend - Combined Source (For LLM Use)
-Generated: 2026-05-12T17:06:38.367Z
+Generated: 2026-05-25T16:51:16.615Z
 Project: EShop Backend
-
 
 =========================================
 📂 PROJECT FOLDER STRUCTURE
 =========================================
 
 ├── docs
+│   ├── components
+│   │   └── security
+│   │       └── bearerAuth.yaml
+│   ├── paths
+│   │   ├── auth.yaml
+│   │   └── products.yaml
+│   └── openapi.yaml
 ├── prisma
 │   ├── migrations
 │   │   ├── 20260416174422_init_schema_setup
@@ -16,45 +22,63 @@ Project: EShop Backend
 │   └── schema.prisma
 ├── src
 │   ├── config
-│   │   ├── constant.ts
+│   │   ├── constants.ts
 │   │   ├── env.ts
-│   │   ├── generate-swagger.ts
 │   │   ├── index.ts
 │   │   ├── logger.ts
-│   │   ├── openapi-registry.ts
-│   │   └── openapi.ts
+│   │   └── swagger.ts
 │   ├── infrastructure
 │   │   ├── auth
-│   │   │   ├── passport.config.ts
 │   │   │   └── token.service.ts
-│   │   └── database
-│   │       └── db.ts
+│   │   ├── database
+│   │   │   ├── repositories
+│   │   │   │   ├── auth.repository.ts
+│   │   │   │   └── product.repository.ts
+│   │   │   ├── db.ts
+│   │   │   └── prisma.client.ts
+│   │   └── oauth
+│   │       └── google.oauth.ts
 │   ├── modules
 │   │   ├── auth
 │   │   │   ├── dtos
 │   │   │   │   └── auth.dto.ts
+│   │   │   ├── interfaces
+│   │   │   │   └── auth.repository.interface.ts
 │   │   │   ├── validators
-│   │   │   │   └── auth.schema.ts
+│   │   │   │   ├── auth.schema.ts
+│   │   │   │   └── responses.ts
 │   │   │   ├── auth.controller.ts
-│   │   │   ├── auth.repository.ts
 │   │   │   ├── auth.routes.ts
 │   │   │   ├── auth.service.ts
 │   │   │   └── oauth.service.ts
 │   │   └── products
 │   │       ├── dtos
 │   │       │   └── product.dto.ts
+│   │       ├── interfaces
+│   │       │   └── product.repository.interface.ts
 │   │       ├── validators
-│   │       │   └── product.schema.ts
+│   │       │   ├── product.schema.ts
+│   │       │   └── responses.ts
 │   │       ├── product.controller.ts
-│   │       ├── product.repository.ts
 │   │       ├── product.routes.ts
 │   │       └── product.service.ts
+│   ├── routes
+│   │   └── index.ts
 │   ├── shared
 │   │   ├── errors
-│   │   │   └── app-error.ts
+│   │   │   ├── app-error.ts
+│   │   │   └── global-handler.ts
 │   │   ├── middlewares
 │   │   │   ├── auth.middleware.ts
-│   │   │   └── error.middleware.ts
+│   │   │   ├── cors.ts
+│   │   │   ├── error.middleware.ts
+│   │   │   ├── helmet.ts
+│   │   │   ├── rbac.middleware.ts
+│   │   │   ├── request-id.middleware.ts
+│   │   │   ├── request-logger.middleware.ts
+│   │   │   └── validate.middleware.ts
+│   │   ├── openapi
+│   │   │   └── registry.ts
 │   │   └── utils
 │   ├── types
 │   │   └── express.d.ts
@@ -69,7 +93,6 @@ Project: EShop Backend
 ├── package.json
 ├── prisma.config.ts
 ├── README.md
-├── swagger.json
 └── tsconfig.json
 
 
@@ -81,7 +104,7 @@ Project: EShop Backend
 ============================================================
 ===== FILE START: .env.example
 Type: Source File
-Size: 445 B
+Size: 0.43 KB
 ============================================================
 
 DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
@@ -102,40 +125,11 @@ GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
 ===== END FILE =====
 
 
-============================================================
-===== FILE START: .gitignore
-Type: Source File
-Size: 74 B
-============================================================
-
-node_modules/
-.env
-.DS_Store
-dist/
-
-/src/generated/prisma
-.claude/
-
-
-===== END FILE =====
-
-
-============================================================
-===== FILE START: .nvmrc
-Type: Source File
-Size: 8 B
-============================================================
-
-20.20.0
-
-
-===== END FILE =====
-
 
 ============================================================
 ===== FILE START: AGENTS.md
 Type: Documentation
-Size: 1005 B
+Size: 0.98 KB
 ============================================================
 
 # AGENTS.md
@@ -180,114 +174,828 @@ Size: 1005 B
 ===== END FILE =====
 
 
+
 ============================================================
-===== FILE START: README.md
-Type: Documentation
-Size: 3.16 KB
+===== FILE START: docs\components\security\bearerAuth.yaml
+Type: Source File
+Size: 0.04 KB
 ============================================================
 
-# eshop-backend
+type: http
+scheme: bearer
+bearerFormat: JWT
 
-A robust backend system for an e-commerce platform, managing users, product catalogs, shopping carts, complex coupon systems, and order processing with integrated payment tracking.
+===== END FILE =====
 
-## 🚀 Tech Stack
 
-- **Runtime:** Node.js 20.20.0 LTS (TypeScript)
-- **Framework:** Express (v5.2.1)
-- **ORM:** Prisma (v7.7.0)
-- **Database:** PostgreSQL
-- **Language:** TypeScript (v6.0.2)
 
-## 📦 Domain Overview
+============================================================
+===== FILE START: docs\openapi.yaml
+Type: Source File
+Size: 8.09 KB
+============================================================
 
-The system is designed with the following core domains:
+openapi: 3.0.3
 
-- **User Management**: Role-based access control (`USER`, `ADMIN`, `DELIVERY`) and multi-provider authentication (Credentials, Google).
-- **Product Catalog**: Hierarchical organization of products into categories, featuring sale pricing, stock tracking, and multi-image support.
-- **Shopping Cart**: Persistent cart system linked to users for seamless shopping experiences.
-- **Coupon Engine**: A sophisticated discount system supporting percentages or fixed amounts applied to specific orders, categories, or products, with validity periods and usage limits.
-- **Order Lifecycle**: Tracks orders from placement through shipping and delivery, including detailed itemization.
-- **Payment Integration**: Support for multiple payment gateways including SSLCOMMERZ, Stripe, COD, Bkash, and Nagad.
+info:
+  title: E-Shop API
+  version: 1.0.0
+  description: Backend API for E-Shop project
 
-## 🛠️ Getting Started
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
 
-### Prerequisites
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Products
+    description: Product management endpoints
 
-- Node.js v20.20.0 / v20+ (as specified in `.nvmrc`)
-- PostgreSQL database
+paths:
+  /auth/register:
+    $ref: './paths/auth.yaml#/register'
+  /auth/login:
+    $ref: './paths/auth.yaml#/login'
+  /auth/refresh:
+    $ref: './paths/auth.yaml#/refresh'
+  /auth/oauth/{provider}:
+    $ref: './paths/auth.yaml#/oauth'
+  /products:
+    $ref: './paths/products.yaml#/products'
+  /products/{id}:
+    $ref: './paths/products.yaml#/productById'
+  /products/slug/{slug}:
+    $ref: './paths/products.yaml#/productBySlug'
 
-### Installation
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: './components/security/bearerAuth.yaml'
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd eshop-backend
-   ```
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    SearchParam:
+      name: search
+      in: query
+      schema:
+        type: string
+    CategoryIdParam:
+      name: categoryId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    MinPriceParam:
+      name: minPrice
+      in: query
+      schema:
+        type: number
+        minimum: 0
+    MaxPriceParam:
+      name: maxPrice
+      in: query
+      schema:
+        type: number
+        minimum: 0
+    InStockParam:
+      name: inStock
+      in: query
+      schema:
+        type: string
+        enum: [true, false]
+    OnSaleParam:
+      name: onSale
+      in: query
+      schema:
+        type: string
+        enum: [true, false]
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+  schemas:
+    Provider:
+      type: string
+      enum: [google]
+      description: OAuth provider name
 
-3. **Environment Configuration**
-   Create a `.env` file in the root directory with:
-   ```env
-   DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
-   PORT=3000
-   NODE_ENV=development
-   JWT_ACCESS_SECRET=your_access_secret
-   JWT_REFRESH_SECRET=your_refresh_secret
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
-   ```
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            stack:
+              type: string
+              nullable: true
 
-4. **Database Setup**
-   ```bash
-   npx prisma migrate dev
-   npx prisma generate
-   ```
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [USER, ADMIN, DELIVERY]
+        name:
+          type: string
+          nullable: true
 
-5. **Run the application**
-   ```bash
-   npm run dev
-   ```
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+                  enum: [USER, ADMIN, DELIVERY]
 
-### Available Scripts
+    TokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/AuthUser'
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm run typecheck` - Run TypeScript type checking
-- `npm run lint` - Run ESLint
-- `npm run swagger:generate` - Generate swagger.json from code-first OpenAPI registry
+    RefreshResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
 
-## 🔗 API Documentation
+    OAuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            message:
+              type: string
+            user:
+              $ref: '#/components/schemas/AuthUser'
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
 
-Once the server is running, visit: http://localhost:3000/api-docs
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        originalPrice:
+          type: number
+        salePrice:
+          type: number
+          nullable: true
+        stock:
+          type: integer
+        categoryId:
+          type: string
+          format: uuid
+        isOnSale:
+          type: boolean
+        saleStartDate:
+          type: string
+          format: date-time
+          nullable: true
+        saleEndDate:
+          type: string
+          format: date-time
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
-- Swagger UI is served at `/api-docs`
-- OpenAPI JSON is served at `/swagger.json`
-- `swagger.json` can be regenerated with `npm run swagger:generate`
-- OpenAPI source of truth is `src/config/openapi-registry.ts` using Zod schemas
+    ProductResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            product:
+              $ref: '#/components/schemas/Product'
 
-Endpoints display roles in their summary:
-- `(PUBLIC)` - Accessible without authentication
-- `(ADMIN)` - Admin only
-- `(USER, ADMIN, DELIVERY)` - Authenticated users with specified roles
+    PaginatedProductsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            products:
+              type: array
+              items:
+                $ref: '#/components/schemas/Product'
+            total:
+              type: integer
+            page:
+              type: integer
+            limit:
+              type: integer
+            totalPages:
+              type: integer
 
-## 📂 Project Structure
+    CreateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        originalPrice:
+          type: number
+          minimum: 0
+        salePrice:
+          type: number
+          minimum: 0
+        stock:
+          type: integer
+          minimum: 0
+        categoryId:
+          type: string
+          format: uuid
+        isOnSale:
+          type: boolean
+        saleStartDate:
+          type: string
+          format: date-time
+        saleEndDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
 
-- `prisma/schema.prisma`: Database models and relations.
-- `src/`: Source code for the application.
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        originalPrice:
+          type: number
+          minimum: 0
+        salePrice:
+          type: number
+          minimum: 0
+        stock:
+          type: integer
+          minimum: 0
+        categoryId:
+          type: string
+          format: uuid
+        isOnSale:
+          type: boolean
+        saleStartDate:
+          type: string
+          format: date-time
+        saleEndDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        name:
+          type: string
+          minLength: 2
+        phone:
+          type: string
+        profileImage:
+          type: string
+          format: uri
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+
+    OAuthLoginRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Authorization code from OAuth provider
+        codeVerifier:
+          type: string
+          description: PKCE code verifier
+        redirectUri:
+          type: string
+          format: uri
+          description: Redirect URI
+        idToken:
+          type: string
+          description: OAuth id_token
 
 
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: docs\paths\auth.yaml
+Type: Source File
+Size: 3.36 KB
+============================================================
+
+register:
+  post:
+    summary: Register a new user (PUBLIC)
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterRequest'
+    responses:
+      '201':
+        description: User registered successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '409':
+        description: User already exists
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+login:
+  post:
+    summary: Login with email and password (PUBLIC)
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+    responses:
+      '200':
+        description: Login successful
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Invalid credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+refresh:
+  post:
+    summary: Refresh access token (PUBLIC)
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RefreshRequest'
+    responses:
+      '200':
+        description: Token refreshed successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Invalid refresh token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+oauth:
+  post:
+    summary: OAuth login with id_token or authorization code (PUBLIC)
+    tags:
+      - Auth
+    parameters:
+      - name: provider
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Provider'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OAuthLoginRequest'
+    responses:
+      '200':
+        description: OAuth authentication successful
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Authentication failed
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '503':
+        description: OAuth provider is not configured
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: docs\paths\products.yaml
+Type: Source File
+Size: 5.98 KB
+============================================================
+
+products:
+  get:
+    summary: Get all products (USER, ADMIN, DELIVERY)
+    tags:
+      - Products
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/PageParam'
+      - $ref: '#/components/parameters/LimitParam'
+      - $ref: '#/components/parameters/SearchParam'
+      - $ref: '#/components/parameters/CategoryIdParam'
+      - $ref: '#/components/parameters/MinPriceParam'
+      - $ref: '#/components/parameters/MaxPriceParam'
+      - $ref: '#/components/parameters/InStockParam'
+      - $ref: '#/components/parameters/OnSaleParam'
+    responses:
+      '200':
+        description: Products retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginatedProductsResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+  post:
+    summary: Create a new product (ADMIN)
+    tags:
+      - Products
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateProductRequest'
+    responses:
+      '201':
+        description: Product created successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '403':
+        description: Forbidden - Admin only
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+productById:
+  get:
+    summary: Get product by ID (USER, ADMIN, DELIVERY)
+    tags:
+      - Products
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: Product retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '404':
+        description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+  patch:
+    summary: Update a product (ADMIN)
+    tags:
+      - Products
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateProductRequest'
+    responses:
+      '200':
+        description: Product updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductResponse'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '403':
+        description: Forbidden - Admin only
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '404':
+        description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+  delete:
+    summary: Delete a product (ADMIN)
+    tags:
+      - Products
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '204':
+        description: Product deleted successfully (no content)
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '403':
+        description: Forbidden - Admin only
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '404':
+        description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+productBySlug:
+  get:
+    summary: Get product by slug (USER, ADMIN, DELIVERY)
+    tags:
+      - Products
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Product retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductResponse'
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      '404':
+        description: Product not found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: eslint.config.js
-Type: Source File
-Size: 769 B
+Type: Config File
+Size: 0.75 KB
 ============================================================
 
 const tseslint = require('@typescript-eslint/eslint-plugin');
@@ -325,10 +1033,11 @@ module.exports = [
 ===== END FILE =====
 
 
+
 ============================================================
 ===== FILE START: package.json
 Type: Source File
-Size: 1.63 KB
+Size: 1.78 KB
 ============================================================
 
 {
@@ -338,9 +1047,8 @@ Size: 1.63 KB
   "scripts": {
     "test": "echo \"No tests configured yet\"",
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "ts-node -r tsconfig-paths/register src/server.ts",
-    "swagger:generate": "tsx -r tsconfig-paths/register src/config/generate-swagger.ts",
+    "build": "tsc && node -e \"require('fs').cpSync('docs', 'dist/docs', { recursive: true })\"",
+    "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },
@@ -357,8 +1065,10 @@ Size: 1.63 KB
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.4.1",
+    "google-auth-library": "^10.6.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
+    "lodash.merge": "^4.6.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.20.0",
@@ -366,6 +1076,7 @@ Size: 1.63 KB
     "pino-pretty": "^13.1.3",
     "swagger-ui-express": "^5.0.1",
     "tsconfig-paths": "^4.2.0",
+    "yamljs": "^0.3.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -374,10 +1085,13 @@ Size: 1.63 KB
     "@types/express": "^5.0.6",
     "@types/express-rate-limit": "^5.1.3",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/lodash": "^4.17.24",
+    "@types/lodash.merge": "^4.6.9",
     "@types/node": "^20",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
     "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
     "prisma": "^7.7.0",
@@ -391,10 +1105,11 @@ Size: 1.63 KB
 ===== END FILE =====
 
 
+
 ============================================================
 ===== FILE START: prisma.config.ts
-Type: Source File
-Size: 388 B
+Type: Config File
+Size: 0.38 KB
 ============================================================
 
 // This file was generated by Prisma, and assumes you have installed the following:
@@ -416,321 +1131,10 @@ export default defineConfig({
 ===== END FILE =====
 
 
-============================================================
-===== FILE START: prisma\migrations\20260416174422_init_schema_setup\migration.sql
-Type: Source File
-Size: 9.89 KB
-============================================================
-
--- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN', 'DELIVERY');
-
--- CreateEnum
-CREATE TYPE "AuthProvider" AS ENUM ('CREDENTIALS', 'GOOGLE');
-
--- CreateEnum
-CREATE TYPE "CouponAppliesTo" AS ENUM ('ORDER', 'CATEGORY', 'PRODUCT');
-
--- CreateEnum
-CREATE TYPE "DiscountType" AS ENUM ('PERCENTAGE', 'FIXED');
-
--- CreateEnum
-CREATE TYPE "OrderStatus" AS ENUM ('PLACED', 'SHIPPED', 'DELIVERED', 'CANCELLED');
-
--- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'FAILED', 'REFUNDED');
-
--- CreateEnum
-CREATE TYPE "PaymentMethod" AS ENUM ('SSLCOMMERZ', 'STRIPE', 'COD', 'BKASH', 'NAGAD');
-
--- CreateTable
-CREATE TABLE "users" (
-    "id" UUID NOT NULL,
-    "name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "password" TEXT,
-    "profileImage" TEXT,
-    "phone" TEXT,
-    "role" "UserRole" NOT NULL DEFAULT 'USER',
-    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "user_providers" (
-    "id" UUID NOT NULL,
-    "userId" UUID NOT NULL,
-    "provider" "AuthProvider" NOT NULL,
-    "providerUserId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "user_providers_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "categories" (
-    "id" UUID NOT NULL,
-    "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "categories_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "products" (
-    "id" UUID NOT NULL,
-    "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
-    "description" TEXT,
-    "originalPrice" DECIMAL(10,2) NOT NULL,
-    "salePrice" DECIMAL(10,2),
-    "stock" INTEGER NOT NULL,
-    "categoryId" UUID NOT NULL,
-    "isOnSale" BOOLEAN NOT NULL DEFAULT false,
-    "saleStartDate" TIMESTAMP(3),
-    "saleEndDate" TIMESTAMP(3),
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "products_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "product_images" (
-    "id" UUID NOT NULL,
-    "productId" UUID NOT NULL,
-    "url" TEXT NOT NULL,
-    "isPrimary" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "product_images_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "carts" (
-    "id" UUID NOT NULL,
-    "userId" UUID NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "carts_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "cart_items" (
-    "id" UUID NOT NULL,
-    "cartId" UUID NOT NULL,
-    "productId" UUID NOT NULL,
-    "quantity" INTEGER NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "cart_items_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "coupons" (
-    "id" UUID NOT NULL,
-    "code" TEXT NOT NULL,
-    "description" TEXT,
-    "appliesTo" "CouponAppliesTo" NOT NULL,
-    "discountType" "DiscountType" NOT NULL,
-    "discountValue" DECIMAL(10,2) NOT NULL,
-    "minOrderAmount" DECIMAL(10,2),
-    "maxDiscountAmount" DECIMAL(10,2),
-    "startDate" TIMESTAMP(3),
-    "endDate" TIMESTAMP(3),
-    "usageLimit" INTEGER,
-    "usageLimitPerUser" INTEGER,
-    "usedCount" INTEGER NOT NULL DEFAULT 0,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "coupons_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "coupon_categories" (
-    "id" UUID NOT NULL,
-    "couponId" UUID NOT NULL,
-    "categoryId" UUID NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "coupon_categories_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "coupon_products" (
-    "id" UUID NOT NULL,
-    "couponId" UUID NOT NULL,
-    "productId" UUID NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "coupon_products_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "orders" (
-    "id" UUID NOT NULL,
-    "userId" UUID NOT NULL,
-    "couponId" UUID,
-    "totalAmount" DECIMAL(10,2) NOT NULL,
-    "discountAmount" DECIMAL(10,2) NOT NULL,
-    "finalAmount" DECIMAL(10,2) NOT NULL,
-    "status" "OrderStatus" NOT NULL DEFAULT 'PLACED',
-    "paymentStatus" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
-    "shippingName" TEXT NOT NULL,
-    "shippingPhone" TEXT NOT NULL,
-    "shippingAddress" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "orders_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "order_items" (
-    "id" UUID NOT NULL,
-    "orderId" UUID NOT NULL,
-    "productId" UUID NOT NULL,
-    "quantity" INTEGER NOT NULL,
-    "price" DECIMAL(10,2) NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "order_items_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "coupon_usages" (
-    "id" UUID NOT NULL,
-    "couponId" UUID NOT NULL,
-    "userId" UUID NOT NULL,
-    "orderId" UUID NOT NULL,
-    "usedAt" TIMESTAMP(3) NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "coupon_usages_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "payments" (
-    "id" UUID NOT NULL,
-    "orderId" UUID NOT NULL,
-    "method" "PaymentMethod" NOT NULL,
-    "transactionId" TEXT,
-    "amount" DECIMAL(10,2) NOT NULL,
-    "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
-    "paidAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
-);
-
--- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "categories_slug_key" ON "categories"("slug");
-
--- CreateIndex
-CREATE UNIQUE INDEX "products_slug_key" ON "products"("slug");
-
--- CreateIndex
-CREATE UNIQUE INDEX "carts_userId_key" ON "carts"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "coupons_code_key" ON "coupons"("code");
-
--- AddForeignKey
-ALTER TABLE "user_providers" ADD CONSTRAINT "user_providers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "product_images" ADD CONSTRAINT "product_images_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "carts" ADD CONSTRAINT "carts_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "carts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "cart_items" ADD CONSTRAINT "cart_items_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "coupon_categories" ADD CONSTRAINT "coupon_categories_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "coupons"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "coupon_categories" ADD CONSTRAINT "coupon_categories_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "categories"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "coupon_products" ADD CONSTRAINT "coupon_products_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "coupons"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "coupon_products" ADD CONSTRAINT "coupon_products_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "orders" ADD CONSTRAINT "orders_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "orders" ADD CONSTRAINT "orders_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "coupons"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "order_items" ADD CONSTRAINT "order_items_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "order_items" ADD CONSTRAINT "order_items_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "coupon_usages" ADD CONSTRAINT "coupon_usages_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "coupons"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "coupon_usages" ADD CONSTRAINT "coupon_usages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "coupon_usages" ADD CONSTRAINT "coupon_usages_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "payments" ADD CONSTRAINT "payments_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
-
-===== END FILE =====
-
-
-============================================================
-===== FILE START: prisma\migrations\migration_lock.toml
-Type: Source File
-Size: 131 B
-============================================================
-
-# Please do not edit this file manually
-# It should be added in your version-control system (e.g., Git)
-provider = "postgresql"
-
-
-===== END FILE =====
-
 
 ============================================================
 ===== FILE START: prisma\schema.prisma
-Type: Source File
+Type: Database Schema
 Size: 7.47 KB
 ============================================================
 
@@ -1024,66 +1428,199 @@ model Payment {
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: README.md
+Type: Documentation
+Size: 3.16 KB
+============================================================
+
+# eshop-backend
+
+A robust backend system for an e-commerce platform, managing users, product catalogs, shopping carts, complex coupon systems, and order processing with integrated payment tracking.
+
+## 🚀 Tech Stack
+
+- **Runtime:** Node.js 20.20.0 LTS (TypeScript)
+- **Framework:** Express (v5.2.1)
+- **ORM:** Prisma (v7.7.0)
+- **Database:** PostgreSQL
+- **Language:** TypeScript (v6.0.2)
+
+## 📦 Domain Overview
+
+The system is designed with the following core domains:
+
+- **User Management**: Role-based access control (`USER`, `ADMIN`, `DELIVERY`) and multi-provider authentication (Credentials, Google).
+- **Product Catalog**: Hierarchical organization of products into categories, featuring sale pricing, stock tracking, and multi-image support.
+- **Shopping Cart**: Persistent cart system linked to users for seamless shopping experiences.
+- **Coupon Engine**: A sophisticated discount system supporting percentages or fixed amounts applied to specific orders, categories, or products, with validity periods and usage limits.
+- **Order Lifecycle**: Tracks orders from placement through shipping and delivery, including detailed itemization.
+- **Payment Integration**: Support for multiple payment gateways including SSLCOMMERZ, Stripe, COD, Bkash, and Nagad.
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- Node.js v20.20.0 / v20+ (as specified in `.nvmrc`)
+- PostgreSQL database
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd eshop-backend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Configuration**
+   Create a `.env` file in the root directory with:
+   ```env
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/eshop_db?schema=public"
+   PORT=3000
+   NODE_ENV=development
+   JWT_ACCESS_SECRET=your_access_secret
+   JWT_REFRESH_SECRET=your_refresh_secret
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   GOOGLE_CALLBACK_URL=http://localhost:3000/api/v1/auth/google/callback
+   ```
+
+4. **Database Setup**
+   ```bash
+   npx prisma migrate dev
+   npx prisma generate
+   ```
+
+5. **Run the application**
+   ```bash
+   npm run dev
+   ```
+
+### Available Scripts
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm run typecheck` - Run TypeScript type checking
+- `npm run lint` - Run ESLint
+- `npm run swagger:generate` - Generate swagger.json from code-first OpenAPI registry
+
+## 🔗 API Documentation
+
+Once the server is running, visit: http://localhost:3000/api-docs
+
+- Swagger UI is served at `/api-docs`
+- OpenAPI JSON is served at `/swagger.json`
+- `swagger.json` can be regenerated with `npm run swagger:generate`
+- OpenAPI source of truth is `src/config/openapi-registry.ts` using Zod schemas
+
+Endpoints display roles in their summary:
+- `(PUBLIC)` - Accessible without authentication
+- `(ADMIN)` - Admin only
+- `(USER, ADMIN, DELIVERY)` - Authenticated users with specified roles
+
+## 📂 Project Structure
+
+- `prisma/schema.prisma`: Database models and relations.
+- `src/`: Source code for the application.
+
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: src\app.ts
-Type: Source File
-Size: 876 B
+Type: App Entry
+Size: 1.44 KB
 ============================================================
 
 import express from 'express';
-import passport from 'passport';
-import { setupSwaggerUI } from './config/openapi';
-import { container } from './container';
-import { errorHandler } from './shared/middlewares/error.middleware';
-import logger from './config/logger';
-import helmet from 'helmet';
-import cors from 'cors';
+import { setupSwagger } from './config/swagger';
+import { config } from './config';
+import { buildApiRouter } from './routes';
+import { helmetMiddleware } from './shared/middlewares/helmet';
+import { corsMiddleware } from './shared/middlewares/cors';
+import { requestIdMiddleware } from './shared/middlewares/request-id.middleware';
+import { requestLoggerMiddleware } from './shared/middlewares/request-logger.middleware';
+import { globalErrorHandler, notFoundHandler } from './shared/errors/global-handler';
 
-const app = express();
+export const createApp = () => {
+  const app = express();
 
-app.use(helmet());
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(passport.initialize());
+  app.disable('x-powered-by');
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
-    logger.info({ method: req.method, url: req.originalUrl, status: res.statusCode, duration }, 'request');
+  app.use(requestIdMiddleware);
+  app.use(requestLoggerMiddleware);
+  app.use(helmetMiddleware());
+  app.use(corsMiddleware());
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true }));
+
+  setupSwagger(app);
+
+  app.get('/health', (_req, res) => {
+    res.status(200).json({
+      success: true,
+      data: {
+        status: 'ok',
+        service: 'eshop-backend',
+        timestamp: new Date().toISOString(),
+      },
+    });
   });
-  next();
-});
 
-setupSwaggerUI(app);
+  app.get('/', (_req, res) => {
+    res.status(200).json({
+      success: true,
+      data: {
+        message: 'EShop Backend API',
+        docs: '/api-docs',
+        health: '/health',
+      },
+    });
+  });
 
-app.use('/api/v1/auth', container.authRouter);
-app.use('/api/v1/products', container.productRouter);
-app.use(errorHandler);
+  app.use(config.constants.API_PREFIX, buildApiRouter());
 
-export default app;
+  app.use(notFoundHandler);
+  app.use(globalErrorHandler);
+
+  return app;
+};
+
+export default createApp();
 
 
 ===== END FILE =====
 
 
+
 ============================================================
-===== FILE START: src\config\constant.ts
-Type: Source File
-Size: 76 B
+===== FILE START: src\config\constants.ts
+Type: Config File
+Size: 0.10 KB
 ============================================================
 
 export const constants = {
-  API_PREFIX: '/api',
+  API_PREFIX: '/api/v1',
   DEFAULT_PAGE_SIZE: 10,
+  MAX_PAGE_SIZE: 100,
 };
 
+
 ===== END FILE =====
+
 
 
 ============================================================
 ===== FILE START: src\config\env.ts
-Type: Source File
+Type: Config File
 Size: 1.13 KB
 ============================================================
 
@@ -1121,56 +1658,72 @@ if (envConfig.NODE_ENV === 'production') {
 ===== END FILE =====
 
 
-============================================================
-===== FILE START: src\config\generate-swagger.ts
-Type: Source File
-Size: 73 B
-============================================================
-
-import { generateSwaggerJson } from './openapi';
-
-generateSwaggerJson();
-
-
-===== END FILE =====
-
 
 ============================================================
 ===== FILE START: src\config\index.ts
-Type: Source File
-Size: 204 B
+Type: Config File
+Size: 0.60 KB
 ============================================================
 
 import dotenv from 'dotenv';
 import { envConfig } from './env';
-import { constants } from './constant';
+import { constants } from './constants';
 
 dotenv.config();
 
 export const config = {
   env: envConfig,
   constants,
+  app: {
+    port: envConfig.PORT,
+    nodeEnv: envConfig.NODE_ENV,
+    isDevelopment: envConfig.NODE_ENV === 'development',
+    isProduction: envConfig.NODE_ENV === 'production',
+    apiPrefix: constants.API_PREFIX,
+    corsOrigin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
+      : ['http://localhost:3000', 'http://localhost:3001'],
+  },
 };
 
 export default config;
 
+
 ===== END FILE =====
+
 
 
 ============================================================
 ===== FILE START: src\config\logger.ts
-Type: Source File
-Size: 166 B
+Type: Config File
+Size: 0.65 KB
 ============================================================
 
 import pino from 'pino';
 
-const logger = pino({
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const logLevel = process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info');
+
+export const logger = pino({
+  level: logLevel,
+  transport: isDevelopment
+    ? {
+        target: 'pino-pretty',
+        options: {
+          colorize: true,
+          translateTime: 'SYS:standard',
+          ignore: 'pid,hostname',
+        },
+      }
+    : undefined,
+  formatters: {
+    level: (label) => {
+      return { level: label.toUpperCase() };
     },
+  },
+  timestamp: pino.stdTimeFunctions.isoTime,
+  base: {
+    env: process.env.NODE_ENV || 'development',
   },
 });
 
@@ -1179,482 +1732,262 @@ export default logger;
 ===== END FILE =====
 
 
-============================================================
-===== FILE START: src\config\openapi-registry.ts
-Type: Source File
-Size: 8.07 KB
-============================================================
-
-import { extendZodWithOpenApi, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { z } from 'zod';
-import { registerSchema, loginSchema, refreshSchema } from '@/modules/auth/validators/auth.schema';
-import { createProductSchema, updateProductSchema } from '@/modules/products/validators/product.schema';
-
-extendZodWithOpenApi(z);
-
-const Error = z.object({
-  message: z.string(),
-  statusCode: z.number().int(),
-});
-
-const User = z.object({
-  id: z.string().uuid(),
-  email: z.string().email(),
-  role: z.enum(['USER', 'ADMIN', 'DELIVERY']),
-  name: z.string(),
-});
-
-const RegisterResponse = z.object({
-  message: z.string(),
-  user: z.object({
-    id: z.string().uuid(),
-    email: z.string().email(),
-    role: z.enum(['USER', 'ADMIN', 'DELIVERY']),
-  }),
-});
-
-const TokenResponse = z.object({
-  user: User,
-  accessToken: z.string(),
-  refreshToken: z.string(),
-});
-
-const RefreshResponse = z.object({
-  accessToken: z.string(),
-});
-
-const OAuthResponse = z.object({
-  message: z.string(),
-  user: User,
-  accessToken: z.string(),
-  refreshToken: z.string(),
-});
-
-const Product = z.object({
-  id: z.string().uuid(),
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().nullable(),
-  originalPrice: z.number(),
-  salePrice: z.number().nullable(),
-  stock: z.number().int(),
-  categoryId: z.string().uuid(),
-  isOnSale: z.boolean(),
-  saleStartDate: z.string().datetime().nullable(),
-  saleEndDate: z.string().datetime().nullable(),
-  isActive: z.boolean(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-});
-
-const PaginatedProducts = z.object({
-  products: z.array(Product),
-  total: z.number().int(),
-  page: z.number().int(),
-  limit: z.number().int(),
-  totalPages: z.number().int(),
-});
-
-export const registry = new OpenAPIRegistry();
-
-registry.register('Error', Error);
-registry.register('User', User);
-registry.register('RegisterResponse', RegisterResponse);
-registry.register('TokenResponse', TokenResponse);
-registry.register('RefreshResponse', RefreshResponse);
-registry.register('OAuthResponse', OAuthResponse);
-registry.register('Product', Product);
-registry.register('PaginatedProducts', PaginatedProducts);
-
-registry.registerComponent('securitySchemes', 'bearerAuth', {
-  type: 'http',
-  scheme: 'bearer',
-  bearerFormat: 'JWT',
-});
-
-registry.registerPath({
-  method: 'post',
-  path: '/api/v1/auth/register',
-  summary: 'Register a new user (PUBLIC)',
-  tags: ['Auth'],
-  request: {
-    body: {
-      content: { 'application/json': { schema: registerSchema } },
-    },
-  },
-  responses: {
-    201: {
-      description: 'User registered successfully',
-      content: { 'application/json': { schema: RegisterResponse } },
-    },
-    400: {
-      description: 'Validation error',
-      content: { 'application/json': { schema: Error } },
-    },
-    409: {
-      description: 'User already exists',
-      content: { 'application/json': { schema: Error } },
-    },
-  },
-});
-
-registry.registerPath({
-  method: 'post',
-  path: '/api/v1/auth/login',
-  summary: 'Login with email and password (PUBLIC)',
-  tags: ['Auth'],
-  request: {
-    body: {
-      content: { 'application/json': { schema: loginSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Login successful',
-      content: { 'application/json': { schema: TokenResponse } },
-    },
-    401: {
-      description: 'Invalid credentials',
-      content: { 'application/json': { schema: Error } },
-    },
-  },
-});
-
-registry.registerPath({
-  method: 'post',
-  path: '/api/v1/auth/refresh',
-  summary: 'Refresh access token (PUBLIC)',
-  tags: ['Auth'],
-  request: {
-    body: {
-      content: { 'application/json': { schema: refreshSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Token refreshed successfully',
-      content: { 'application/json': { schema: RefreshResponse } },
-    },
-    401: {
-      description: 'Invalid refresh token',
-      content: { 'application/json': { schema: Error } },
-    },
-  },
-});
-
-registry.registerPath({
-  method: 'get',
-  path: '/api/v1/auth/google',
-  summary: 'Initiate Google OAuth flow (PUBLIC)',
-  tags: ['Auth'],
-  responses: {
-    302: { description: 'Redirects to Google consent screen' },
-  },
-});
-
-registry.registerPath({
-  method: 'get',
-  path: '/api/v1/auth/google/callback',
-  summary: 'Google OAuth callback (PUBLIC)',
-  tags: ['Auth'],
-  responses: {
-    200: {
-      description: 'OAuth authentication successful',
-      content: { 'application/json': { schema: OAuthResponse } },
-    },
-    401: {
-      description: 'Authentication failed',
-      content: { 'application/json': { schema: Error } },
-    },
-  },
-});
-
-const productListQuery = z.object({
-  page: z.coerce.number().int().min(1).default(1).describe('Page number'),
-  limit: z.coerce.number().int().min(1).max(100).default(10).describe('Items per page'),
-  search: z.string().optional().describe('Search term'),
-  categoryId: z.string().uuid().optional().describe('Filter by category'),
-  minPrice: z.coerce.number().min(0).optional().describe('Minimum price'),
-  maxPrice: z.coerce.number().min(0).optional().describe('Maximum price'),
-  inStock: z.enum(['true', 'false']).optional().describe('Filter by stock availability'),
-  onSale: z.enum(['true', 'false']).optional().describe('Filter by sale items'),
-});
-
-registry.registerPath({
-  method: 'get',
-  path: '/api/v1/products',
-  summary: 'Get all products (USER, ADMIN, DELIVERY)',
-  tags: ['Products'],
-  security: [{ bearerAuth: [] }],
-  request: {
-    query: productListQuery,
-  },
-  responses: {
-    200: {
-      description: 'Products retrieved successfully',
-      content: { 'application/json': { schema: PaginatedProducts } },
-    },
-    401: { description: 'Unauthorized' },
-  },
-});
-
-registry.registerPath({
-  method: 'post',
-  path: '/api/v1/products',
-  summary: 'Create a new product (ADMIN)',
-  tags: ['Products'],
-  security: [{ bearerAuth: [] }],
-  request: {
-    body: {
-      content: { 'application/json': { schema: createProductSchema } },
-    },
-  },
-  responses: {
-    201: {
-      description: 'Product created successfully',
-      content: { 'application/json': { schema: Product } },
-    },
-    401: { description: 'Unauthorized' },
-    403: { description: 'Forbidden - Admin only' },
-  },
-});
-
-registry.registerPath({
-  method: 'get',
-  path: '/api/v1/products/{id}',
-  summary: 'Get product by ID (USER, ADMIN, DELIVERY)',
-  tags: ['Products'],
-  security: [{ bearerAuth: [] }],
-  request: {
-    params: z.object({ id: z.string().uuid() }),
-  },
-  responses: {
-    200: {
-      description: 'Product retrieved successfully',
-      content: { 'application/json': { schema: Product } },
-    },
-    404: { description: 'Product not found' },
-  },
-});
-
-registry.registerPath({
-  method: 'patch',
-  path: '/api/v1/products/{id}',
-  summary: 'Update a product (ADMIN)',
-  tags: ['Products'],
-  security: [{ bearerAuth: [] }],
-  request: {
-    params: z.object({ id: z.string().uuid() }),
-    body: {
-      content: { 'application/json': { schema: updateProductSchema } },
-    },
-  },
-  responses: {
-    200: {
-      description: 'Product updated successfully',
-      content: { 'application/json': { schema: Product } },
-    },
-    401: { description: 'Unauthorized' },
-    403: { description: 'Forbidden - Admin only' },
-    404: { description: 'Product not found' },
-  },
-});
-
-registry.registerPath({
-  method: 'delete',
-  path: '/api/v1/products/{id}',
-  summary: 'Delete a product (ADMIN)',
-  tags: ['Products'],
-  security: [{ bearerAuth: [] }],
-  request: {
-    params: z.object({ id: z.string().uuid() }),
-  },
-  responses: {
-    204: { description: 'Product deleted successfully (no content)' },
-    401: { description: 'Unauthorized' },
-    403: { description: 'Forbidden - Admin only' },
-    404: { description: 'Product not found' },
-  },
-});
-
-registry.registerPath({
-  method: 'get',
-  path: '/api/v1/products/slug/{slug}',
-  summary: 'Get product by slug (USER, ADMIN, DELIVERY)',
-  tags: ['Products'],
-  security: [{ bearerAuth: [] }],
-  request: {
-    params: z.object({ slug: z.string() }),
-  },
-  responses: {
-    200: {
-      description: 'Product retrieved successfully',
-      content: { 'application/json': { schema: Product } },
-    },
-    404: { description: 'Product not found' },
-  },
-});
-
-
-===== END FILE =====
-
 
 ============================================================
-===== FILE START: src\config\openapi.ts
-Type: Source File
-Size: 1.49 KB
+===== FILE START: src\config\swagger.ts
+Type: Config File
+Size: 4.93 KB
 ============================================================
 
-import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
+import { Express } from 'express';
 import swaggerUi from 'swagger-ui-express';
-import fs from 'fs';
+import YAML from 'yamljs';
 import path from 'path';
-import { Application } from 'express';
-import { registry } from './openapi-registry';
+import merge from 'lodash.merge';
+import { generateOpenApiSpec } from '../shared/openapi/registry';
 import logger from './logger';
 
-export function generateOpenApiSpec(): ReturnType<OpenApiGeneratorV3['generateDocument']> {
-  const generator = new OpenApiGeneratorV3(registry.definitions);
-  return generator.generateDocument({
-    openapi: '3.0.3',
-    info: {
-      title: 'E-Shop API',
-      version: '1.0.0',
-      description: 'Backend API for E-Shop project',
+type JsonObject = Record<string, unknown>;
+
+const isPlainObject = (value: unknown): value is JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const getRefTarget = (document: unknown, fragment: string): unknown => {
+  if (!fragment.startsWith('#/')) {
+    throw new Error(`Unsupported OpenAPI ref fragment: ${fragment}`);
+  }
+
+  return fragment
+    .slice(2)
+    .split('/')
+    .reduce<unknown>((current, rawSegment) => {
+      const segment = rawSegment.replace(/~1/g, '/').replace(/~0/g, '~');
+
+      if (!isPlainObject(current) && !Array.isArray(current)) {
+        throw new Error(`Unable to resolve OpenAPI ref segment: ${segment}`);
+      }
+
+      return (current as Record<string, unknown>)[segment];
+    }, document);
+};
+
+const resolveLocalFileRefs = (
+  value: unknown,
+  baseDir: string,
+  cache: Map<string, unknown>,
+  schemaNames: Set<string>,
+): unknown => {
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      resolveLocalFileRefs(item, baseDir, cache, schemaNames),
+    );
+  }
+
+  if (!isPlainObject(value)) {
+    return value;
+  }
+
+  if (
+    typeof value.$ref === 'string' &&
+    value.$ref.includes('/components/schemas/') &&
+    value.$ref.includes('#/')
+  ) {
+    const rawRefName = value.$ref.split('#/')[1];
+
+    if (!rawRefName) {
+      throw new Error(`Invalid schema ref: ${value.$ref}`);
+    }
+
+    const refName = rawRefName.startsWith('components/schemas/')
+      ? rawRefName.slice('components/schemas/'.length)
+      : rawRefName;
+
+    schemaNames.add(refName);
+
+    return {
+      $ref: `#/components/schemas/${refName}`,
+    };
+  }
+
+  if (typeof value.$ref === 'string' && value.$ref.startsWith('./')) {
+    const [relativePath = '', fragment = ''] = value.$ref.split('#');
+    const resolvedPath = path.resolve(baseDir, relativePath);
+    const loadedDocument =
+      cache.get(resolvedPath) ?? YAML.load(resolvedPath);
+
+    cache.set(resolvedPath, loadedDocument);
+
+    const target = fragment
+      ? getRefTarget(loadedDocument, `#${fragment}`)
+      : loadedDocument;
+
+    return resolveLocalFileRefs(
+      target,
+      path.dirname(resolvedPath),
+      cache,
+      schemaNames,
+    );
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, child]) => [
+      key,
+      resolveLocalFileRefs(child, baseDir, cache, schemaNames),
+    ]),
+  );
+};
+
+const loadStaticOpenApiSpec = (): JsonObject => {
+  const sourceSpecPath = path.join(process.cwd(), 'docs', 'openapi.yaml');
+  const sourceSpec = YAML.load(sourceSpecPath) as JsonObject;
+  const docsDir = path.dirname(sourceSpecPath);
+  const cache = new Map<string, unknown>([[sourceSpecPath, sourceSpec]]);
+  const schemaNames = new Set<string>();
+  const components = isPlainObject(sourceSpec.components)
+    ? sourceSpec.components
+    : {};
+  const paths = isPlainObject(sourceSpec.paths) ? sourceSpec.paths : {};
+  const securitySchemes = isPlainObject(components.securitySchemes)
+    ? components.securitySchemes
+    : {};
+  const sourceSchemas = isPlainObject(components.schemas)
+    ? components.schemas
+    : {};
+  const resolvedSchemas = resolveLocalFileRefs(
+    sourceSchemas,
+    docsDir,
+    cache,
+    schemaNames,
+  );
+  const staticSchemas = isPlainObject(resolvedSchemas) ? resolvedSchemas : {};
+
+  return {
+    ...sourceSpec,
+    paths: resolveLocalFileRefs(paths, docsDir, cache, schemaNames),
+    components: {
+      ...components,
+      securitySchemes: resolveLocalFileRefs(
+        securitySchemes,
+        docsDir,
+        cache,
+        schemaNames,
+      ),
+      schemas: {
+        ...staticSchemas,
+        ...Object.fromEntries(
+          Array.from(schemaNames, (schemaName) => [
+            schemaName,
+            staticSchemas[schemaName] ?? { type: 'object' },
+          ]),
+        ),
+      },
     },
-    servers: [
-      { url: 'http://localhost:3000', description: 'Development server' },
-    ],
-    tags: [
-      { name: 'Auth', description: 'Authentication endpoints' },
-      { name: 'Products', description: 'Product management endpoints' },
-    ],
+  };
+};
+
+export const setupSwagger = (app: Express): void => {
+  const staticSpec = loadStaticOpenApiSpec();
+  const dynamicSpec = generateOpenApiSpec();
+  const staticComponents = isPlainObject(staticSpec.components)
+    ? staticSpec.components
+    : {};
+  const dynamicComponents = isPlainObject(dynamicSpec.components)
+    ? dynamicSpec.components
+    : {};
+
+  const finalSpec = merge({}, staticSpec, {
+    components: {
+      ...staticComponents,
+      ...dynamicComponents,
+      securitySchemes: merge(
+        {},
+        staticComponents.securitySchemes ?? {},
+        dynamicComponents.securitySchemes ?? {},
+      ),
+      schemas: merge(
+        {},
+        staticComponents.schemas ?? {},
+        dynamicComponents.schemas ?? {},
+      ),
+    },
+    paths: merge({}, staticSpec.paths ?? {}, dynamicSpec.paths ?? {}),
   });
-}
 
-export function generateSwaggerJson(outputPath?: string): object {
-  const spec = generateOpenApiSpec();
-  const filePath = outputPath || path.join(process.cwd(), 'swagger.json');
-  fs.writeFileSync(filePath, JSON.stringify(spec, null, 2), 'utf-8');
-  logger.info(`Swagger spec generated at ${filePath}`);
-  return spec;
-}
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(finalSpec));
 
-export function setupSwaggerUI(app: Application): void {
-  const spec = generateOpenApiSpec();
-
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(spec));
-
-  app.get('/swagger.json', (_req, res) => {
-    res.json(generateOpenApiSpec());
-  });
-
-  logger.info('Swagger UI running at http://localhost:3000/api-docs');
-}
+  logger.info('🚀 Swagger UI available at: http://localhost:3000/api-docs');
+};
 
 
 ===== END FILE =====
+
 
 
 ============================================================
 ===== FILE START: src\container.ts
-Type: Source File
-Size: 1.40 KB
+Type: DI Container
+Size: 1.72 KB
 ============================================================
 
-import { configurePassport } from './infrastructure/auth/passport.config';
 import { prisma } from './infrastructure/database/db';
 import { AuthController } from './modules/auth/auth.controller';
-import { AuthRepository } from './modules/auth/auth.repository';
+import { AuthRepository } from './infrastructure/database/repositories/auth.repository';
 import { createAuthRouter } from './modules/auth/auth.routes';
 import { AuthService } from './modules/auth/auth.service';
 import { OAuthService } from './modules/auth/oauth.service';
 import { ProductController } from './modules/products/product.controller';
-import { ProductRepository } from './modules/products/product.repository';
+import { ProductRepository } from './infrastructure/database/repositories/product.repository';
 import { createProductRouter } from './modules/products/product.routes';
 import { ProductService } from './modules/products/product.service';
+import { notFoundHandler } from './shared/errors/global-handler';
 
+// Infrastructure adapters
 const authRepository = new AuthRepository(prisma);
-const authService = new AuthService(authRepository);
-const authController = new AuthController(authService);
-const oauthService = new OAuthService(authRepository);
-
 const productRepository = new ProductRepository(prisma);
+
+// Domain services
+const authService = new AuthService(authRepository);
+const oauthService = new OAuthService(authRepository);
 const productService = new ProductService(productRepository);
+
+// HTTP controllers
+const authController = new AuthController(authService);
 const productController = new ProductController(productService);
 
-configurePassport(oauthService);
+// HTTP routers
+const authRouter = createAuthRouter(authController);
+const productRouter = createProductRouter(productController);
 
+// Manual composition root.
+// This intentionally avoids tsyringe while keeping the same YL-style layering:
+// infrastructure -> services -> controllers -> routers.
 export const container = {
+  prisma,
+
   authRepository,
-  authService,
-  authController,
-  oauthService,
-  authRouter: createAuthRouter(authController),
   productRepository,
+
+  authService,
+  oauthService,
   productService,
+
+  authController,
   productController,
-  productRouter: createProductRouter(productController),
+
+  authRouter,
+  productRouter,
+
+  notFoundHandler,
 };
 
 
 ===== END FILE =====
 
-
-============================================================
-===== FILE START: src\infrastructure\auth\passport.config.ts
-Type: Source File
-Size: 1.15 KB
-============================================================
-
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import passport from 'passport';
-import { envConfig } from '../../config/env';
-import { OAuthService } from '../../modules/auth/oauth.service';
-import logger from '../../config/logger';
-
-let isPassportConfigured = false;
-
-export const configurePassport = (oauthService: OAuthService) => {
-  if (isPassportConfigured) {
-    return passport;
-  }
-
-  if (!envConfig.GOOGLE_CLIENT_ID || !envConfig.GOOGLE_CLIENT_SECRET) {
-    logger.warn('Google OAuth not configured - skipping passport strategy setup');
-    isPassportConfigured = true;
-    return passport;
-  }
-
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: envConfig.GOOGLE_CLIENT_ID,
-        clientSecret: envConfig.GOOGLE_CLIENT_SECRET,
-        callbackURL: envConfig.GOOGLE_CALLBACK_URL,
-      },
-      async (accessToken, refreshToken, profile, done) => {
-        try {
-          const user = await oauthService.findOrCreateUser(profile, 'GOOGLE');
-          return done(null, user);
-        } catch (error) {
-          return done(error as Error);
-        }
-      }
-    )
-  );
-
-  isPassportConfigured = true;
-  return passport;
-};
-
-
-===== END FILE =====
 
 
 ============================================================
 ===== FILE START: src\infrastructure\auth\token.service.ts
-Type: Source File
+Type: Infrastructure Layer
 Size: 1.31 KB
 ============================================================
 
@@ -1705,143 +2038,94 @@ export class TokenService {
 ===== END FILE =====
 
 
+
 ============================================================
 ===== FILE START: src\infrastructure\database\db.ts
-Type: Source File
-Size: 326 B
+Type: Infrastructure Layer
+Size: 0.12 KB
+============================================================
+
+export {
+  prisma,
+  connectPrisma as connectDatabase,
+  disconnectPrisma as disconnectDatabase,
+} from './prisma.client';
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\infrastructure\database\prisma.client.ts
+Type: Infrastructure Layer
+Size: 0.97 KB
 ============================================================
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import { config } from '../../config';
+import logger from '../../config/logger';
 
-const adapter = new PrismaPg(new pg.Pool({
-  connectionString: config.env.DATABASE_URL,
-}));
+const globalForPrisma = globalThis as typeof globalThis & {
+  prisma?: PrismaClient;
+};
 
-export const prisma = new PrismaClient({ adapter });
+const adapter = new PrismaPg(
+  new pg.Pool({
+    connectionString: config.env.DATABASE_URL,
+  }),
+);
 
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    adapter,
+    log: ['error'],
+  });
 
+globalForPrisma.prisma = prisma;
 
-
-
-
-
-
-
-===== END FILE =====
-
-
-============================================================
-===== FILE START: src\modules\auth\auth.controller.ts
-Type: Source File
-Size: 2.56 KB
-============================================================
-
-import { NextFunction, Request, Response } from 'express';
-import { AuthService } from './auth.service';
-import { TokenService } from '../../infrastructure/auth/token.service';
-import { registerSchema, loginSchema, refreshSchema } from './validators/auth.schema';
-import { ZodError } from 'zod';
-import { AppError } from '@/shared/errors/app-error';
-
-export class AuthController {
-  constructor(private authService: AuthService) {}
-
-  async register(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validatedData = registerSchema.parse(req.body);
-      const user = await this.authService.register(validatedData);
-      res.status(201).json({
-        message: 'User registered successfully',
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        },
-      });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
+function getDatabaseHost() {
+  try {
+    return new URL(config.env.DATABASE_URL).host;
+  } catch {
+    return 'unknown';
   }
+}
 
-  async login(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validatedData = loginSchema.parse(req.body);
-      const result = await this.authService.login(validatedData);
-      res.status(200).json(result);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
-  }
+export async function connectPrisma() {
+  await prisma.$connect();
 
-  async refresh(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validatedData = refreshSchema.parse(req.body);
-      const user = await this.authService.validateRefreshToken(validatedData.refreshToken);
-      const accessToken = TokenService.generateAccessToken(user.id, user.role);
+  logger.info(
+    {
+      databaseHost: getDatabaseHost(),
+      databaseSource: 'DATABASE_URL',
+    },
+    'Database connection established',
+  );
+}
 
-      res.status(200).json({ accessToken });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
-  }
-
-  oauthSuccess(req: Request, res: Response) {
-    const user = req.user as { id: string; role: string; email: string; name?: string } | undefined;
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
-    }
-
-    const accessToken = TokenService.generateAccessToken(user.id, user.role);
-    const refreshToken = TokenService.generateRefreshToken(user.id);
-
-    res.status(200).json({
-      message: 'OAuth authentication successful',
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: user.name,
-      },
-      accessToken,
-      refreshToken,
-    });
-  }
+export async function disconnectPrisma() {
+  await prisma.$disconnect();
+  logger.info('Database disconnected');
 }
 
 
 ===== END FILE =====
 
 
+
 ============================================================
-===== FILE START: src\modules\auth\auth.repository.ts
-Type: Source File
-Size: 2.38 KB
+===== FILE START: src\infrastructure\database\repositories\auth.repository.ts
+Type: Infrastructure Layer
+Size: 1.91 KB
 ============================================================
 
 import { PrismaClient, User, AuthProvider } from '@prisma/client';
-import { RegisterDto, OAuthProfile } from './dtos/auth.dto';
-
-export interface IAuthRepository {
-  findUserByEmail(email: string): Promise<User | null>;
-  findUserById(id: string): Promise<User | null>;
-  createUser(data: RegisterDto & { password: string }): Promise<User>;
-  findUserByProvider(provider: AuthProvider, providerUserId: string): Promise<User | null>;
-  linkProvider(userId: string, provider: AuthProvider, providerUserId: string): Promise<void>;
-  createOAuthUser(profile: OAuthProfile, provider: AuthProvider, email: string): Promise<User>;
-  updateUser(id: string, data: Partial<User>): Promise<User>;
-}
+import { RegisterDto, OAuthProfile } from '@/modules/auth/dtos/auth.dto';
+import { IAuthRepository } from '@/modules/auth/interfaces/auth.repository.interface';
 
 export class AuthRepository implements IAuthRepository {
   constructor(private prisma: PrismaClient) {}
@@ -1855,9 +2139,7 @@ export class AuthRepository implements IAuthRepository {
   }
 
   async createUser(data: RegisterDto & { password: string }): Promise<User> {
-    return this.prisma.user.create({
-      data,
-    });
+    return this.prisma.user.create({ data });
   }
 
   async findUserByProvider(provider: AuthProvider, providerUserId: string): Promise<User | null> {
@@ -1912,39 +2194,338 @@ export class AuthRepository implements IAuthRepository {
   }
 }
 
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\infrastructure\database\repositories\product.repository.ts
+Type: Infrastructure Layer
+Size: 2.42 KB
+============================================================
+
+import { PrismaClient, Product } from '@prisma/client';
+import { CreateProductDto, UpdateProductDto, ProductListQuery, ProductWithRelations } from '@/modules/products/dtos/product.dto';
+import { IProductRepository } from '@/modules/products/interfaces/product.repository.interface';
+import { Prisma } from '@prisma/client';
+
+export class ProductRepository implements IProductRepository {
+  constructor(private prisma: PrismaClient) {}
+
+  async create(data: CreateProductDto): Promise<Product> {
+    return this.prisma.product.create({ data });
+  }
+
+  async findById(id: string): Promise<ProductWithRelations | null> {
+    return this.prisma.product.findUnique({
+      where: { id },
+      include: { category: true, images: true },
+    });
+  }
+
+  async findBySlug(slug: string): Promise<ProductWithRelations | null> {
+    return this.prisma.product.findUnique({
+      where: { slug },
+      include: { category: true, images: true },
+    });
+  }
+
+  async findAll(query: ProductListQuery): Promise<{ products: ProductWithRelations[]; total: number }> {
+    const { categoryId, search, minPrice, maxPrice, inStock, onSale, page, limit } = query;
+
+    const where: Prisma.ProductWhereInput = {};
+
+    if (categoryId) where.categoryId = categoryId;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.originalPrice = {};
+      if (minPrice !== undefined) where.originalPrice.gte = minPrice;
+      if (maxPrice !== undefined) where.originalPrice.lte = maxPrice;
+    }
+    if (inStock) where.stock = { gt: 0 };
+    if (onSale) where.isOnSale = true;
+
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        include: { category: true, images: true },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    return { products, total };
+  }
+
+  async update(id: string, data: UpdateProductDto): Promise<Product> {
+    return this.prisma.product.update({ where: { id }, data });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.product.delete({ where: { id } });
+  }
+
+  async findByCategory(categoryId: string): Promise<Product[]> {
+    return this.prisma.product.findMany({ where: { categoryId } });
+  }
+}
 
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: src\infrastructure\oauth\google.oauth.ts
+Type: Infrastructure Layer
+Size: 2.42 KB
+============================================================
+
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
+import { envConfig } from '@/config/env';
+import logger from '@/config/logger';
+
+export interface GoogleOAuthProfile {
+  sub: string;
+  email: string;
+  emailVerified: boolean;
+  name?: string;
+  picture?: string;
+}
+
+const GOOGLE_ISSUERS = new Set(['https://accounts.google.com', 'accounts.google.com']);
+
+class GoogleOAuthClient {
+  private clientId = envConfig.GOOGLE_CLIENT_ID;
+  private clientSecret = envConfig.GOOGLE_CLIENT_SECRET;
+  private oauthClient = new OAuth2Client(this.clientId, this.clientSecret);
+
+  private toProfile(payload: TokenPayload): GoogleOAuthProfile {
+    return {
+      sub: payload.sub || '',
+      email: payload.email || '',
+      emailVerified: payload.email_verified === true,
+      name: payload.name || undefined,
+      picture: payload.picture || undefined,
+    };
+  }
+
+  async getProfileFromIdToken(idToken: string): Promise<GoogleOAuthProfile> {
+    if (!this.clientId) {
+      throw new Error('Google OAuth not configured');
+    }
+
+    try {
+      const ticket = await this.oauthClient.verifyIdToken({
+        idToken,
+        audience: this.clientId,
+      });
+      const payload = ticket.getPayload();
+      if (!payload) {
+        throw new Error('Invalid Google id_token payload');
+      }
+
+      if (payload.iss && !GOOGLE_ISSUERS.has(payload.iss)) {
+        throw new Error('Invalid Google token issuer');
+      }
+
+      return this.toProfile(payload);
+    } catch (error) {
+      logger.error({ err: error }, 'Google id_token verification failed');
+      throw new Error('Invalid Google id_token');
+    }
+  }
+
+  async exchangeCodeForProfile(
+    code: string,
+    redirectUri?: string,
+    codeVerifier?: string,
+  ): Promise<GoogleOAuthProfile> {
+    if (!this.clientId || !this.clientSecret) {
+      throw new Error('Google OAuth not configured');
+    }
+
+    if (!redirectUri) {
+      throw new Error('redirectUri is required');
+    }
+
+    try {
+      const { tokens } = await this.oauthClient.getToken({
+        code,
+        redirect_uri: redirectUri,
+        codeVerifier,
+      });
+
+      if (!tokens.id_token) {
+        throw new Error('Google token exchange missing id_token');
+      }
+
+      return this.getProfileFromIdToken(tokens.id_token);
+    } catch (error) {
+      logger.error({ err: error }, 'Google token exchange failed');
+      throw new Error('Google token exchange failed');
+    }
+  }
+}
+
+export const googleOAuthClient = new GoogleOAuthClient();
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\modules\auth\auth.controller.ts
+Type: Domain Module
+Size: 2.54 KB
+============================================================
+
+import { NextFunction, Request, Response } from 'express';
+import { AuthService } from './auth.service';
+import { TokenService } from '../../infrastructure/auth/token.service';
+import { OAuthLoginDto, RegisterDto, LoginDto } from './dtos/auth.dto';
+
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  async register(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await this.authService.register(req.body as RegisterDto);
+
+      res.status(201).json({
+        success: true,
+        data: {
+          message: 'User registered successfully',
+          user: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          },
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await this.authService.login(req.body as LoginDto);
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async refresh(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { refreshToken } = req.body as { refreshToken: string };
+      const user = await this.authService.validateRefreshToken(refreshToken);
+      const accessToken = TokenService.generateAccessToken(user.id, user.role);
+
+      res.status(200).json({ success: true, data: { accessToken } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async oauthLogin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const provider = req.params.provider as string;
+      const result = await this.authService.oauthLogin(
+        provider,
+        req.body as OAuthLoginDto,
+      );
+
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  oauthSuccess(req: Request, res: Response) {
+    const user = req.user as { id: string; role: string; email: string; name?: string } | undefined;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'User not found' },
+      });
+    }
+
+    const accessToken = TokenService.generateAccessToken(user.id, user.role);
+    const refreshToken = TokenService.generateRefreshToken(user.id);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        message: 'OAuth authentication successful',
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          name: user.name,
+        },
+        accessToken,
+        refreshToken,
+      },
+    });
+  }
+}
+
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: src\modules\auth\auth.routes.ts
-Type: Source File
-Size: 1.43 KB
+Type: Domain Module
+Size: 2.04 KB
 ============================================================
 
 import { Router, Request, Response } from 'express';
 import passport from 'passport';
+import rateLimit from 'express-rate-limit';
 import { AuthController } from './auth.controller';
 import { envConfig } from '@/config/env';
-import rateLimit from 'express-rate-limit';
+import { validate } from '@/shared/middlewares/validate.middleware';
+import { loginSchema, oauthSchema, refreshSchema, registerSchema } from './validators/auth.schema';
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
-  message: { message: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: { message: 'Too many requests, please try again later' },
+  },
 });
 
-const oauthNotConfigured = (req: Request, res: Response) => {
-  res.status(503).json({ message: 'Google OAuth is not configured' });
+const oauthNotConfigured = (_req: Request, res: Response) => {
+  res.status(503).json({
+    success: false,
+    error: { message: 'Google OAuth is not configured' },
+  });
 };
 
 export const createAuthRouter = (authController: AuthController) => {
   const router = Router();
 
-  router.post('/register', authLimiter, (req, res, next) => authController.register(req, res, next));
-  router.post('/login', authLimiter, (req, res, next) => authController.login(req, res, next));
-  router.post('/refresh', authLimiter, (req, res, next) => authController.refresh(req, res, next));
+  router.post('/register', authLimiter, validate(registerSchema), (req, res, next) => authController.register(req, res, next));
+  router.post('/login', authLimiter, validate(loginSchema), (req, res, next) => authController.login(req, res, next));
+  router.post('/refresh', authLimiter, validate(refreshSchema), (req, res, next) => authController.refresh(req, res, next));
 
+  // OAuth with id_token/code (YL-style API route)
+  router.post('/oauth/:provider', authLimiter, validate(oauthSchema), (req, res, next) => authController.oauthLogin(req, res, next));
+
+  // Legacy passport OAuth (optional, for backward compatibility)
   const googleConfigured = !!(envConfig.GOOGLE_CLIENT_ID && envConfig.GOOGLE_CLIENT_SECRET);
 
   if (googleConfigured) {
@@ -1952,7 +2533,7 @@ export const createAuthRouter = (authController: AuthController) => {
     router.get(
       '/google/callback',
       passport.authenticate('google', { session: false, failureRedirect: '/api/v1/auth/login' }),
-      (req, res) => authController.oauthSuccess(req, res)
+      (req, res) => authController.oauthSuccess(req, res),
     );
   } else {
     router.get('/google', oauthNotConfigured);
@@ -1966,18 +2547,21 @@ export const createAuthRouter = (authController: AuthController) => {
 ===== END FILE =====
 
 
+
 ============================================================
 ===== FILE START: src\modules\auth\auth.service.ts
-Type: Source File
-Size: 2.05 KB
+Type: Domain Module
+Size: 4.31 KB
 ============================================================
 
 import bcrypt from 'bcrypt';
-import { IAuthRepository } from './auth.repository';
+import { IAuthRepository } from './interfaces/auth.repository.interface';
 import { TokenService } from '../../infrastructure/auth/token.service';
 import { User } from '@prisma/client';
-import { RegisterDto, LoginDto, TokenResponse, RefreshJwtPayload } from './dtos/auth.dto';
+import { RegisterDto, LoginDto, TokenResponse, RefreshJwtPayload, OAuthLoginDto } from './dtos/auth.dto';
 import { ConflictError, UnauthorizedError } from '@/shared/errors/app-error';
+import { googleOAuthClient, GoogleOAuthProfile as GoogleProfile } from '../../infrastructure/oauth/google.oauth';
+import logger from '@/config/logger';
 
 export class AuthService {
   private readonly SALT_ROUNDS = 10;
@@ -1992,10 +2576,13 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(userData.password, this.SALT_ROUNDS);
 
-    return this.authRepository.createUser({
+    const user = await this.authRepository.createUser({
       ...userData,
       password: hashedPassword,
     });
+
+    logger.info({ userId: user.id, email: user.email }, 'User registered');
+    return user;
   }
 
   async login(credentials: LoginDto): Promise<TokenResponse> {
@@ -2011,6 +2598,8 @@ export class AuthService {
 
     const accessToken = TokenService.generateAccessToken(user.id, user.role);
     const refreshToken = TokenService.generateRefreshToken(user.id);
+
+    logger.info({ userId: user.id, email: user.email }, 'User logged in');
 
     return {
       user: {
@@ -2039,16 +2628,83 @@ export class AuthService {
     }
     return user;
   }
+
+  async oauthLogin(provider: string, dto: OAuthLoginDto): Promise<TokenResponse> {
+    let profile: GoogleProfile;
+
+    if (provider !== 'google') {
+      throw new Error('Unsupported OAuth provider');
+    }
+
+    if (dto.idToken) {
+      profile = await googleOAuthClient.getProfileFromIdToken(dto.idToken);
+    } else if (dto.code) {
+      profile = await googleOAuthClient.exchangeCodeForProfile(
+        dto.code,
+        dto.redirectUri
+      );
+    } else {
+      throw new Error('code or idToken is required');
+    }
+
+    if (!profile.email) {
+      throw new Error('Missing email in OAuth profile');
+    }
+
+    if (!profile.emailVerified) {
+      throw new Error('Email not verified');
+    }
+
+    let user = await this.authRepository.findUserByProvider('GOOGLE', profile.sub);
+
+    if (!user) {
+      const existingByEmail = await this.authRepository.findUserByEmail(profile.email);
+      if (existingByEmail) {
+        user = await this.authRepository.updateUser(existingByEmail.id, {
+          name: profile.name || existingByEmail.name,
+        });
+        await this.authRepository.linkProvider(existingByEmail.id, 'GOOGLE', profile.sub);
+      } else {
+        user = await this.authRepository.createOAuthUser(
+          {
+            id: profile.sub,
+            displayName: profile.name || profile.email,
+            emails: [{ value: profile.email }],
+            photos: profile.picture ? [{ value: profile.picture }] : undefined,
+          },
+          'GOOGLE',
+          profile.email
+        );
+      }
+    }
+
+    logger.info({ userId: user.id, email: user.email, provider }, 'OAuth login');
+
+    const accessToken = TokenService.generateAccessToken(user.id, user.role);
+    const refreshToken = TokenService.generateRefreshToken(user.id);
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+      },
+      accessToken,
+      refreshToken,
+    };
+  }
 }
 
 
 ===== END FILE =====
 
 
+
 ============================================================
 ===== FILE START: src\modules\auth\dtos\auth.dto.ts
-Type: Source File
-Size: 742 B
+Type: Domain Module
+Size: 0.98 KB
 ============================================================
 
 import { UserRole } from '@prisma/client';
@@ -2098,19 +2754,58 @@ export interface OAuthProfile {
   photos?: { value: string }[];
 }
 
+export interface GoogleOAuthProfile {
+  sub: string;
+  email: string;
+  emailVerified: boolean;
+  name?: string;
+  picture?: string;
+}
+
+export interface OAuthLoginDto {
+  code?: string;
+  codeVerifier?: string;
+  redirectUri?: string;
+  idToken?: string;
+}
+
 
 ===== END FILE =====
 
 
+
 ============================================================
-===== FILE START: src\modules\auth\oauth.service.ts
-Type: Source File
-Size: 1.02 KB
+===== FILE START: src\modules\auth\interfaces\auth.repository.interface.ts
+Type: Domain Module
+Size: 0.66 KB
 ============================================================
 
-import { User } from '@prisma/client';
+import { User, AuthProvider } from '@prisma/client';
+import { RegisterDto, OAuthProfile } from '../dtos/auth.dto';
+
+export interface IAuthRepository {
+  findUserByEmail(email: string): Promise<User | null>;
+  findUserById(id: string): Promise<User | null>;
+  createUser(data: RegisterDto & { password: string }): Promise<User>;
+  findUserByProvider(provider: AuthProvider, providerUserId: string): Promise<User | null>;
+  linkProvider(userId: string, provider: AuthProvider, providerUserId: string): Promise<void>;
+  createOAuthUser(profile: OAuthProfile, provider: AuthProvider, email: string): Promise<User>;
+  updateUser(id: string, data: Partial<User>): Promise<User>;
+}
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\modules\auth\oauth.service.ts
+Type: Domain Module
+Size: 1.08 KB
+============================================================
+
+import { User, AuthProvider } from '@prisma/client';
 import { OAuthProfile } from './dtos/auth.dto';
-import { IAuthRepository } from './auth.repository';
+import { IAuthRepository } from './interfaces/auth.repository.interface';
 import { AppError } from '@/shared/errors/app-error';
 
 export class OAuthService {
@@ -2119,7 +2814,7 @@ export class OAuthService {
   async findOrCreateUser(profile: OAuthProfile, provider: string): Promise<User> {
     const providerUserId = profile.id;
 
-    const existingProviderUser = await this.authRepository.findUserByProvider(provider as any, providerUserId);
+    const existingProviderUser = await this.authRepository.findUserByProvider(provider as AuthProvider, providerUserId);
     if (existingProviderUser) {
       return existingProviderUser;
     }
@@ -2131,11 +2826,11 @@ export class OAuthService {
 
     const userByEmail = await this.authRepository.findUserByEmail(email);
     if (userByEmail) {
-      await this.authRepository.linkProvider(userByEmail.id, provider as any, providerUserId);
+      await this.authRepository.linkProvider(userByEmail.id, provider as AuthProvider, providerUserId);
       return userByEmail;
     }
 
-    return this.authRepository.createOAuthUser(profile, provider as any, email);
+    return this.authRepository.createOAuthUser(profile, provider as AuthProvider, email);
   }
 }
 
@@ -2143,13 +2838,17 @@ export class OAuthService {
 ===== END FILE =====
 
 
+
 ============================================================
 ===== FILE START: src\modules\auth\validators\auth.schema.ts
-Type: Source File
-Size: 809 B
+Type: Domain Module
+Size: 1.28 KB
 ============================================================
 
 import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+
+extendZodWithOpenApi(z);
 
 export const registerSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -2157,16 +2856,27 @@ export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters long'),
   phone: z.string().optional(),
   profileImage: z.string().url('Invalid image URL').optional().or(z.literal('')),
-});
+}).openapi('RegisterRequest');
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
-});
+}).openapi('LoginRequest');
 
 export const refreshSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
-});
+}).openapi('RefreshRequest');
+
+export const oauthSchema = {
+  body: z.object({
+    code: z.string().min(1).optional(),
+    codeVerifier: z.string().min(1).optional(),
+    redirectUri: z.string().url().optional(),
+    idToken: z.string().min(1).optional(),
+  }).refine((data) => data.code || data.idToken, {
+    message: 'code or idToken is required',
+  }),
+};
 
 export type RegisterDto = z.infer<typeof registerSchema>;
 export type LoginDto = z.infer<typeof loginSchema>;
@@ -2176,10 +2886,68 @@ export type RefreshDto = z.infer<typeof refreshSchema>;
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: src\modules\auth\validators\responses.ts
+Type: Domain Module
+Size: 1.18 KB
+============================================================
+
+import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+
+extendZodWithOpenApi(z);
+
+export const authUserResponseSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  role: z.enum(['USER', 'ADMIN', 'DELIVERY']),
+  name: z.string().nullable().optional(),
+}).openapi('AuthUserResponse');
+
+export const registerResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    message: z.string(),
+    user: authUserResponseSchema.omit({ name: true }),
+  }),
+}).openapi('RegisterResponse');
+
+export const tokenResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    user: authUserResponseSchema,
+    accessToken: z.string(),
+    refreshToken: z.string(),
+  }),
+}).openapi('TokenResponse');
+
+export const refreshResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    accessToken: z.string(),
+  }),
+}).openapi('RefreshResponse');
+
+export const oauthResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    message: z.string().optional(),
+    user: authUserResponseSchema,
+    accessToken: z.string(),
+    refreshToken: z.string(),
+  }),
+}).openapi('OAuthResponse');
+
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: src\modules\products\dtos\product.dto.ts
-Type: Source File
-Size: 839 B
+Type: Domain Module
+Size: 0.82 KB
 ============================================================
 
 import { Product, Category, ProductImage } from '@prisma/client';
@@ -2227,116 +2995,15 @@ export type PaginatedProducts = {
 ===== END FILE =====
 
 
-============================================================
-===== FILE START: src\modules\products\product.controller.ts
-Type: Source File
-Size: 3.04 KB
-============================================================
-
-import { NextFunction, Request, Response } from 'express';
-import { ProductService } from './product.service';
-import { createSchema, updateSchema, listSchema, productIdSchema } from './validators/product.schema';
-import { ZodError } from 'zod';
-import { AppError } from '@/shared/errors/app-error';
-
-export class ProductController {
-  constructor(private productService: ProductService) {}
-
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validatedData = createSchema.parse(req.body);
-      const product = await this.productService.create(validatedData);
-      res.status(201).json(product);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
-  }
-
-  async findAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      const validatedQuery = listSchema.parse(req.query);
-      const result = await this.productService.findAll(validatedQuery);
-      res.status(200).json(result);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
-  }
-
-  async findById(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = productIdSchema.parse(req.params as Record<string, string>);
-      const product = await this.productService.findById(id);
-      if (!product) {
-        return next(new AppError('Product not found', 404));
-      }
-      res.status(200).json(product);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
-  }
-
-  async findBySlug(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { slug } = req.params as Record<string, string>;
-      const product = await this.productService.findBySlug(slug);
-      if (!product) {
-        return next(new AppError('Product not found', 404));
-      }
-      res.status(200).json(product);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async update(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = productIdSchema.parse(req.params as Record<string, string>);
-      const validatedData = updateSchema.parse(req.body);
-      const product = await this.productService.update(id, validatedData);
-      res.status(200).json(product);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
-  }
-
-  async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { id } = productIdSchema.parse(req.params as Record<string, string>);
-      await this.productService.delete(id);
-      res.status(204).send();
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return next(new AppError(error.issues[0]?.message || 'Validation failed', 400));
-      }
-      next(error);
-    }
-  }
-}
-
-
-===== END FILE =====
-
 
 ============================================================
-===== FILE START: src\modules\products\product.repository.ts
-Type: Source File
-Size: 2.71 KB
+===== FILE START: src\modules\products\interfaces\product.repository.interface.ts
+Type: Domain Module
+Size: 0.62 KB
 ============================================================
 
-import { PrismaClient, Product } from '@prisma/client';
-import { CreateProductDto, UpdateProductDto, ProductListQuery, ProductWithRelations } from './dtos/product.dto';
+import { Product } from '@prisma/client';
+import { CreateProductDto, UpdateProductDto, ProductListQuery, ProductWithRelations } from '../dtos/product.dto';
 
 export interface IProductRepository {
   create(data: CreateProductDto): Promise<Product>;
@@ -2348,111 +3015,151 @@ export interface IProductRepository {
   findByCategory(categoryId: string): Promise<Product[]>;
 }
 
-export class ProductRepository implements IProductRepository {
-  constructor(private prisma: PrismaClient) {}
+===== END FILE =====
 
-  async create(data: CreateProductDto): Promise<Product> {
-    return this.prisma.product.create({ data });
-  }
 
-  async findById(id: string): Promise<ProductWithRelations | null> {
-    return this.prisma.product.findUnique({
-      where: { id },
-      include: { category: true, images: true },
-    });
-  }
 
-  async findBySlug(slug: string): Promise<ProductWithRelations | null> {
-    return this.prisma.product.findUnique({
-      where: { slug },
-      include: { category: true, images: true },
-    });
-  }
+============================================================
+===== FILE START: src\modules\products\product.controller.ts
+Type: Domain Module
+Size: 2.31 KB
+============================================================
 
-  async findAll(query: ProductListQuery): Promise<{ products: ProductWithRelations[]; total: number }> {
-    const { categoryId, search, minPrice, maxPrice, inStock, onSale, page, limit } = query;
+import { NextFunction, Request, Response } from 'express';
+import { ProductService } from './product.service';
+import { CreateProductDto, ProductListQuery, UpdateProductDto } from './dtos/product.dto';
+import { AppError } from '@/shared/errors/app-error';
 
-    const where: any = {};
+export class ProductController {
+  constructor(private productService: ProductService) {}
 
-    if (categoryId) where.categoryId = categoryId;
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-      ];
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const product = await this.productService.create(req.body as CreateProductDto);
+      res.status(201).json({ success: true, data: { product } });
+    } catch (error) {
+      next(error);
     }
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.originalPrice = {};
-      if (minPrice !== undefined) where.originalPrice.gte = minPrice;
-      if (maxPrice !== undefined) where.originalPrice.lte = maxPrice;
+  }
+
+  async findAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await this.productService.findAll(
+        req.query as unknown as ProductListQuery,
+      );
+
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
     }
-    if (inStock) where.stock = { gt: 0 };
-    if (onSale) where.isOnSale = true;
-
-    const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
-        where,
-        include: { category: true, images: true },
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.product.count({ where }),
-    ]);
-
-    return { products, total };
   }
 
-  async update(id: string, data: UpdateProductDto): Promise<Product> {
-    return this.prisma.product.update({ where: { id }, data });
+  async findById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params as { id: string };
+      const product = await this.productService.findById(id);
+
+      if (!product) {
+        return next(new AppError('Product not found', 404));
+      }
+
+      res.status(200).json({ success: true, data: { product } });
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async delete(id: string): Promise<void> {
-    await this.prisma.product.delete({ where: { id } });
+  async findBySlug(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { slug } = req.params as { slug: string };
+      const product = await this.productService.findBySlug(slug);
+
+      if (!product) {
+        return next(new AppError('Product not found', 404));
+      }
+
+      res.status(200).json({ success: true, data: { product } });
+    } catch (error) {
+      next(error);
+    }
   }
 
-  async findByCategory(categoryId: string): Promise<Product[]> {
-    return this.prisma.product.findMany({ where: { categoryId } });
+  async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params as { id: string };
+      const product = await this.productService.update(
+        id,
+        req.body as UpdateProductDto,
+      );
+
+      res.status(200).json({ success: true, data: { product } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id } = req.params as { id: string };
+      await this.productService.delete(id);
+
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
   }
 }
 
+
 ===== END FILE =====
+
 
 
 ============================================================
 ===== FILE START: src\modules\products\product.routes.ts
-Type: Source File
-Size: 1.18 KB
+Type: Domain Module
+Size: 1.56 KB
 ============================================================
 
 import { Router } from 'express';
+import { UserRole } from '@prisma/client';
 import { ProductController } from './product.controller';
 import { authenticate, authorize } from '@/shared/middlewares/auth.middleware';
-import { UserRole } from '@prisma/client';
+import { validate } from '@/shared/middlewares/validate.middleware';
+import {
+  createProductSchema,
+  productIdSchema,
+  productQuerySchema,
+  updateProductSchema,
+} from './validators/product.schema';
 
 export const createProductRouter = (productController: ProductController) => {
   const router = Router();
+  const authenticatedRoles = authorize(UserRole.USER, UserRole.ADMIN, UserRole.DELIVERY);
+  const adminOnly = authorize(UserRole.ADMIN);
 
-  router.post('/', authenticate, authorize(UserRole.ADMIN), (req, res, next) => productController.create(req, res, next));
-  router.get('/', authenticate, authorize(UserRole.USER, UserRole.ADMIN, UserRole.DELIVERY), (req, res, next) => productController.findAll(req, res, next));
-  router.get('/slug/:slug', authenticate, authorize(UserRole.USER, UserRole.ADMIN, UserRole.DELIVERY), (req, res, next) => productController.findBySlug(req, res, next));
-  router.get('/:id', authenticate, authorize(UserRole.USER, UserRole.ADMIN, UserRole.DELIVERY), (req, res, next) => productController.findById(req, res, next));
-  router.patch('/:id', authenticate, authorize(UserRole.ADMIN), (req, res, next) => productController.update(req, res, next));
-  router.delete('/:id', authenticate, authorize(UserRole.ADMIN), (req, res, next) => productController.delete(req, res, next));
+  router.post('/', authenticate, adminOnly, validate(createProductSchema), (req, res, next) => productController.create(req, res, next));
+  router.get('/', authenticate, authenticatedRoles, validate({ query: productQuerySchema }), (req, res, next) => productController.findAll(req, res, next));
+  router.get('/slug/:slug', authenticate, authenticatedRoles, (req, res, next) => productController.findBySlug(req, res, next));
+  router.get('/:id', authenticate, authenticatedRoles, validate({ params: productIdSchema }), (req, res, next) => productController.findById(req, res, next));
+  router.patch('/:id', authenticate, adminOnly, validate({ params: productIdSchema, body: updateProductSchema }), (req, res, next) => productController.update(req, res, next));
+  router.delete('/:id', authenticate, adminOnly, validate({ params: productIdSchema }), (req, res, next) => productController.delete(req, res, next));
 
   return router;
 };
 
+
 ===== END FILE =====
+
 
 
 ============================================================
 ===== FILE START: src\modules\products\product.service.ts
-Type: Source File
-Size: 1.34 KB
+Type: Domain Module
+Size: 1.36 KB
 ============================================================
 
-import { IProductRepository } from './product.repository';
+import { IProductRepository } from './interfaces/product.repository.interface';
 import { CreateProductDto, UpdateProductDto, ProductWithRelations, PaginatedProducts, ProductListQuery } from './dtos/product.dto';
 
 export class ProductService {
@@ -2490,13 +3197,17 @@ export class ProductService {
 ===== END FILE =====
 
 
+
 ============================================================
 ===== FILE START: src\modules\products\validators\product.schema.ts
-Type: Source File
-Size: 1.98 KB
+Type: Domain Module
+Size: 2.13 KB
 ============================================================
 
 import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+
+extendZodWithOpenApi(z);
 
 export const createProductSchema = z.object({
   name: z.string().min(1).max(255),
@@ -2510,7 +3221,7 @@ export const createProductSchema = z.object({
   saleStartDate: z.string().datetime().optional(),
   saleEndDate: z.string().datetime().optional(),
   isActive: z.boolean().optional(),
-});
+}).openapi('CreateProductRequest');
 
 export const updateProductSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -2524,7 +3235,7 @@ export const updateProductSchema = z.object({
   saleStartDate: z.string().datetime().optional(),
   saleEndDate: z.string().datetime().optional(),
   isActive: z.boolean().optional(),
-});
+}).openapi('UpdateProductRequest');
 
 export const productIdSchema = z.object({
   id: z.string().uuid(),
@@ -2551,51 +3262,181 @@ export const listSchema = productQuerySchema;
 ===== END FILE =====
 
 
+
 ============================================================
-===== FILE START: src\server.ts
-Type: Source File
-Size: 810 B
+===== FILE START: src\modules\products\validators\responses.ts
+Type: Domain Module
+Size: 1.15 KB
 ============================================================
 
-import app from './app';
-import { envConfig } from './config/env';
-import logger from './config/logger';
-import { prisma } from './infrastructure/database/db';
+import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 
-const PORT = envConfig.PORT;
+extendZodWithOpenApi(z);
 
-const server = app.listen(PORT, () => {
-  logger.info(`Server running on http://localhost:${PORT}`);
-});
+export const productResponseSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().nullable().optional(),
+  originalPrice: z.number(),
+  salePrice: z.number().nullable().optional(),
+  stock: z.number().int(),
+  categoryId: z.string().uuid(),
+  isOnSale: z.boolean(),
+  saleStartDate: z.string().datetime().nullable().optional(),
+  saleEndDate: z.string().datetime().nullable().optional(),
+  isActive: z.boolean(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+}).openapi('Product');
 
-async function gracefulShutdown(signal: string) {
-  logger.info(`${signal} received - shutting down gracefully`);
-  server.close(() => {
-    logger.info('HTTP server closed');
-  });
+export const productEnvelopeSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    product: productResponseSchema,
+  }),
+}).openapi('ProductResponse');
 
-  await prisma.$disconnect();
-  logger.info('Prisma disconnected');
-
-  setTimeout(() => {
-    logger.error('Forced shutdown after timeout');
-    process.exit(1);
-  }, 10000).unref();
-
-  process.exit(0);
-}
-
-process.on('SIGINT', () => { gracefulShutdown('SIGINT'); });
-process.on('SIGTERM', () => { gracefulShutdown('SIGTERM'); });
+export const paginatedProductsEnvelopeSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    products: z.array(productResponseSchema),
+    total: z.number().int(),
+    page: z.number().int(),
+    limit: z.number().int(),
+    totalPages: z.number().int(),
+  }),
+}).openapi('PaginatedProductsResponse');
 
 
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: src\routes\index.ts
+Type: Index File
+Size: 0.29 KB
+============================================================
+
+import { Router } from 'express';
+import { container } from '../container';
+
+export const buildApiRouter = () => {
+  const router = Router();
+
+  router.use('/auth', container.authRouter);
+  router.use('/products', container.productRouter);
+
+  return router;
+};
+
+export default buildApiRouter;
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\server.ts
+Type: Entry Point
+Size: 2.31 KB
+============================================================
+
+import { createApp } from './app';
+import { config } from './config';
+import logger from './config/logger';
+import { connectDatabase, disconnectDatabase } from './infrastructure/database/db';
+
+const PORT = config.app.port;
+
+async function startServer() {
+  let server: ReturnType<ReturnType<typeof createApp>['listen']> | undefined;
+
+  const gracefulShutdown = async (signal: string) => {
+    logger.info({ signal }, 'Shutdown signal received');
+
+    const forceShutdownTimer = setTimeout(() => {
+      logger.error('Forced shutdown after timeout');
+      process.exit(1);
+    }, 10000);
+    forceShutdownTimer.unref();
+
+    const closeDatabase = async () => {
+      try {
+        await disconnectDatabase();
+        logger.info('Shutdown completed');
+        process.exit(0);
+      } catch (shutdownError) {
+        logger.error({ err: shutdownError }, 'Shutdown failed');
+        process.exit(1);
+      }
+    };
+
+    if (!server) {
+      await closeDatabase();
+      return;
+    }
+
+    server.close(async (error) => {
+      if (error) {
+        logger.error({ err: error }, 'HTTP server close failed');
+        process.exit(1);
+      }
+
+      logger.info('HTTP server closed');
+      await closeDatabase();
+    });
+  };
+
+  try {
+    logger.info('Starting EShop Backend...');
+
+    await connectDatabase();
+
+    const app = createApp();
+    logger.info('Express app configured');
+
+    server = app.listen(PORT, () => {
+      logger.info(`Server listening on port ${PORT}`);
+      logger.info(`Environment: ${config.app.nodeEnv}`);
+      logger.info('EShop Backend started successfully');
+    });
+
+    process.on('SIGINT', () => void gracefulShutdown('SIGINT'));
+    process.on('SIGTERM', () => void gracefulShutdown('SIGTERM'));
+
+    process.on('uncaughtException', (error) => {
+      logger.fatal({ err: error }, 'Uncaught exception');
+      void gracefulShutdown('uncaughtException');
+    });
+
+    process.on('unhandledRejection', (reason) => {
+      logger.fatal({ err: reason }, 'Unhandled promise rejection');
+      void gracefulShutdown('unhandledRejection');
+    });
+  } catch (error) {
+    logger.fatal({ err: error }, 'Server startup failed');
+    await disconnectDatabase().catch((disconnectError) => {
+      logger.error({ err: disconnectError }, 'Database disconnect after startup failure failed');
+    });
+    process.exit(1);
+  }
+}
+
+void startServer();
+
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: src\shared\errors\app-error.ts
-Type: Source File
-Size: 724 B
+Type: Shared Utilities
+Size: 0.71 KB
 ============================================================
 
 export class AppError extends Error {
@@ -2633,9 +3474,89 @@ export class ConflictError extends AppError {
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: src\shared\errors\global-handler.ts
+Type: Shared Utilities
+Size: 1.54 KB
+============================================================
+
+import { NextFunction, Request, Response } from 'express';
+import { AppError } from './app-error';
+import logger from '../../config/logger';
+
+type HttpParserError = Error & {
+  status?: number;
+  statusCode?: number;
+  expose?: boolean;
+};
+
+const isHttpParserError = (error: Error): error is HttpParserError => {
+  const candidate = error as HttpParserError;
+  return (
+    typeof candidate.statusCode === 'number' ||
+    typeof candidate.status === 'number'
+  );
+};
+
+export const globalErrorHandler = (
+  error: Error | AppError,
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
+  let statusCode = 500;
+  let message = 'Internal server error';
+
+  if (error instanceof AppError) {
+    statusCode = error.statusCode;
+    message = error.message;
+  } else if (isHttpParserError(error)) {
+    statusCode = error.statusCode ?? error.status ?? statusCode;
+    message = error.expose || statusCode < 500 ? error.message : message;
+  }
+
+  logger.error(
+    {
+      err: error,
+      requestId: req.requestId,
+      statusCode,
+      method: req.method,
+      path: req.originalUrl,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    },
+    'Request error',
+  );
+
+  res.status(statusCode).json({
+    success: false,
+    error: {
+      message,
+      ...(process.env.NODE_ENV === 'development' && {
+        stack: error.stack,
+      }),
+    },
+  });
+};
+
+export const notFoundHandler = (req: Request, res: Response) => {
+  res.status(404).json({
+    success: false,
+    error: {
+      message: `Route ${req.method} ${req.originalUrl} not found`,
+    },
+  });
+};
+
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: src\shared\middlewares\auth.middleware.ts
-Type: Source File
+Type: Shared Utilities
 Size: 1.23 KB
 ============================================================
 
@@ -2684,37 +3605,337 @@ export const authorize = (...roles: UserRole[]) => {
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: src\shared\middlewares\cors.ts
+Type: Shared Utilities
+Size: 0.82 KB
+============================================================
+
+import cors from 'cors';
+import { config } from '../../config';
+import logger from '../../config/logger';
+
+export const corsMiddleware = () =>
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = config.app.corsOrigin;
+      const isAllowed = allowedOrigins.includes(origin);
+
+      if (!isAllowed) {
+        logger.warn(
+          { origin, allowedOrigins },
+          'CORS rejected origin',
+        );
+      }
+
+      callback(null, isAllowed);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'X-Request-Id',
+    ],
+    exposedHeaders: ['X-Request-Id'],
+    optionsSuccessStatus: 204,
+  });
+
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: src\shared\middlewares\error.middleware.ts
-Type: Source File
-Size: 464 B
+Type: Shared Utilities
+Size: 0.10 KB
+============================================================
+
+export {
+  globalErrorHandler as errorHandler,
+  notFoundHandler,
+} from '../errors/global-handler';
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\shared\middlewares\helmet.ts
+Type: Shared Utilities
+Size: 0.08 KB
+============================================================
+
+import helmet from 'helmet';
+
+export const helmetMiddleware = () => helmet();
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\shared\middlewares\rbac.middleware.ts
+Type: Shared Utilities
+Size: 0.54 KB
 ============================================================
 
 import { NextFunction, Request, Response } from 'express';
-import { AppError } from '../errors/app-error';
+import { UserRole } from '@prisma/client';
+import { ForbiddenError, UnauthorizedError } from '../errors/app-error';
 
-export const errorHandler = (
-  error: unknown,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
-  if (error instanceof AppError) {
-    return res.status(error.statusCode).json({ message: error.message });
-  }
+export const requireRoles = (...roles: UserRole[]) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.authUser) {
+      return next(new UnauthorizedError('User not authenticated'));
+    }
 
-  const message = error instanceof Error ? error.message : 'Internal server error';
-  return res.status(500).json({ message });
+    if (!roles.includes(req.authUser.role)) {
+      return next(new ForbiddenError('Forbidden: Insufficient permissions'));
+    }
+
+    next();
+  };
 };
 
 
 ===== END FILE =====
 
 
+
+============================================================
+===== FILE START: src\shared\middlewares\request-id.middleware.ts
+Type: Shared Utilities
+Size: 0.39 KB
+============================================================
+
+import { randomUUID } from 'crypto';
+import { NextFunction, Request, Response } from 'express';
+
+export const requestIdMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const incomingRequestId = req.header('x-request-id');
+  const requestId = incomingRequestId || randomUUID();
+
+  req.requestId = requestId;
+  res.setHeader('X-Request-Id', requestId);
+
+  next();
+};
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\shared\middlewares\request-logger.middleware.ts
+Type: Shared Utilities
+Size: 0.52 KB
+============================================================
+
+import { NextFunction, Request, Response } from 'express';
+import logger from '../../config/logger';
+
+export const requestLoggerMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const startedAt = Date.now();
+
+  res.on('finish', () => {
+    logger.info(
+      {
+        requestId: req.requestId,
+        method: req.method,
+        path: req.originalUrl,
+        statusCode: res.statusCode,
+        durationMs: Date.now() - startedAt,
+      },
+      'HTTP request completed',
+    );
+  });
+
+  next();
+};
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\shared\middlewares\validate.middleware.ts
+Type: Shared Utilities
+Size: 1.00 KB
+============================================================
+
+import { NextFunction, Request, Response } from 'express';
+import { z, ZodError, ZodTypeAny } from 'zod';
+import { AppError } from '../errors/app-error';
+
+type RequestSchema = {
+  body?: ZodTypeAny;
+  query?: ZodTypeAny;
+  params?: ZodTypeAny;
+};
+
+const toAppError = (error: ZodError) =>
+  new AppError(error.issues[0]?.message || 'Validation failed', 400);
+
+export const validate = (schema: ZodTypeAny | RequestSchema) => {
+  const normalized: RequestSchema = schema instanceof z.ZodType
+    ? { body: schema }
+    : schema;
+
+  return (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      if (normalized.body) req.body = normalized.body.parse(req.body);
+      if (normalized.query) req.query = normalized.query.parse(req.query) as Request['query'];
+      if (normalized.params) req.params = normalized.params.parse(req.params) as Request['params'];
+
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return next(toAppError(error));
+      }
+
+      next(error);
+    }
+  };
+};
+
+
+===== END FILE =====
+
+
+
+============================================================
+===== FILE START: src\shared\openapi\registry.ts
+Type: Shared Utilities
+Size: 2.44 KB
+============================================================
+
+import {
+  OpenAPIRegistry,
+  OpenApiGeneratorV3,
+} from '@asteasolutions/zod-to-openapi';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+import { z } from 'zod';
+import fs from 'fs';
+import path from 'path';
+
+extendZodWithOpenApi(z);
+
+export const registry = new OpenAPIRegistry();
+
+type RegisteredZodSchema = z.ZodTypeAny & {
+  _def?: {
+    openapi?: {
+      _internal?: {
+        refId?: string;
+      };
+    };
+  };
+};
+
+const isRegisteredZodSchema = (value: unknown): value is RegisteredZodSchema => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as RegisteredZodSchema;
+  return Boolean(candidate._def?.openapi?._internal?.refId);
+};
+
+const collectValidatorFiles = (dirPath: string, bucket: string[]) => {
+  if (!fs.existsSync(dirPath)) return;
+
+  for (const entry of fs.readdirSync(dirPath, { withFileTypes: true })) {
+    const absolutePath = path.join(dirPath, entry.name);
+
+    if (entry.isDirectory()) {
+      if (entry.name === 'validators') {
+        collectValidatorFiles(absolutePath, bucket);
+        continue;
+      }
+      collectValidatorFiles(absolutePath, bucket);
+      continue;
+    }
+
+    if (
+      !/\.(js|ts)$/.test(entry.name) ||
+      /\.d\.ts$/.test(entry.name) ||
+      /\.map$/.test(entry.name)
+    ) {
+      continue;
+    }
+
+    bucket.push(absolutePath);
+  }
+};
+
+const loadRegisteredSchemas = () => {
+  const modulesRoot = path.resolve(__dirname, '..', '..', 'modules');
+  const validatorFiles: string[] = [];
+  collectValidatorFiles(modulesRoot, validatorFiles);
+
+  const schemas = new Map<string, z.ZodTypeAny>();
+
+  for (const filePath of validatorFiles) {
+    const exportsRecord = require(filePath) as Record<string, unknown>;
+
+    for (const value of Object.values(exportsRecord)) {
+      if (!isRegisteredZodSchema(value)) continue;
+
+      const refId = value._def?.openapi?._internal?.refId;
+      if (!refId || schemas.has(refId)) continue;
+      schemas.set(refId, value);
+    }
+  }
+
+  return Array.from(schemas.values()).map((schema) => ({
+    type: 'schema' as const,
+    schema,
+  }));
+};
+
+export const generateOpenApiSpec = () => {
+  const generator = new OpenApiGeneratorV3([
+    ...registry.definitions,
+    ...loadRegisteredSchemas(),
+  ]);
+
+  return generator.generateDocument({
+    openapi: '3.0.3',
+    info: {
+      title: 'E-Shop API (Dynamic)',
+      version: '1.0.0',
+      description: 'Dynamically generated API documentation from Zod schemas.',
+    },
+  });
+};
+
+export { z };
+
+===== END FILE =====
+
+
+
 ============================================================
 ===== FILE START: src\types\express.d.ts
 Type: Source File
-Size: 172 B
+Size: 0.19 KB
 ============================================================
 
 import { AuthUser } from '@/modules/auth/dtos/auth.dto';
@@ -2723,6 +3944,7 @@ declare global {
   namespace Express {
     interface Request {
       authUser?: AuthUser;
+      requestId?: string;
     }
   }
 }
@@ -2733,1652 +3955,11 @@ export {};
 ===== END FILE =====
 
 
-============================================================
-===== FILE START: swagger.json
-Type: Source File
-Size: 44.12 KB
-============================================================
-
-{
-  "openapi": "3.0.3",
-  "info": {
-    "title": "E-Shop API",
-    "version": "1.0.0",
-    "description": "Backend API for E-Shop project"
-  },
-  "servers": [
-    {
-      "url": "http://localhost:3000",
-      "description": "Development server"
-    }
-  ],
-  "tags": [
-    {
-      "name": "Auth",
-      "description": "Authentication endpoints"
-    },
-    {
-      "name": "Products",
-      "description": "Product management endpoints"
-    }
-  ],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    },
-    "schemas": {
-      "Error": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "statusCode": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "message",
-          "statusCode"
-        ]
-      },
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "USER",
-              "ADMIN",
-              "DELIVERY"
-            ]
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "email",
-          "role",
-          "name"
-        ]
-      },
-      "RegisterResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "user": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "email": {
-                "type": "string",
-                "format": "email"
-              },
-              "role": {
-                "type": "string",
-                "enum": [
-                  "USER",
-                  "ADMIN",
-                  "DELIVERY"
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "email",
-              "role"
-            ]
-          }
-        },
-        "required": [
-          "message",
-          "user"
-        ]
-      },
-      "TokenResponse": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "email": {
-                "type": "string",
-                "format": "email"
-              },
-              "role": {
-                "type": "string",
-                "enum": [
-                  "USER",
-                  "ADMIN",
-                  "DELIVERY"
-                ]
-              },
-              "name": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "email",
-              "role",
-              "name"
-            ]
-          },
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "user",
-          "accessToken",
-          "refreshToken"
-        ]
-      },
-      "RefreshResponse": {
-        "type": "object",
-        "properties": {
-          "accessToken": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "accessToken"
-        ]
-      },
-      "OAuthResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "user": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "format": "uuid"
-              },
-              "email": {
-                "type": "string",
-                "format": "email"
-              },
-              "role": {
-                "type": "string",
-                "enum": [
-                  "USER",
-                  "ADMIN",
-                  "DELIVERY"
-                ]
-              },
-              "name": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "email",
-              "role",
-              "name"
-            ]
-          },
-          "accessToken": {
-            "type": "string"
-          },
-          "refreshToken": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "message",
-          "user",
-          "accessToken",
-          "refreshToken"
-        ]
-      },
-      "Product": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "originalPrice": {
-            "type": "number"
-          },
-          "salePrice": {
-            "type": "number",
-            "nullable": true
-          },
-          "stock": {
-            "type": "integer"
-          },
-          "categoryId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "isOnSale": {
-            "type": "boolean"
-          },
-          "saleStartDate": {
-            "type": "string",
-            "nullable": true,
-            "format": "date-time"
-          },
-          "saleEndDate": {
-            "type": "string",
-            "nullable": true,
-            "format": "date-time"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug",
-          "description",
-          "originalPrice",
-          "salePrice",
-          "stock",
-          "categoryId",
-          "isOnSale",
-          "saleStartDate",
-          "saleEndDate",
-          "isActive",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "PaginatedProducts": {
-        "type": "object",
-        "properties": {
-          "products": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "slug": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string",
-                  "nullable": true
-                },
-                "originalPrice": {
-                  "type": "number"
-                },
-                "salePrice": {
-                  "type": "number",
-                  "nullable": true
-                },
-                "stock": {
-                  "type": "integer"
-                },
-                "categoryId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "isOnSale": {
-                  "type": "boolean"
-                },
-                "saleStartDate": {
-                  "type": "string",
-                  "nullable": true,
-                  "format": "date-time"
-                },
-                "saleEndDate": {
-                  "type": "string",
-                  "nullable": true,
-                  "format": "date-time"
-                },
-                "isActive": {
-                  "type": "boolean"
-                },
-                "createdAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "slug",
-                "description",
-                "originalPrice",
-                "salePrice",
-                "stock",
-                "categoryId",
-                "isOnSale",
-                "saleStartDate",
-                "saleEndDate",
-                "isActive",
-                "createdAt",
-                "updatedAt"
-              ]
-            }
-          },
-          "total": {
-            "type": "integer"
-          },
-          "page": {
-            "type": "integer"
-          },
-          "limit": {
-            "type": "integer"
-          },
-          "totalPages": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "products",
-          "total",
-          "page",
-          "limit",
-          "totalPages"
-        ]
-      }
-    },
-    "parameters": {}
-  },
-  "paths": {
-    "/api/v1/auth/register": {
-      "post": {
-        "summary": "Register a new user (PUBLIC)",
-        "tags": [
-          "Auth"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "format": "email"
-                  },
-                  "password": {
-                    "type": "string",
-                    "minLength": 6
-                  },
-                  "name": {
-                    "type": "string",
-                    "minLength": 2
-                  },
-                  "phone": {
-                    "type": "string"
-                  },
-                  "profileImage": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "format": "uri"
-                      },
-                      {
-                        "type": "string",
-                        "enum": [
-                          ""
-                        ]
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "email",
-                  "password",
-                  "name"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User registered successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "user": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "email": {
-                          "type": "string",
-                          "format": "email"
-                        },
-                        "role": {
-                          "type": "string",
-                          "enum": [
-                            "USER",
-                            "ADMIN",
-                            "DELIVERY"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "email",
-                        "role"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "user"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "statusCode"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User already exists",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "statusCode"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/login": {
-      "post": {
-        "summary": "Login with email and password (PUBLIC)",
-        "tags": [
-          "Auth"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "format": "email"
-                  },
-                  "password": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                },
-                "required": [
-                  "email",
-                  "password"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Login successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "user": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "email": {
-                          "type": "string",
-                          "format": "email"
-                        },
-                        "role": {
-                          "type": "string",
-                          "enum": [
-                            "USER",
-                            "ADMIN",
-                            "DELIVERY"
-                          ]
-                        },
-                        "name": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "email",
-                        "role",
-                        "name"
-                      ]
-                    },
-                    "accessToken": {
-                      "type": "string"
-                    },
-                    "refreshToken": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "user",
-                    "accessToken",
-                    "refreshToken"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid credentials",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "statusCode"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/refresh": {
-      "post": {
-        "summary": "Refresh access token (PUBLIC)",
-        "tags": [
-          "Auth"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "refreshToken": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                },
-                "required": [
-                  "refreshToken"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Token refreshed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "accessToken": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "accessToken"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid refresh token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "statusCode"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/google": {
-      "get": {
-        "summary": "Initiate Google OAuth flow (PUBLIC)",
-        "tags": [
-          "Auth"
-        ],
-        "responses": {
-          "302": {
-            "description": "Redirects to Google consent screen"
-          }
-        }
-      }
-    },
-    "/api/v1/auth/google/callback": {
-      "get": {
-        "summary": "Google OAuth callback (PUBLIC)",
-        "tags": [
-          "Auth"
-        ],
-        "responses": {
-          "200": {
-            "description": "OAuth authentication successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "user": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "format": "uuid"
-                        },
-                        "email": {
-                          "type": "string",
-                          "format": "email"
-                        },
-                        "role": {
-                          "type": "string",
-                          "enum": [
-                            "USER",
-                            "ADMIN",
-                            "DELIVERY"
-                          ]
-                        },
-                        "name": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "email",
-                        "role",
-                        "name"
-                      ]
-                    },
-                    "accessToken": {
-                      "type": "string"
-                    },
-                    "refreshToken": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "user",
-                    "accessToken",
-                    "refreshToken"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication failed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "statusCode"
-                  ]
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/products": {
-      "get": {
-        "summary": "Get all products (USER, ADMIN, DELIVERY)",
-        "tags": [
-          "Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1,
-              "description": "Page number"
-            },
-            "required": false,
-            "description": "Page number",
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 10,
-              "description": "Items per page"
-            },
-            "required": false,
-            "description": "Items per page",
-            "name": "limit",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "description": "Search term"
-            },
-            "required": false,
-            "description": "Search term",
-            "name": "search",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "description": "Filter by category"
-            },
-            "required": false,
-            "description": "Filter by category",
-            "name": "categoryId",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "number",
-              "nullable": true,
-              "minimum": 0,
-              "description": "Minimum price"
-            },
-            "required": false,
-            "description": "Minimum price",
-            "name": "minPrice",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "number",
-              "nullable": true,
-              "minimum": 0,
-              "description": "Maximum price"
-            },
-            "required": false,
-            "description": "Maximum price",
-            "name": "maxPrice",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ],
-              "description": "Filter by stock availability"
-            },
-            "required": false,
-            "description": "Filter by stock availability",
-            "name": "inStock",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "true",
-                "false"
-              ],
-              "description": "Filter by sale items"
-            },
-            "required": false,
-            "description": "Filter by sale items",
-            "name": "onSale",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Products retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "products": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "slug": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "originalPrice": {
-                            "type": "number"
-                          },
-                          "salePrice": {
-                            "type": "number",
-                            "nullable": true
-                          },
-                          "stock": {
-                            "type": "integer"
-                          },
-                          "categoryId": {
-                            "type": "string",
-                            "format": "uuid"
-                          },
-                          "isOnSale": {
-                            "type": "boolean"
-                          },
-                          "saleStartDate": {
-                            "type": "string",
-                            "nullable": true,
-                            "format": "date-time"
-                          },
-                          "saleEndDate": {
-                            "type": "string",
-                            "nullable": true,
-                            "format": "date-time"
-                          },
-                          "isActive": {
-                            "type": "boolean"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "name",
-                          "slug",
-                          "description",
-                          "originalPrice",
-                          "salePrice",
-                          "stock",
-                          "categoryId",
-                          "isOnSale",
-                          "saleStartDate",
-                          "saleEndDate",
-                          "isActive",
-                          "createdAt",
-                          "updatedAt"
-                        ]
-                      }
-                    },
-                    "total": {
-                      "type": "integer"
-                    },
-                    "page": {
-                      "type": "integer"
-                    },
-                    "limit": {
-                      "type": "integer"
-                    },
-                    "totalPages": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "products",
-                    "total",
-                    "page",
-                    "limit",
-                    "totalPages"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a new product (ADMIN)",
-        "tags": [
-          "Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 255
-                  },
-                  "slug": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 255
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "originalPrice": {
-                    "type": "number",
-                    "minimum": 0,
-                    "exclusiveMinimum": true
-                  },
-                  "salePrice": {
-                    "type": "number",
-                    "minimum": 0,
-                    "exclusiveMinimum": true
-                  },
-                  "stock": {
-                    "type": "integer",
-                    "minimum": 0
-                  },
-                  "categoryId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "isOnSale": {
-                    "type": "boolean"
-                  },
-                  "saleStartDate": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "saleEndDate": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "isActive": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "name",
-                  "slug",
-                  "originalPrice",
-                  "stock",
-                  "categoryId"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Product created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "slug": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "originalPrice": {
-                      "type": "number"
-                    },
-                    "salePrice": {
-                      "type": "number",
-                      "nullable": true
-                    },
-                    "stock": {
-                      "type": "integer"
-                    },
-                    "categoryId": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "isOnSale": {
-                      "type": "boolean"
-                    },
-                    "saleStartDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "saleEndDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "isActive": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "slug",
-                    "description",
-                    "originalPrice",
-                    "salePrice",
-                    "stock",
-                    "categoryId",
-                    "isOnSale",
-                    "saleStartDate",
-                    "saleEndDate",
-                    "isActive",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin only"
-          }
-        }
-      }
-    },
-    "/api/v1/products/{id}": {
-      "get": {
-        "summary": "Get product by ID (USER, ADMIN, DELIVERY)",
-        "tags": [
-          "Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Product retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "slug": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "originalPrice": {
-                      "type": "number"
-                    },
-                    "salePrice": {
-                      "type": "number",
-                      "nullable": true
-                    },
-                    "stock": {
-                      "type": "integer"
-                    },
-                    "categoryId": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "isOnSale": {
-                      "type": "boolean"
-                    },
-                    "saleStartDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "saleEndDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "isActive": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "slug",
-                    "description",
-                    "originalPrice",
-                    "salePrice",
-                    "stock",
-                    "categoryId",
-                    "isOnSale",
-                    "saleStartDate",
-                    "saleEndDate",
-                    "isActive",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Product not found"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update a product (ADMIN)",
-        "tags": [
-          "Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 255
-                  },
-                  "slug": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 255
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "originalPrice": {
-                    "type": "number",
-                    "minimum": 0,
-                    "exclusiveMinimum": true
-                  },
-                  "salePrice": {
-                    "type": "number",
-                    "minimum": 0,
-                    "exclusiveMinimum": true
-                  },
-                  "stock": {
-                    "type": "integer",
-                    "minimum": 0
-                  },
-                  "categoryId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "isOnSale": {
-                    "type": "boolean"
-                  },
-                  "saleStartDate": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "saleEndDate": {
-                    "type": "string",
-                    "format": "date-time"
-                  },
-                  "isActive": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Product updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "slug": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "originalPrice": {
-                      "type": "number"
-                    },
-                    "salePrice": {
-                      "type": "number",
-                      "nullable": true
-                    },
-                    "stock": {
-                      "type": "integer"
-                    },
-                    "categoryId": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "isOnSale": {
-                      "type": "boolean"
-                    },
-                    "saleStartDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "saleEndDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "isActive": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "slug",
-                    "description",
-                    "originalPrice",
-                    "salePrice",
-                    "stock",
-                    "categoryId",
-                    "isOnSale",
-                    "saleStartDate",
-                    "saleEndDate",
-                    "isActive",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin only"
-          },
-          "404": {
-            "description": "Product not found"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a product (ADMIN)",
-        "tags": [
-          "Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Product deleted successfully (no content)"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden - Admin only"
-          },
-          "404": {
-            "description": "Product not found"
-          }
-        }
-      }
-    },
-    "/api/v1/products/slug/{slug}": {
-      "get": {
-        "summary": "Get product by slug (USER, ADMIN, DELIVERY)",
-        "tags": [
-          "Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "required": true,
-            "name": "slug",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Product retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "slug": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "originalPrice": {
-                      "type": "number"
-                    },
-                    "salePrice": {
-                      "type": "number",
-                      "nullable": true
-                    },
-                    "stock": {
-                      "type": "integer"
-                    },
-                    "categoryId": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "isOnSale": {
-                      "type": "boolean"
-                    },
-                    "saleStartDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "saleEndDate": {
-                      "type": "string",
-                      "nullable": true,
-                      "format": "date-time"
-                    },
-                    "isActive": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "slug",
-                    "description",
-                    "originalPrice",
-                    "salePrice",
-                    "stock",
-                    "categoryId",
-                    "isOnSale",
-                    "saleStartDate",
-                    "saleEndDate",
-                    "isActive",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Product not found"
-          }
-        }
-      }
-    }
-  }
-}
-
-===== END FILE =====
-
 
 ============================================================
 ===== FILE START: tsconfig.json
-Type: Source File
-Size: 441 B
+Type: Config File
+Size: 0.43 KB
 ============================================================
 
 {
@@ -4404,4 +3985,5 @@ Size: 441 B
 
 
 ===== END FILE =====
+
 
