@@ -4,12 +4,14 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common'
+import { PromotionsService } from '../promotions/promotions.service'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
 import { quoteIncludes } from '../cart/cart.service'
 import { calculateCartQuote } from '../cart/cart.quote'
 import { estimateConfiguredCharges } from './checkout.pricing'
 import { CreateReservationDto } from './reservation.dto'
+import { DeliveryZonesService } from './delivery-zones.service'
 
 // A bounded hold; a scheduled checkout:expire run is required in deployment.
 export const RESERVATION_TTL_MS = 10 * 60 * 1000
@@ -30,7 +32,11 @@ function present(hold: Hold) {
     countryCode: hold.countryCode,
     currency: hold.currency,
     subtotalMinor: hold.subtotalMinor,
+    discountMinor: hold.discountMinor,
+    couponCode: hold.couponCode,
+    couponSnapshot: hold.couponSnapshot,
     shippingMinor: hold.shippingMinor,
+    deliveryKind: hold.deliveryKind?.toLowerCase() ?? null,
     taxMinor: hold.taxMinor,
     estimatedTotalMinor: hold.estimatedTotalMinor,
     expiresAt: hold.expiresAt,
@@ -39,6 +45,7 @@ function present(hold: Hold) {
       variantId: line.variantId,
       quantity: line.quantity,
       unitPriceMinor: line.unitPriceMinor,
+      discountMinor: line.discountMinor,
     })),
     payable: false as const,
   }
@@ -46,7 +53,11 @@ function present(hold: Hold) {
 
 @Injectable()
 export class ReservationService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly zones: DeliveryZonesService,
+    private readonly promotions: PromotionsService,
+  ) {}
 
   /** Must run within one DB transaction. Locks reservation row before balances. */
   private async transition(
@@ -91,7 +102,13 @@ export class ReservationService {
       include: includeLines,
     })
     if (seen) {
-      if (seen.countryCode !== input.countryCode)
+      if (
+        seen.countryCode !== input.countryCode ||
+        seen.couponCode !== (input.couponCode ?? null) ||
+        (seen.deliveryKind ?? null) !==
+          (input.deliveryKind?.toUpperCase() ??
+            (seen.deliveryKind === 'STANDARD' ? 'STANDARD' : null))
+      )
         throw new ConflictException(
           'Request UUID reused with different country',
         )
@@ -113,7 +130,13 @@ export class ReservationService {
             include: includeLines,
           })
           if (replay) {
-            if (replay.countryCode !== input.countryCode)
+            if (
+              replay.countryCode !== input.countryCode ||
+              replay.couponCode !== (input.couponCode ?? null) ||
+              (replay.deliveryKind ?? null) !==
+                (input.deliveryKind?.toUpperCase() ??
+                  (replay.deliveryKind === 'STANDARD' ? 'STANDARD' : null))
+            )
               throw new ConflictException(
                 'Request UUID reused with different country',
               )
@@ -156,12 +179,33 @@ export class ReservationService {
             throw new UnprocessableEntityException(
               'No enabled shipping/tax policy for this country/currency',
             )
+          const delivery = await this.zones.resolve(
+            tx,
+            input.countryCode,
+            quote.currency,
+            input.deliveryKind,
+            rate,
+          )
+          const discount = await this.promotions.quote(
+            tx,
+            customerId,
+            quote.currency,
+            quote.subtotalMinor,
+            cart.items,
+            input.couponCode,
+            true,
+          )
           const charges = estimateConfiguredCharges(
             quote.subtotalMinor,
-            rate.shippingMinor,
-            rate.freeOverSubtotalMinor,
+            delivery.shippingMinor,
+            delivery.freeOverSubtotalMinor,
             rate.taxBps,
+            discount.discountMinor,
           )
+          if (discount.couponId && charges.estimatedTotalMinor === 0)
+            throw new UnprocessableEntityException(
+              'Zero-total coupon checkout is not supported',
+            )
           const lines = cart.items
             .map((line) => {
               const balanceId = line.product.hasVariants
@@ -176,6 +220,7 @@ export class ReservationService {
                 variantId: line.variantId,
                 quantity: line.quantity,
                 unitPriceMinor: price,
+                discountMinor: discount.lineDiscounts[line.id] ?? 0,
               }
             })
             .sort((a, b) => a.balanceId.localeCompare(b.balanceId))
@@ -201,7 +246,13 @@ export class ReservationService {
               countryCode: input.countryCode,
               currency: quote.currency,
               subtotalMinor: quote.subtotalMinor,
+              discountMinor: discount.discountMinor,
+              couponCode: discount.couponCode,
+              ...(discount.snapshot
+                ? { couponSnapshot: discount.snapshot }
+                : {}),
               shippingMinor: charges.shippingMinor,
+              deliveryKind: delivery.deliveryKind,
               taxMinor: charges.taxMinor,
               estimatedTotalMinor: charges.estimatedTotalMinor,
               expiresAt: new Date(Date.now() + RESERVATION_TTL_MS),
@@ -209,6 +260,15 @@ export class ReservationService {
             },
             include: includeLines,
           })
+          if (discount.couponId)
+            await tx.couponRedemption.create({
+              data: {
+                couponId: discount.couponId,
+                reservationId: saved.id,
+                customerId,
+                discountMinor: discount.discountMinor,
+              },
+            })
           return present(saved)
         },
         {
@@ -227,7 +287,14 @@ export class ReservationService {
             where: key,
             include: includeLines,
           })
-        if (winner && winner.countryCode === input.countryCode)
+        if (
+          winner &&
+          winner.countryCode === input.countryCode &&
+          winner.couponCode === (input.couponCode ?? null) &&
+          (winner.deliveryKind ?? null) ===
+            (input.deliveryKind?.toUpperCase() ??
+              (winner.deliveryKind === 'STANDARD' ? 'STANDARD' : null))
+        )
           return present(winner)
       }
       throw error

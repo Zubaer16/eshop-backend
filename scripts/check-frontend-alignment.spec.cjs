@@ -58,6 +58,14 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
     result.results.find((item) => item.id === 'guest-cart')?.status,
     'ADAPTER',
   )
+  const commerce = result.results.find((item) => item.id === 'commerce-future')
+  assert.equal(commerce?.detected, true)
+  assert.equal(commerce?.status, 'ADAPTER') // G4 coupon APIs now exist; browser integration is still pending.
+  assert.doesNotMatch(
+    commerce.summary,
+    /orders, payments and coupons remain planned/,
+  )
+  assert.match(commerce.summary, /G4 coupon\/campaign APIs are source-present/)
 })
 
 test('missing projects are never treated as aligned', () => {

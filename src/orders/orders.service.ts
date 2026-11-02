@@ -56,7 +56,11 @@ function present(order: OrderRecord) {
     countryCode: order.countryCode,
     currency: order.currency,
     subtotalMinor: order.subtotalMinor,
+    discountMinor: order.discountMinor,
+    couponCode: order.couponCode,
+    couponSnapshot: order.couponSnapshot,
     shippingMinor: order.shippingMinor,
+    deliveryKind: order.deliveryKind?.toLowerCase() ?? null,
     taxMinor: order.taxMinor,
     totalMinor: order.totalMinor,
     shippingAddress: order.shippingAddress,
@@ -74,6 +78,8 @@ function present(order: OrderRecord) {
       quantity: line.quantity,
       unitPriceMinor: line.unitPriceMinor,
       lineTotalMinor: line.lineTotalMinor,
+      discountMinor: line.discountMinor,
+      netLineTotalMinor: line.lineTotalMinor - line.discountMinor,
     })),
     payable: false as const,
   }
@@ -188,7 +194,8 @@ export class OrdersService {
           if (!reservation.lines.length)
             throw new ConflictException('Reservation has no line items')
           if (
-            reservation.subtotalMinor +
+            reservation.subtotalMinor -
+              reservation.discountMinor +
               reservation.shippingMinor +
               reservation.taxMinor !==
             reservation.estimatedTotalMinor
@@ -254,7 +261,9 @@ export class OrdersService {
             const lineTotalMinor = line.unitPriceMinor * line.quantity
             if (
               !Number.isSafeInteger(lineTotalMinor) ||
-              lineTotalMinor > 2147483647
+              lineTotalMinor > 2147483647 ||
+              line.discountMinor < 0 ||
+              line.discountMinor > lineTotalMinor
             )
               throw new ConflictException('Order line money overflow')
             return {
@@ -266,6 +275,7 @@ export class OrdersService {
               quantity: line.quantity,
               unitPriceMinor: line.unitPriceMinor,
               lineTotalMinor,
+              discountMinor: line.discountMinor,
             }
           })
           if (
@@ -277,6 +287,13 @@ export class OrdersService {
             throw new ConflictException(
               'Reservation price snapshot inconsistent with subtotal',
             )
+          if (
+            snapshotLines.reduce((sum, line) => sum + line.discountMinor, 0) !==
+            reservation.discountMinor
+          )
+            throw new ConflictException(
+              'Reservation discount snapshot inconsistent',
+            )
           const order = await tx.order.create({
             data: {
               customerId,
@@ -287,7 +304,16 @@ export class OrdersService {
               countryCode: reservation.countryCode,
               currency: reservation.currency,
               subtotalMinor: reservation.subtotalMinor,
+              discountMinor: reservation.discountMinor,
+              couponCode: reservation.couponCode,
+              ...(reservation.couponSnapshot !== null
+                ? {
+                    couponSnapshot:
+                      reservation.couponSnapshot as Prisma.InputJsonValue,
+                  }
+                : {}),
               shippingMinor: reservation.shippingMinor,
+              deliveryKind: reservation.deliveryKind,
               taxMinor: reservation.taxMinor,
               totalMinor: reservation.estimatedTotalMinor,
               shippingAddress: address,

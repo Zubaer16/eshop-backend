@@ -1,8 +1,8 @@
 {
-  "version": "1.8.0",
+  "version": "1.10.0",
   "purpose": "Source-backed pre-integration contract baseline, NOT proof of runtime integration",
   "sourceBaselines": {
-    "backend": "kookaburra-backend-full-20261027-193743.zip + Phase 04B-2 reservation",
+    "backend": "Local working tree reviewed 2026-11-02 through G4 promotions/coupons; runtime acceptance recorded separately",
     "admin": "kookaburra-admin-full-20261025-181323.zip",
     "storefront": "kookaburra-storefront-full-20261020-101939.zip"
   },
@@ -114,9 +114,9 @@
     {
       "id": "commerce-future",
       "priority": "P2",
-      "status": "PLANNED",
-      "summary": "04B-1 live customer checkout estimate and explicit OWNER country/currency shipping/tax policy implemented; 10-minute stock holds implemented in 04B-2; true address tax, orders, payments and coupons remain planned",
-      "action": "Integrate customer reservation/release calls with Storefront and add order/payment capture; configure region/postcode taxes and legally applicable shipping/tax rules before production."
+      "status": "ADAPTER",
+      "summary": "Checkout, holds, orders, payments, G3 delivery zones and G4 coupon/campaign APIs are source-present; browser commerce adapters and acceptance remain pending",
+      "action": "Use one normalized couponCode on estimate/reservation/delivery-options; map percent to basis points and money to minor units. Preserve server discount snapshots and null/unlimited semantics. G11 external provider acceptance remains separate; G5 content is a separate gate."
     },
     {
       "id": "status-shape",

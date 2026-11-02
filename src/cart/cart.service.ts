@@ -22,7 +22,10 @@ export const quoteIncludes = {
           currency: true,
           priceMinor: true,
           hasVariants: true,
-          inventoryBalance: { select: { id: true, onHand: true, reservedQuantity: true } },
+          categories: { select: { categoryId: true } },
+          inventoryBalance: {
+            select: { id: true, onHand: true, reservedQuantity: true },
+          },
         },
       },
       variant: {
@@ -31,7 +34,9 @@ export const quoteIncludes = {
           productId: true,
           sku: true,
           priceMinor: true,
-          inventoryBalance: { select: { id: true, onHand: true, reservedQuantity: true } },
+          inventoryBalance: {
+            select: { id: true, onHand: true, reservedQuantity: true },
+          },
         },
       },
     },
@@ -39,11 +44,18 @@ export const quoteIncludes = {
 } satisfies Prisma.CartInclude
 
 /** Call after locking the cart row, to serialize edits against hold creation. */
-export async function ensureCartEditable(tx: Prisma.TransactionClient, cartId: string) {
+export async function ensureCartEditable(
+  tx: Prisma.TransactionClient,
+  cartId: string,
+) {
   const active = await tx.checkoutReservation.findFirst({
-    where: { cartId, status: 'ACTIVE' }, select: { id: true },
+    where: { cartId, status: 'ACTIVE' },
+    select: { id: true },
   })
-  if (active) throw new ConflictException('Release the active checkout reservation before editing cart')
+  if (active)
+    throw new ConflictException(
+      'Release the active checkout reservation before editing cart',
+    )
 }
 
 @Injectable()

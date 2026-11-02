@@ -1,5 +1,10 @@
 import { Controller, Get, Header } from '@nestjs/common'
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiServiceUnavailableResponse,
+  ApiTags,
+} from '@nestjs/swagger'
 import { PublicStoreBootstrapDto } from './store-bootstrap.dto'
 import { StoreBootstrapService } from './store-bootstrap.service'
 
@@ -17,6 +22,9 @@ export class StoreBootstrapController {
       'Read-only composition. No administrative revisions, credentials or unpublished media identifiers. Empty/unconfigured fields are explicit. Store pricing, policy, payment and CORS remain authoritative elsewhere.',
   })
   @ApiOkResponse({ type: PublicStoreBootstrapDto })
+  @ApiServiceUnavailableResponse({
+    description: 'Authoritative store configuration is unavailable',
+  })
   get() {
     return this.bootstrap.get()
   }

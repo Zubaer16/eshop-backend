@@ -3,16 +3,23 @@ import {
   Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common'
+import { PromotionsService } from '../promotions/promotions.service'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
 import { quoteIncludes } from '../cart/cart.service'
 import { calculateCartQuote } from '../cart/cart.quote'
 import { CheckoutEstimateDto, PutCheckoutRateDto } from './checkout.dto'
 import { estimateConfiguredCharges } from './checkout.pricing'
+import { DeliveryZonesService } from './delivery-zones.service'
+import type { AvailableDeliveryOptionsDto } from './delivery-zones.dto'
 
 @Injectable()
 export class CheckoutService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly zones: DeliveryZonesService,
+    private readonly promotions: PromotionsService,
+  ) {}
 
   /** Read-only reprice: no inventory hold, no order or payment, and no payable amount promised. */
   async estimate(customerId: string, input: CheckoutEstimateDto) {
@@ -40,24 +47,123 @@ export class CheckoutService {
           throw new UnprocessableEntityException(
             'No enabled shipping/tax policy for this country and cart currency',
           )
+        const delivery = await this.zones.resolve(
+          tx,
+          input.countryCode,
+          quote.currency,
+          input.deliveryKind,
+          rate,
+        )
+        const discount = await this.promotions.quote(
+          tx,
+          customerId,
+          quote.currency,
+          quote.subtotalMinor,
+          cart!.items,
+          input.couponCode,
+        )
         const charges = estimateConfiguredCharges(
           quote.subtotalMinor,
-          rate.shippingMinor,
-          rate.freeOverSubtotalMinor,
+          delivery.shippingMinor,
+          delivery.freeOverSubtotalMinor,
           rate.taxBps,
+          discount.discountMinor,
         )
         return {
           cartId: quote.cartId,
           countryCode: input.countryCode,
           currency: quote.currency,
           subtotalMinor: quote.subtotalMinor,
+          discountMinor: discount.discountMinor,
+          couponCode: discount.couponCode,
+          couponSnapshot: discount.snapshot,
           ...charges,
+          deliveryKind: delivery.deliveryKind?.toLowerCase() ?? null,
+          deliveryZoneName: delivery.zoneName,
+          deliveryEtaNote: delivery.etaNote,
           appliedTaxBps: rate.taxBps,
           quotedAt: quote.quotedAt,
           reservationStatus: 'NOT_RESERVED' as const,
           payable: false as const,
           notice:
             'Estimate only. No stock reserved, order created or payment authorized. Verify jurisdiction-specific tax and address rules before checkout.',
+        }
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+    )
+  }
+
+  /** Customer JWT only: quote server-defined delivery options for the live cart.
+   * A disabled/unconfigured tax lane fails closed; no guest checkout.
+   */
+  async deliveryOptions(
+    customerId: string,
+    countryCode: string,
+    couponCode?: string,
+  ): Promise<AvailableDeliveryOptionsDto> {
+    return this.database.client.$transaction(
+      async (tx) => {
+        const cart = await tx.cart.findUnique({
+          where: { userId: customerId },
+          include: quoteIncludes,
+        })
+        const quote = calculateCartQuote(cart?.id ?? null, cart?.items ?? [])
+        if (!quote.checkoutReady || !quote.currency)
+          throw new ConflictException('Cart is not checkout-ready')
+        const currency = quote.currency
+        const rate = await tx.checkoutRate.findUnique({
+          where: { countryCode_currency: { countryCode, currency } },
+        })
+        if (!rate?.enabled)
+          throw new UnprocessableEntityException(
+            'No enabled shipping/tax policy for this destination',
+          )
+        const discount = await this.promotions.quote(
+          tx,
+          customerId,
+          currency,
+          quote.subtotalMinor,
+          cart!.items,
+          couponCode,
+        )
+        const available = await this.zones.options(
+          tx,
+          countryCode,
+          currency,
+          rate,
+        )
+        return {
+          countryCode,
+          currency,
+          subtotalMinor: quote.subtotalMinor,
+          discountMinor: discount.discountMinor,
+          couponCode: discount.couponCode,
+          options: available.map((option) => {
+            const price = estimateConfiguredCharges(
+              quote.subtotalMinor,
+              option.shippingMinor,
+              option.freeOverSubtotalMinor,
+              rate.taxBps,
+              discount.discountMinor,
+            )
+            return {
+              kind: option.deliveryKind
+                ? option.deliveryKind === 'STANDARD'
+                  ? 'standard'
+                  : 'express'
+                : null,
+              label: option.deliveryKind
+                ? option.deliveryKind === 'STANDARD'
+                  ? 'Standard'
+                  : 'Express'
+                : 'Legacy flat rate',
+              shippingMinor: price.shippingMinor,
+              taxMinor: price.taxMinor,
+              totalMinor: price.estimatedTotalMinor,
+              etaNote: option.etaNote,
+            }
+          }),
+          guestCheckoutEnabled: false,
         }
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },

@@ -1,5 +1,7 @@
 # Delivery roadmap (verified scope, not marketing completion)
 
+> **2026-11-02 orientation:** The checkboxes below are historical phase notes, not the current gate ledger. The owner-held `KOOKABURRA-V2-MASTER-DOCS/03_BACKEND_ROADMAP_STATUS.md` controls the bounded G0–G12 plan. Latest local acceptance: G4 in `G4_VALIDATION_RESULTS.md` and `G4_PROMOTIONS_COUPONS.md`; earlier G3 evidence remains in `PHASE05B5_LOCAL_VALIDATION.md`. G1 approved scope/G2 email dependency are in `G1_G2_CONTRACT_REVIEW.md`. Next backend gate is G5 content/merchandising. Source is edited directly; no overlay archive is required in the current local workflow.
+
 ## Phase 01 — Bootstrap and HTTP foundation
 
 - [x] NestJS dev server and HTTP 200 health verified by user screenshot.

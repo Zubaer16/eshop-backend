@@ -24,8 +24,12 @@ test('04B-2 OpenAPI exposes customer JWT-only stock holds and no payable promise
   )
   expect(Object.keys(dto.properties).sort()).toEqual([
     'countryCode',
+    'couponCode',
+    'deliveryKind',
     'requestId',
   ])
+  expect(dto.required).not.toContain('deliveryKind')
+  expect(dto.properties.deliveryKind.enum).toEqual(['standard', 'express'])
   const response =
     doc.components.schemas.CheckoutReservationResponseDto.properties
   for (const key of [

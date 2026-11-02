@@ -31,8 +31,11 @@ describe('Phase 03B API smoke tests (no real database)', () => {
       response.body.tags?.map((tag: { name: string }) => tag.name),
     ).toEqual([
       'System / Health',
+      'Promotions / Public',
+      'Promotions / Admin',
       'Authentication / Customer',
       'Authentication / Admin',
+      'Store Bootstrap / Public',
       'Catalog / Storefront',
       'Catalog / Admin',
       'Inventory / Admin',
@@ -54,6 +57,15 @@ describe('Phase 03B API smoke tests (no real database)', () => {
       'Payments / Webhooks',
       'Checkout / Admin',
       'Customers / Admin',
+      'Store Profile / Public',
+      'Store Profile / Admin',
+      'Store Content / Public',
+      'Store Content / Admin',
+      'Store Branding / Public',
+      'Store Branding / Admin',
+      'Store Operations / Public',
+      'Store Operations / Admin',
+      'Delivery Zones / Admin',
       'Workspace / Admin',
     ])
   })

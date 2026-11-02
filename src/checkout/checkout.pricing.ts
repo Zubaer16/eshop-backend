@@ -6,10 +6,15 @@ export function estimateConfiguredCharges(
   shippingMinor: number,
   freeOverSubtotalMinor: number | null,
   taxBps: number,
+  discountMinor = 0,
 ) {
   if (
-    ![subtotalMinor, shippingMinor, taxBps].every(Number.isSafeInteger) ||
+    ![subtotalMinor, shippingMinor, taxBps, discountMinor].every(
+      Number.isSafeInteger,
+    ) ||
     subtotalMinor < 0 ||
+    discountMinor < 0 ||
+    discountMinor > subtotalMinor ||
     shippingMinor < 0 ||
     taxBps < 0 ||
     taxBps > 10000 ||
@@ -19,12 +24,16 @@ export function estimateConfiguredCharges(
   )
     throw new ConflictException('Invalid checkout pricing configuration')
   const actualShippingMinor =
-    freeOverSubtotalMinor !== null && subtotalMinor >= freeOverSubtotalMinor
+    freeOverSubtotalMinor !== null &&
+    subtotalMinor - discountMinor >= freeOverSubtotalMinor
       ? 0
       : shippingMinor
   // Nonnegative minor units: round half up to the nearest whole minor unit.
-  const taxMinor = Math.floor((subtotalMinor * taxBps + 5000) / 10000)
-  const estimatedTotalMinor = subtotalMinor + actualShippingMinor + taxMinor
+  const taxMinor = Math.floor(
+    ((subtotalMinor - discountMinor) * taxBps + 5000) / 10000,
+  )
+  const estimatedTotalMinor =
+    subtotalMinor - discountMinor + actualShippingMinor + taxMinor
   if (
     ![taxMinor, estimatedTotalMinor].every(Number.isSafeInteger) ||
     estimatedTotalMinor > 2_147_483_647

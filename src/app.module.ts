@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { PromotionsModule } from './promotions/promotions.module'
 import { ConfigModule } from '@nestjs/config'
 import { validateEnvironment } from './config/environment'
 import { HealthModule } from './health/health.module'
@@ -18,11 +19,13 @@ import { StoreProfileModule } from './store-profile/store-profile.module'
 import { StoreContentModule } from './store-content/store-content.module'
 import { StoreBrandingModule } from './store-branding/store-branding.module'
 import { StoreBootstrapModule } from './store-bootstrap/store-bootstrap.module'
+import { StoreOperationsModule } from './store-operations/store-operations.module'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnvironment }),
     HealthModule,
+    PromotionsModule,
     DatabaseModule,
     AuthModule,
     CatalogModule,
@@ -39,6 +42,7 @@ import { StoreBootstrapModule } from './store-bootstrap/store-bootstrap.module'
     StoreContentModule,
     StoreBrandingModule,
     StoreBootstrapModule,
+    StoreOperationsModule,
   ],
 })
 export class AppModule {}

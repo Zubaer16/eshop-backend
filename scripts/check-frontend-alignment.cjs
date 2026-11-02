@@ -47,8 +47,30 @@ function evaluate(roots) {
       'src/media/media.controller.ts',
     ),
     backendCartController: read(roots.backend, 'src/cart/cart.controller.ts'),
-    backendGuestController: read(roots.backend, 'src/cart/guest-cart.controller.ts'),
-    backendCheckoutController: read(roots.backend, 'src/checkout/checkout.controller.ts'),
+    backendGuestController: read(
+      roots.backend,
+      'src/cart/guest-cart.controller.ts',
+    ),
+    backendCheckoutController: read(
+      roots.backend,
+      'src/checkout/checkout.controller.ts',
+    ),
+    backendOrdersController: read(
+      roots.backend,
+      'src/orders/orders.controller.ts',
+    ),
+    backendPromotionsController: read(
+      roots.backend,
+      'src/promotions/promotions.controller.ts',
+    ),
+    backendPaymentsController: read(
+      roots.backend,
+      'src/payments/payments.controller.ts',
+    ),
+    backendDeliveryZonesController: read(
+      roots.backend,
+      'src/checkout/delivery-zones.controller.ts',
+    ),
     backendCatalogPresentation: read(
       roots.backend,
       'src/catalog/catalog.presentation.ts',
@@ -153,6 +175,16 @@ function evaluate(roots) {
       /ApiCheckoutQuote/.test(source.storefrontContracts) &&
       /@Controller\('checkout'\)/.test(source.backendCheckoutController) &&
       /@Post\('estimate'\)/.test(source.backendCheckoutController) &&
+      /@Post\('reservations'\)/.test(source.backendCheckoutController) &&
+      /@Controller\('orders'\)/.test(source.backendOrdersController) &&
+      /@Controller\('payments\/orders'\)/.test(
+        source.backendPaymentsController,
+      ) &&
+      /@Controller\('admin\/checkout\/zones'\)/.test(
+        source.backendDeliveryZonesController,
+      ) &&
+      /@Post\('coupons'\)/.test(source.backendPromotionsController) &&
+      /model CouponRedemption\s*\{/.test(source.backendSchema) &&
       /model CheckoutRate\s*\{/.test(source.backendSchema),
     'status-shape':
       /'Active' \| 'Draft'/.test(source.adminTypes) &&

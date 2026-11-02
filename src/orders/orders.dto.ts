@@ -123,6 +123,8 @@ export class OrderLineResponseDto {
   @ApiProperty({ type: 'integer' }) quantity!: number
   @ApiProperty({ type: 'integer' }) unitPriceMinor!: number
   @ApiProperty({ type: 'integer' }) lineTotalMinor!: number
+  @ApiProperty({ type: 'integer' }) discountMinor!: number
+  @ApiProperty({ type: 'integer' }) netLineTotalMinor!: number
 }
 
 export class OrderResponseDto {
@@ -133,8 +135,16 @@ export class OrderResponseDto {
   status!: string
   @ApiProperty({ example: 'US' }) countryCode!: string
   @ApiProperty({ example: 'USD' }) currency!: string
+  @ApiProperty({ type: 'integer' }) discountMinor!: number
+  @ApiProperty({ type: String, nullable: true }) couponCode!: string | null
+  @ApiProperty({ type: Object, nullable: true }) couponSnapshot!: Record<
+    string,
+    unknown
+  > | null
   @ApiProperty({ type: 'integer' }) subtotalMinor!: number
   @ApiProperty({ type: 'integer' }) shippingMinor!: number
+  @ApiPropertyOptional({ enum: ['standard', 'express'], nullable: true })
+  deliveryKind!: 'standard' | 'express' | null
   @ApiProperty({ type: 'integer' }) taxMinor!: number
   @ApiProperty({ type: 'integer' }) totalMinor!: number
   @ApiProperty({ type: OrderShippingAddressDto })

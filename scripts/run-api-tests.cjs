@@ -38,6 +38,8 @@ const allowed = [
   'visual-store-content',
   'visual-store-branding',
   'visual-store-bootstrap',
+  'visual-store-gate',
+  'visual-promotions',
   'visual-report',
   'security',
 ]
@@ -220,7 +222,9 @@ try {
     mode === 'visual-store-profile' ||
     mode === 'visual-store-content' ||
     mode === 'visual-store-branding' ||
-    mode === 'visual-store-bootstrap'
+    mode === 'visual-store-bootstrap' ||
+    mode === 'visual-promotions' ||
+    mode === 'visual-store-gate'
   ) {
     safe.MEDIA_PROVIDER = 'disk'
     safe.MEDIA_DISK_ROOT = path.join(
@@ -255,7 +259,9 @@ try {
       mode === 'visual-store-profile' ||
       mode === 'visual-store-content' ||
       mode === 'visual-store-branding' ||
-      mode === 'visual-store-bootstrap'
+      mode === 'visual-store-bootstrap' ||
+      mode === 'visual-promotions' ||
+      mode === 'visual-store-gate'
       ? [
           'test',
           '--config=playwright.swagger.config.mjs',
@@ -319,6 +325,12 @@ try {
             : []),
           ...(mode === 'visual-store-bootstrap'
             ? ['--grep', '05B-4 Swagger Chromium: public store bootstrap']
+            : []),
+          ...(mode === 'visual-store-gate'
+            ? ['--grep', '05B-5 Swagger Chromium: OWNER store ops']
+            : []),
+          ...(mode === 'visual-promotions'
+            ? ['--grep', 'G4 Swagger Chromium:']
             : []),
         ]
       : mode === 'security'

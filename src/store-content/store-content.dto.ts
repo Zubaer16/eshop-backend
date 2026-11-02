@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { IsInt, IsString, Matches, Max, MaxLength, Min } from 'class-validator'
 
 // Plain text only. Preserve newline/tab in policies, but never accept HTML or controls.
+// eslint-disable-next-line no-control-regex -- Intentionally reject controls while allowing tab, LF and CR in policies.
 const safePlainText = /^[^<>\x00-\x08\x0b\x0c\x0e-\x1f]*$/
 
 export class PutStoreContentDto {

@@ -55,7 +55,20 @@ test('05B-4 PostgreSQL: bootstrap reflects current authoritative public projecti
     })
     const res = await request.get('/v1/store/bootstrap')
     expect(res.status()).toBe(200)
+    expect(res.headers()['cache-control']).toContain('no-store')
     const bootstrap = await res.json()
+    expect(bootstrap.schemaVersion).toBe(1)
+    expect(Object.keys(bootstrap).sort()).toEqual([
+      'branding',
+      'content',
+      'profile',
+      'schemaVersion',
+    ])
+    for (const key of ['profile', 'content', 'branding'])
+      expect(typeof bootstrap[key].configured).toBe('boolean')
+    expect(JSON.stringify(bootstrap)).not.toMatch(
+      /providerAssetId|passwordHash|revision|actorId|updatedAt/,
+    )
     expect(bootstrap.profile.storeName).toBe(marker)
     expect(bootstrap.content.seoTitle).toBe(marker)
     const [profile, content, branding] = await Promise.all([

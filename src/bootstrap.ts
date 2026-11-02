@@ -75,6 +75,14 @@ export async function createHttpApp(): Promise<INestApplication> {
         'guest-cart-token',
       )
       .addTag('System / Health', 'Health liveness and status')
+      .addTag(
+        'Promotions / Public',
+        'Active promotion campaign summaries; no coupon disclosure',
+      )
+      .addTag(
+        'Promotions / Admin',
+        'Permission-gated coupons, campaign windows and usage',
+      )
       .addTag('Authentication / Customer', 'Customer identity and sessions')
       .addTag(
         'Authentication / Admin',
@@ -191,6 +199,18 @@ export async function createHttpApp(): Promise<INestApplication> {
       .addTag(
         'Store Branding / Admin',
         'OWNER-only revision-safe Media Library branding bindings',
+      )
+      .addTag(
+        'Store Operations / Public',
+        'Safe store presentation settings and guest checkout policy',
+      )
+      .addTag(
+        'Store Operations / Admin',
+        'OWNER-maintained presentation and deployment origin metadata',
+      )
+      .addTag(
+        'Delivery Zones / Admin',
+        'OWNER-managed currency-scoped shipping zones and service choices',
       )
       .addTag(
         'Workspace / Admin',

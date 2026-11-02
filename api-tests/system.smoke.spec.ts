@@ -23,8 +23,11 @@ test.describe('System & OpenAPI', () => {
     const doc = await res.json()
     expect(doc.tags.map((tag: { name: string }) => tag.name)).toEqual([
       'System / Health',
+      'Promotions / Public',
+      'Promotions / Admin',
       'Authentication / Customer',
       'Authentication / Admin',
+      'Store Bootstrap / Public',
       'Catalog / Storefront',
       'Catalog / Admin',
       'Inventory / Admin',
@@ -48,6 +51,13 @@ test.describe('System & OpenAPI', () => {
       'Customers / Admin',
       'Store Profile / Public',
       'Store Profile / Admin',
+      'Store Content / Public',
+      'Store Content / Admin',
+      'Store Branding / Public',
+      'Store Branding / Admin',
+      'Store Operations / Public',
+      'Store Operations / Admin',
+      'Delivery Zones / Admin',
       'Workspace / Admin',
     ])
     for (const endpoint of [
@@ -79,6 +89,16 @@ test.describe('System & OpenAPI', () => {
       '/v1/admin/customers/{id}',
       '/v1/store/profile',
       '/v1/admin/store/profile',
+      '/v1/store/content',
+      '/v1/admin/store/content',
+      '/v1/store/branding',
+      '/v1/admin/store/branding',
+      '/v1/store/bootstrap',
+      '/v1/store/operations',
+      '/v1/admin/store/operations',
+      '/v1/checkout/delivery-options',
+      '/v1/admin/checkout/zones',
+      '/v1/admin/checkout/zones/{id}',
     ]) {
       expect(doc.paths, `Missing OpenAPI path ${endpoint}`).toHaveProperty(
         endpoint,

@@ -26,6 +26,7 @@ export class PutStoreProfileDto {
   @MinLength(2)
   @MaxLength(70)
   @Matches(/\S/)
+  // eslint-disable-next-line no-control-regex -- Intentionally reject ASCII control characters in public text.
   @Matches(/^[^<>\x00-\x1f]*$/)
   storeName!: string
 
@@ -60,6 +61,7 @@ export class PutStoreProfileDto {
   })
   @IsString()
   @MaxLength(180)
+  // eslint-disable-next-line no-control-regex -- Intentionally reject ASCII control characters in public text.
   @Matches(/^[^<>\x00-\x1f]*$/)
   supportNotice!: string
 }
