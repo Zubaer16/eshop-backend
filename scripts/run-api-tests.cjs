@@ -40,6 +40,11 @@ const allowed = [
   'visual-store-bootstrap',
   'visual-store-gate',
   'visual-promotions',
+  'visual-merchandising',
+  'visual-notifications',
+  'visual-email-delivery',
+  'visual-push',
+  'visual-reporting',
   'visual-report',
   'security',
 ]
@@ -66,6 +71,25 @@ if (
 function baseEnv() {
   return {
     ...env,
+    PUSH_DELIVERY_MODE: 'disabled',
+    FCM_PROJECT_ID: 'kookaburra-api-test',
+    FCM_CLIENT_EMAIL: '',
+    FCM_PRIVATE_KEY: '',
+    PUSH_TOKEN_ENCRYPTION_KEY: randomBytes(32).toString('hex'),
+    PUSH_STOREFRONT_ORIGIN: 'https://store.example.test',
+    PUSH_ADMIN_ORIGIN: 'https://admin.example.test',
+    PUSH_RECIPIENT_USER_IDS: '',
+    EMAIL_DELIVERY_MODE: 'disabled',
+    EMAIL_SMTP_HOST: '',
+    EMAIL_SMTP_USER: '',
+    EMAIL_SMTP_PASSWORD: '',
+    EMAIL_SMTP_PORT: '465',
+    EMAIL_FROM_ADDRESS: '',
+    EMAIL_FROM_NAME: 'Test Store',
+    EMAIL_REPLY_TO: '',
+    EMAIL_PUBLIC_ORIGIN: '',
+    EMAIL_ADMIN_ORIGIN: '',
+    EMAIL_RECIPIENT_ALLOWLIST: '',
     NODE_ENV: 'test',
     PORT: '4101',
     API_TEST_PORT: '4101',
@@ -223,6 +247,11 @@ try {
     mode === 'visual-store-content' ||
     mode === 'visual-store-branding' ||
     mode === 'visual-store-bootstrap' ||
+    mode === 'visual-reporting' ||
+    mode === 'visual-push' ||
+    mode === 'visual-email-delivery' ||
+    mode === 'visual-notifications' ||
+    mode === 'visual-merchandising' ||
     mode === 'visual-promotions' ||
     mode === 'visual-store-gate'
   ) {
@@ -260,6 +289,11 @@ try {
       mode === 'visual-store-content' ||
       mode === 'visual-store-branding' ||
       mode === 'visual-store-bootstrap' ||
+      mode === 'visual-reporting' ||
+      mode === 'visual-push' ||
+      mode === 'visual-email-delivery' ||
+      mode === 'visual-notifications' ||
+      mode === 'visual-merchandising' ||
       mode === 'visual-promotions' ||
       mode === 'visual-store-gate'
       ? [
@@ -331,6 +365,19 @@ try {
             : []),
           ...(mode === 'visual-promotions'
             ? ['--grep', 'G4 Swagger Chromium:']
+            : []),
+          ...(mode === 'visual-reporting'
+            ? ['--grep', 'G9 Swagger Chromium:']
+            : []),
+          ...(mode === 'visual-push' ? ['--grep', 'G8 Swagger Chromium:'] : []),
+          ...(mode === 'visual-email-delivery'
+            ? ['--grep', 'G7 Swagger Chromium:']
+            : []),
+          ...(mode === 'visual-notifications'
+            ? ['--grep', 'G6 Swagger Chromium:']
+            : []),
+          ...(mode === 'visual-merchandising'
+            ? ['--grep', 'G5 Swagger Chromium:']
             : []),
         ]
       : mode === 'security'

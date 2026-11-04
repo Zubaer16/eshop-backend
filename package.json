@@ -62,7 +62,19 @@
     "test:api:visual:store-branding": "npm run build && node scripts/run-api-tests.cjs visual-store-branding",
     "test:api:visual:store-bootstrap": "npm run build && node scripts/run-api-tests.cjs visual-store-bootstrap",
     "test:api:visual:store-gate": "npm run build && node scripts/run-api-tests.cjs visual-store-gate",
-    "test:api:visual:promotions": "npm run build && node scripts/run-api-tests.cjs visual-promotions"
+    "test:api:visual:promotions": "npm run build && node scripts/run-api-tests.cjs visual-promotions",
+    "test:api:visual:merchandising": "npm run build && node scripts/run-api-tests.cjs visual-merchandising",
+    "check:static": "npm run db:generate && npm run db:validate && npm run typecheck && npm run typecheck:swagger:syntax && npm run lint && npm run build",
+    "notifications:dispatch": "npm run build && node -r dotenv/config dist/tools/notifications-dispatch.js",
+    "test:api:visual:notifications": "npm run build && node scripts/run-api-tests.cjs visual-notifications",
+    "email:queue": "npm run build && node -r dotenv/config dist/tools/email-queue.js",
+    "email:dispatch": "npm run build && node -r dotenv/config dist/tools/email-dispatch.js",
+    "test:api:visual:email-delivery": "npm run build && node scripts/run-api-tests.cjs visual-email-delivery",
+    "push:queue": "npm run build && node -r dotenv/config dist/tools/push-queue.js",
+    "push:dispatch": "npm run build && node -r dotenv/config dist/tools/push-dispatch.js",
+    "push:campaigns": "npm run build && node -r dotenv/config dist/tools/push-campaigns.js",
+    "test:api:visual:push": "npm run build && node scripts/run-api-tests.cjs visual-push",
+    "test:api:visual:reporting": "npm run build && node scripts/run-api-tests.cjs visual-reporting"
   },
   "engines": {
     "node": ">=24.11.0 <25"
@@ -80,6 +92,7 @@
     "class-validator": "^0.14.2",
     "dotenv": "^17.2.0",
     "helmet": "^8.0.0",
+    "nodemailer": "10.3.1",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
@@ -93,6 +106,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^24.0.0",
+    "@types/nodemailer": "8.0.2",
     "@types/pg": "^8.15.5",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.31.0",

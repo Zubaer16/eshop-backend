@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { publicContentWindow } from '../merchandising/merchandising.policy'
 import type { Readable } from 'node:stream'
 import {
   BadRequestException,
@@ -177,8 +178,12 @@ export class MediaService {
     }
   }
 
-  /** Public images must be active, attached to an ACTIVE product, and from the VPS provider. */
+  /** Verified VPS bytes require an existing public product/brand/banner or published marketing history reference. */
   async readPublishedDiskImage(id: string, width?: number) {
+    const clock = await this.db.client.$queryRaw<
+      Array<{ now: Date }>
+    >`SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AS now`
+    const bannerWindow = publicContentWindow(clock[0]!.now)
     const asset = await this.db.client.mediaAsset.findFirst({
       where: {
         id,
@@ -188,6 +193,8 @@ export class MediaService {
           { productLinks: { some: { product: { status: 'ACTIVE' } } } },
           { brandLogoRefs: { some: {} } },
           { brandFaviconRefs: { some: {} } },
+          { bannerRefs: { some: bannerWindow } },
+          { notificationImageRefs: { some: { audience: 'MARKETING' } } },
         ],
       },
     })
@@ -217,10 +224,17 @@ export class MediaService {
     for (const id of [...new Set(ids)].sort())
       await tx.$queryRaw`SELECT id FROM media_assets WHERE id = ${id}::uuid FOR UPDATE`
   }
-  // Shared protection for product gallery AND persistent store branding references.
+  // Shared protection for product galleries, branding and all banner references (including drafts).
   // Call only under the deterministic media row lock.
   private async isReferenced(tx: Prisma.TransactionClient, id: string) {
     if (await tx.productMedia.count({ where: { mediaId: id } })) return true
+    if (await tx.storeBanner.count({ where: { imageMediaId: id } })) return true
+    if (await tx.pushCampaign.count({ where: { imageMediaId: id } }))
+      return true
+    if (await tx.pushDelivery.count({ where: { imageMediaId: id } }))
+      return true
+    if (await tx.notification.count({ where: { imageMediaId: id } }))
+      return true
     return (
       (await tx.storeBranding.count({
         where: { OR: [{ logoMediaId: id }, { faviconMediaId: id }] },
@@ -377,7 +391,7 @@ export class MediaService {
         if (!asset) throw new NotFoundException('Media not found')
         if (await this.isReferenced(tx, id))
           throw new ConflictException(
-            'Detach media from all products before deletion',
+            'Detach media from product, branding, banner and notification/campaign references before deletion',
           )
         if (asset.status === 'PENDING_DELETE') return { id, scheduled: true }
         if (asset.status === 'DELETED') return { id, scheduled: false }
@@ -484,6 +498,10 @@ export class MediaService {
         productLinks: { none: {} },
         brandLogoRefs: { none: {} },
         brandFaviconRefs: { none: {} },
+        bannerRefs: { none: {} },
+        pushCampaignRefs: { none: {} },
+        pushDeliveryRefs: { none: {} },
+        notificationImageRefs: { none: {} },
         // Never reset an in-flight or failed deletion during orphan repair.
         OR: [
           { deletionJob: { is: null } },

@@ -269,6 +269,12 @@ export class AuthService {
           targetId: user.id,
         },
       })
+      await tx.outboxEvent.create({
+        data: {
+          eventType: 'auth.password_changed',
+          payload: { userId: user.id },
+        },
+      })
       return { changed: true, sessionsRevoked: true }
     })
   }
@@ -314,6 +320,7 @@ export class AuthService {
           payload: {
             userId,
             eventId,
+            recipientHash: hashToken(normalize(user.email)),
             token: encryptEmailActionToken(key, token, `${userId}:${eventId}`),
             expiresAt: expiresAt.toISOString(),
             // G7 must verify the token hash is still current before sending.
@@ -406,9 +413,13 @@ export class AuthService {
       await tx.$queryRaw`SELECT id FROM users WHERE id = ${user.id}::uuid FOR UPDATE`
       const currentUser = await tx.user.findUnique({
         where: { id: user.id },
-        select: { role: true, status: true },
+        select: { role: true, status: true, email: true },
       })
-      if (currentUser?.role !== 'CUSTOMER' || currentUser.status !== 'ACTIVE')
+      if (
+        currentUser?.role !== 'CUSTOMER' ||
+        currentUser.status !== 'ACTIVE' ||
+        normalize(currentUser.email) !== normalize(dto.email)
+      )
         return
       const now = new Date()
       const previous = await tx.passwordResetChallenge.findUnique({
@@ -449,6 +460,7 @@ export class AuthService {
           payload: {
             userId: user.id,
             eventId,
+            recipientHash: hashToken(normalize(currentUser.email)),
             token: encryptEmailActionToken(key, token, `${user.id}:${eventId}`),
             expiresAt: expiresAt.toISOString(),
           },
@@ -522,6 +534,12 @@ export class AuthService {
           action: 'customer.password_reset_completed',
           targetType: 'user',
           targetId: user.id,
+        },
+      })
+      await tx.outboxEvent.create({
+        data: {
+          eventType: 'auth.password_reset.completed',
+          payload: { userId: user.id },
         },
       })
       return { changed: true, sessionsRevoked: true }

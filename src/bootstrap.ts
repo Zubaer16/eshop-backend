@@ -76,6 +76,47 @@ export async function createHttpApp(): Promise<INestApplication> {
       )
       .addTag('System / Health', 'Health liveness and status')
       .addTag(
+        'Reports / Admin',
+        'Authoritative bounded TEST ledger, SKU/customer/inventory reports and audited CSV',
+      )
+      .addTag(
+        'Dashboard / Admin',
+        'Permission-aware current overview and verified collections',
+      )
+      .addTag('Activity / Admin', 'Filtered persisted audit metadata')
+      .addTag(
+        'Push / Devices',
+        'Owned encrypted web push device lifecycle and protected targets',
+      )
+      .addTag(
+        'Push / Campaigns',
+        'Marketing campaign editing, OWNER approval and safe metrics',
+      )
+      .addTag(
+        'Push / Admin',
+        'Owner-only provider readiness and submission history',
+      )
+      .addTag(
+        'Email / Admin',
+        'Owner-only sender readiness, plain-text templates and safe submission history',
+      )
+      .addTag(
+        'Notifications / Inbox',
+        'Recipient-owned inbox, read state and preferences',
+      )
+      .addTag(
+        'Notifications / Admin',
+        'Owner templates and safe failure reporting',
+      )
+      .addTag(
+        'Merchandising / Public',
+        'Published homepage and curated collection projections',
+      )
+      .addTag(
+        'Merchandising / Admin',
+        'Permission-gated banners and collections with revision/publication controls',
+      )
+      .addTag(
         'Promotions / Public',
         'Active promotion campaign summaries; no coupon disclosure',
       )

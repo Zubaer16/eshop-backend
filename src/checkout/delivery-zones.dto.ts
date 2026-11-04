@@ -46,9 +46,9 @@ export class DeliveryZoneServiceInputDto {
     maxLength: 100,
     description: 'Plain-text informational ETA, never an SLA',
   })
-  // eslint-disable-next-line no-control-regex -- Intentionally reject ASCII control characters in public text.
   @IsString()
   @MaxLength(100)
+  // eslint-disable-next-line no-control-regex -- Intentionally reject ASCII control characters in public text.
   @Matches(/^[^<>\x00-\x1f]*$/)
   etaNote!: string
 

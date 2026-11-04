@@ -21,6 +21,42 @@ function read(root, relative) {
 
 function evaluate(roots) {
   const source = {
+    backendReportsController: read(
+      roots.backend,
+      'src/reporting/reporting.controller.ts',
+    ),
+    backendReportingData: read(
+      roots.backend,
+      'src/reporting/reporting-data.service.ts',
+    ),
+    adminReporting: read(roots.admin, 'lib/reporting.ts'),
+    backendPushController: read(roots.backend, 'src/push/push.controller.ts'),
+    backendPushProvider: read(roots.backend, 'src/push/fcm-push.provider.ts'),
+    backendEmailController: read(
+      roots.backend,
+      'src/email/email.controller.ts',
+    ),
+    backendEmailDispatcher: read(
+      roots.backend,
+      'src/email/email-dispatcher.service.ts',
+    ),
+    backendNotificationsController: read(
+      roots.backend,
+      'src/notifications/notifications.controller.ts',
+    ),
+    backendNotificationDispatcher: read(
+      roots.backend,
+      'src/notifications/notification-dispatcher.service.ts',
+    ),
+    adminShell: read(roots.admin, 'components/layout/admin-shell.tsx'),
+    backendMerchandisingController: read(
+      roots.backend,
+      'src/merchandising/merchandising.controller.ts',
+    ),
+    storefrontContentDraft: read(
+      roots.storefront,
+      'lib/api/content-alignment.ts',
+    ),
     backendCatalogController: read(
       roots.backend,
       'src/catalog/catalog.controller.ts',
@@ -186,6 +222,44 @@ function evaluate(roots) {
       /@Post\('coupons'\)/.test(source.backendPromotionsController) &&
       /model CouponRedemption\s*\{/.test(source.backendSchema) &&
       /model CheckoutRate\s*\{/.test(source.backendSchema),
+    'authoritative-reporting':
+      /@Controller\('admin\/reports'\)/.test(source.backendReportsController) &&
+      /@Controller\('admin\/activity'\)/.test(
+        source.backendReportsController,
+      ) &&
+      /payment_transactions/.test(source.backendReportingData) &&
+      /refund_requests/.test(source.backendReportingData) &&
+      /buildReports/.test(source.adminReporting),
+    'push-campaigns':
+      /@Controller\('notifications\/push'\)/.test(
+        source.backendPushController,
+      ) &&
+      /class FcmPushProvider/.test(source.backendPushProvider) &&
+      /model PushDevice\s*\{/.test(source.backendSchema) &&
+      /model PushCampaign\s*\{/.test(source.backendSchema),
+    'email-delivery':
+      /@Controller\('admin\/email'\)/.test(source.backendEmailController) &&
+      /class EmailDispatcher/.test(source.backendEmailDispatcher) &&
+      /model EmailDelivery\s*\{/.test(source.backendSchema) &&
+      /model EmailTemplate\s*\{/.test(source.backendSchema),
+    'notification-engine':
+      /@Controller\('notifications'\)/.test(
+        source.backendNotificationsController,
+      ) &&
+      /model NotificationRecipient\s*\{/.test(source.backendSchema) &&
+      /class NotificationDispatcher/.test(
+        source.backendNotificationDispatcher,
+      ) &&
+      /Bell/.test(source.adminShell),
+    'store-merchandising':
+      /@Get\('homepage'\)/.test(source.backendMerchandisingController) &&
+      /@Post\('banners'\)/.test(source.backendMerchandisingController) &&
+      /@Post\('collections'\)/.test(source.backendMerchandisingController) &&
+      /model StoreBanner\s*\{/.test(source.backendSchema) &&
+      /model FeaturedCollection\s*\{/.test(source.backendSchema) &&
+      /type StoreBanner/.test(source.adminTypes) &&
+      /type FeaturedCollection/.test(source.adminTypes) &&
+      /PublicHomepageContent/.test(source.storefrontContentDraft),
     'status-shape':
       /'Active' \| 'Draft'/.test(source.adminTypes) &&
       /ARCHIVED/.test(source.backendCatalogDto),

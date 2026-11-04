@@ -1,8 +1,8 @@
 {
-  "version": "1.10.0",
+  "version": "1.15.0",
   "purpose": "Source-backed pre-integration contract baseline, NOT proof of runtime integration",
   "sourceBaselines": {
-    "backend": "Local working tree reviewed 2026-11-02 through G4 promotions/coupons; runtime acceptance recorded separately",
+    "backend": "Local working tree through G9 authoritative reporting/activity; G5-G9 static/build/migration evidence only, runtime tests deferred to G12",
     "admin": "kookaburra-admin-full-20261025-181323.zip",
     "storefront": "kookaburra-storefront-full-20261020-101939.zip"
   },
@@ -138,6 +138,41 @@
       "status": "MATCH",
       "summary": "Both UIs already warn that fixture identities are not authoritative",
       "action": "Do not map demos by product names, prices or slugs without reviewed import data"
+    },
+    {
+      "id": "store-merchandising",
+      "priority": "P1",
+      "status": "ADAPTER",
+      "summary": "G5 banner/curated collection/homepage APIs are source-present; current UIs remain preview-based and runtime validation is deferred to G12",
+      "action": "Map enabled to publication status/window, imageUrl to verified Media Library ID, CTA field names and canonical product IDs/order. Use hasVariants and availability hints safely; add collection route/editor controls during integration. Do not claim live publication or test acceptance from source audit."
+    },
+    {
+      "id": "notification-engine",
+      "priority": "P1",
+      "status": "ADAPTER",
+      "summary": "G6 persisted inbox/read/preferences/templates and outbox subscriber are source-present; Admin bell remains a placeholder and Storefront has no operational inbox",
+      "action": "Implement authenticated own-inbox/preferences UI and typed target navigation. Staff alerts follow current permissions; security history remains mandatory; marketing channels default off. Activate bounded dispatcher after runtime validation. Email/push delivery remain G7/G8; no live browser acceptance from this audit."
+    },
+    {
+      "id": "email-delivery",
+      "priority": "P1",
+      "status": "ADAPTER",
+      "summary": "G7 independent email queue, SMTP adapter, safe submission history and owner template/status APIs are source-present; live provider and browser action flows remain unaccepted",
+      "action": "Build OWNER readiness/template/history UI without exposing credentials. Add Storefront /verify-email and /reset-password fragment-token pages calling existing one-time confirmation APIs. SMTP ACCEPTED means submission only. Keep G2 email acceptance pending until controlled provider and token flows are validated; never publish SMTP secrets in either frontend."
+    },
+    {
+      "id": "push-campaigns",
+      "priority": "P1",
+      "status": "ADAPTER",
+      "summary": "G8 owned encrypted device lifecycle, FCM provider and approved rich campaign/inbox contracts are source-present; both web apps still need push/service-worker integration",
+      "action": "Implement explicit browser permission, per-installation registration/refresh/revoke on sign-out, client token rotation on account switch, and authenticated typed target resolution. Build marketing composer/preview/OWNER approval/schedule/metrics. Provider acceptance is not device display; actual Firebase/worker/frontend validation remains pending. Flutter comes after full web E2E."
+    },
+    {
+      "id": "authoritative-reporting",
+      "priority": "P1",
+      "status": "ADAPTER",
+      "summary": "G9 ledger-aware financial/daily/order/payment/SKU/customer/inventory/audit/CSV and permission-aware dashboard APIs are source-present; Admin reports remain browser preview math",
+      "action": "Replace booked/fulfillment-derived sample revenue with verified TEST collections and confirmed refunds on independent event dates. Preserve currency groups/exact minor-unit strings, UTC exclusive-to bounds and current inventory basis. Hide domain-restricted sections, require extra catalog/customer grants for performance data, and use bounded audited CSV. No live UI/runtime acceptance from source audit."
     }
   ]
 }

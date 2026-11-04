@@ -1,35 +1,38 @@
+import { pushConfiguration, type PushConfig } from '../push/push.config'
 import path from 'node:path'
-export type Environment = {
-  STRIPE_TEST_ENABLED: boolean
-  STRIPE_TEST_CHECKOUT_ENABLED: boolean
-  STRIPE_TEST_REFUNDS_ENABLED: boolean
-  STRIPE_TEST_SECRET_KEY: string
-  STRIPE_TEST_WEBHOOK_SECRET: string
-  NODE_ENV: 'development' | 'test' | 'production'
-  PORT: number
-  CORS_ORIGINS: string
-  SWAGGER_ENABLED: boolean
-  DATABASE_URL: string
-  JWT_ACCESS_SECRET: string
-  AUTH_ACTION_TOKEN_ENCRYPTION_KEY: string
-  MEDIA_CLOUD_NAME: string
-  MEDIA_API_KEY: string
-  MEDIA_API_SECRET: string
-  MEDIA_NAMESPACE: string
-  MEDIA_PROVIDER: 'cloudinary' | 's3' | 'disk'
-  MEDIA_S3_ENDPOINT: string
-  MEDIA_S3_BUCKET: string
-  MEDIA_S3_REGION: string
-  MEDIA_S3_ACCESS_KEY_ID: string
-  MEDIA_S3_SECRET_ACCESS_KEY: string
-  MEDIA_S3_PUBLIC_BASE_URL: string
-  MEDIA_DISK_ROOT: string
-  MEDIA_DISK_API_BASE_URL: string
-  MEDIA_DISK_PUBLIC_BASE_URL: string
-  MEDIA_DISK_UPLOAD_SECRET: string
-  MEDIA_CDN_CF_ZONE_ID: string
-  MEDIA_CDN_CF_API_TOKEN: string
-}
+import { emailConfiguration, type EmailConfig } from '../email/email.config'
+export type Environment = PushConfig &
+  EmailConfig & {
+    STRIPE_TEST_ENABLED: boolean
+    STRIPE_TEST_CHECKOUT_ENABLED: boolean
+    STRIPE_TEST_REFUNDS_ENABLED: boolean
+    STRIPE_TEST_SECRET_KEY: string
+    STRIPE_TEST_WEBHOOK_SECRET: string
+    NODE_ENV: 'development' | 'test' | 'production'
+    PORT: number
+    CORS_ORIGINS: string
+    SWAGGER_ENABLED: boolean
+    DATABASE_URL: string
+    JWT_ACCESS_SECRET: string
+    AUTH_ACTION_TOKEN_ENCRYPTION_KEY: string
+    MEDIA_CLOUD_NAME: string
+    MEDIA_API_KEY: string
+    MEDIA_API_SECRET: string
+    MEDIA_NAMESPACE: string
+    MEDIA_PROVIDER: 'cloudinary' | 's3' | 'disk'
+    MEDIA_S3_ENDPOINT: string
+    MEDIA_S3_BUCKET: string
+    MEDIA_S3_REGION: string
+    MEDIA_S3_ACCESS_KEY_ID: string
+    MEDIA_S3_SECRET_ACCESS_KEY: string
+    MEDIA_S3_PUBLIC_BASE_URL: string
+    MEDIA_DISK_ROOT: string
+    MEDIA_DISK_API_BASE_URL: string
+    MEDIA_DISK_PUBLIC_BASE_URL: string
+    MEDIA_DISK_UPLOAD_SECRET: string
+    MEDIA_CDN_CF_ZONE_ID: string
+    MEDIA_CDN_CF_API_TOKEN: string
+  }
 
 /** Validate deployment config without disclosing secrets in thrown errors. */
 export function validateEnvironment(raw: Record<string, unknown>): Environment {
@@ -265,6 +268,8 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
   if (stripeEnabled && (!stripeKey || !stripeWebhook))
     throw new Error('Stripe TEST mode requires a test key and webhook secret')
   return {
+    ...emailConfiguration(raw, mode),
+    ...pushConfiguration(raw, mode),
     STRIPE_TEST_ENABLED: stripeEnabled,
     STRIPE_TEST_CHECKOUT_ENABLED: checkoutEnabled,
     STRIPE_TEST_REFUNDS_ENABLED: refundsEnabled,

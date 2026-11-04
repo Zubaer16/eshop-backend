@@ -22,6 +22,9 @@ describe('05A-4 customer password change transaction protections', () => {
       passwordResetChallenge: {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
+      outboxEvent: {
+        create: jest.fn().mockResolvedValue({ id: 'security-event' }),
+      },
       auditEvent: { create: jest.fn().mockResolvedValue({ id: 'audit' }) },
     }
     const client = {
@@ -79,6 +82,7 @@ describe('05A-4 customer password change transaction protections', () => {
     expect(s.tx.authSession.updateMany).not.toHaveBeenCalled()
     expect(s.tx.passwordResetChallenge.updateMany).not.toHaveBeenCalled()
     expect(s.tx.auditEvent.create).not.toHaveBeenCalled()
+    expect(s.tx.outboxEvent.create).not.toHaveBeenCalled()
   })
 
   it('uses conditional password write, session fencing and PII-free audit', async () => {
@@ -89,6 +93,12 @@ describe('05A-4 customer password change transaction protections', () => {
         newPassword: 'Next-password-long-2!',
       }),
     ).toEqual({ changed: true, sessionsRevoked: true })
+    expect(s.tx.outboxEvent.create).toHaveBeenCalledWith({
+      data: {
+        eventType: 'auth.password_changed',
+        payload: { userId: 'customer-id' },
+      },
+    })
     expect(s.tx.user.updateMany).toHaveBeenCalledWith({
       where: expect.objectContaining({ id: 'customer-id', sessionVersion: 0 }),
       data: expect.objectContaining({ sessionVersion: { increment: 1 } }),

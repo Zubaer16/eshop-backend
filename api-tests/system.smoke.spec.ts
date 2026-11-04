@@ -23,6 +23,17 @@ test.describe('System & OpenAPI', () => {
     const doc = await res.json()
     expect(doc.tags.map((tag: { name: string }) => tag.name)).toEqual([
       'System / Health',
+      'Reports / Admin',
+      'Dashboard / Admin',
+      'Activity / Admin',
+      'Push / Devices',
+      'Push / Campaigns',
+      'Push / Admin',
+      'Email / Admin',
+      'Notifications / Inbox',
+      'Notifications / Admin',
+      'Merchandising / Public',
+      'Merchandising / Admin',
       'Promotions / Public',
       'Promotions / Admin',
       'Authentication / Customer',

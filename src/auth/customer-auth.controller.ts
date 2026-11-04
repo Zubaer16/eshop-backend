@@ -96,7 +96,7 @@ export class CustomerAuthController {
   @ApiOperation({
     summary: 'Request email verification for the signed-in customer',
     description:
-      'Queues an AES-GCM encrypted delivery event (G7 email sender pending). Never returns the token; 60-second resend cooldown.',
+      'Queues an encrypted, recipient-bound email event. Delivery requires configured G7 workers; token is never returned. 60-second resend cooldown.',
   })
   @ApiAcceptedResponse({ type: EmailVerificationResultDto })
   requestEmailVerification(
@@ -125,7 +125,7 @@ export class CustomerAuthController {
   @ApiOperation({
     summary: 'Request customer password recovery (non-enumerating)',
     description:
-      'Always accepted for valid email input. A one-time token is queued encrypted for G7 delivery; no token or account existence is returned.',
+      'Always accepted for valid email input. A one-time recipient-bound token is queued encrypted for configured G7 delivery; no token or account existence is returned.',
   })
   @ApiAcceptedResponse({ type: PasswordResetRequestResultDto })
   requestPasswordReset(

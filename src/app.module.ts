@@ -1,4 +1,9 @@
+import { ReportingModule } from './reporting/reporting.module'
+import { PushModule } from './push/push.module'
+import { EmailModule } from './email/email.module'
+import { NotificationsModule } from './notifications/notifications.module'
 import { Module } from '@nestjs/common'
+import { MerchandisingModule } from './merchandising/merchandising.module'
 import { PromotionsModule } from './promotions/promotions.module'
 import { ConfigModule } from '@nestjs/config'
 import { validateEnvironment } from './config/environment'
@@ -26,6 +31,11 @@ import { StoreOperationsModule } from './store-operations/store-operations.modul
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnvironment }),
     HealthModule,
     PromotionsModule,
+    MerchandisingModule,
+    NotificationsModule,
+    EmailModule,
+    PushModule,
+    ReportingModule,
     DatabaseModule,
     AuthModule,
     CatalogModule,

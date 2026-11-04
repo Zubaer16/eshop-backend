@@ -1,3 +1,5 @@
+import { DeliveryZonesService } from '../src/checkout/delivery-zones.service'
+import { PromotionsService } from '../src/promotions/promotions.service'
 import { expect, type APIRequestContext } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { PrismaPg } from '@prisma/adapter-pg'
@@ -81,6 +83,33 @@ export class CatalogTestFixture {
         select: { id: true },
       })
       const productIds = products.map((product) => product.id)
+      // G6 trigger/security events are durable; remove only this fixture's sources and inbox snapshots.
+      const balances = await this.db.inventoryBalance.findMany({
+        where: {
+          OR: [
+            { productId: { in: productIds } },
+            { variant: { productId: { in: productIds } } },
+          ],
+        },
+        select: { id: true },
+      })
+      const sourceEvents = await this.db.outboxEvent.findMany({
+        where: {
+          OR: [
+            ...balances.map((row) => ({
+              eventType: 'inventory.low_stock',
+              payload: { path: ['balanceId'], equals: row.id },
+            })),
+          ],
+        },
+        select: { id: true },
+      })
+      await this.db.notification.deleteMany({
+        where: { eventId: { in: sourceEvents.map((row) => row.id) } },
+      })
+      await this.db.outboxEvent.deleteMany({
+        where: { id: { in: sourceEvents.map((row) => row.id) } },
+      })
       // Reservations (including released history) reference SKU balance rows
       // with RESTRICT. Remove only this fixture's customer holds first.
       const fixtureUsers = await this.db.user.findMany({
@@ -89,6 +118,23 @@ export class CatalogTestFixture {
       })
       const fixtureUserIds = fixtureUsers.map((user) => user.id)
       if (fixtureUserIds.length) {
+        const securityEvents = await this.db.outboxEvent.findMany({
+          where: {
+            eventType: {
+              in: ['auth.password_changed', 'auth.password_reset.completed'],
+            },
+            OR: fixtureUserIds.map((id) => ({
+              payload: { path: ['userId'], equals: id },
+            })),
+          },
+          select: { id: true },
+        })
+        await this.db.notification.deleteMany({
+          where: { eventId: { in: securityEvents.map((row) => row.id) } },
+        })
+        await this.db.outboxEvent.deleteMany({
+          where: { id: { in: securityEvents.map((row) => row.id) } },
+        })
         // Pending order allocations also contribute to reserved_quantity.
         // Cancel them through production transactional logic before fixture deletion.
         const fixtureOrders = await this.db.order.findMany({
@@ -181,9 +227,14 @@ export class CatalogTestFixture {
           where: { customerId: { in: fixtureUserIds }, status: 'ACTIVE' },
           select: { id: true, customerId: true },
         })
-        const reservations = new ReservationService({
+        const cleanupDatabase = {
           client: this.db,
-        } as unknown as DatabaseService)
+        } as unknown as DatabaseService
+        const reservations = new ReservationService(
+          cleanupDatabase,
+          new DeliveryZonesService(cleanupDatabase),
+          new PromotionsService(cleanupDatabase),
+        )
         for (const hold of active)
           await reservations.release(hold.customerId, hold.id)
         await this.db.checkoutReservation.deleteMany({

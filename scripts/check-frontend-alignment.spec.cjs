@@ -29,7 +29,7 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
   }
   const result = evaluate(roots)
   assert.deepEqual(result.missing, [])
-  assert.equal(result.results.length, 17)
+  assert.equal(result.results.length, 22)
   assert.equal(
     result.results.find((item) => item.id === 'prefix')?.status,
     'MATCH',
@@ -56,6 +56,27 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
   )
   assert.equal(
     result.results.find((item) => item.id === 'guest-cart')?.status,
+    'ADAPTER',
+  )
+  assert.equal(
+    result.results.find((item) => item.id === 'authoritative-reporting')
+      ?.status,
+    'ADAPTER',
+  )
+  assert.equal(
+    result.results.find((item) => item.id === 'push-campaigns')?.status,
+    'ADAPTER',
+  )
+  assert.equal(
+    result.results.find((item) => item.id === 'email-delivery')?.status,
+    'ADAPTER',
+  )
+  assert.equal(
+    result.results.find((item) => item.id === 'notification-engine')?.status,
+    'ADAPTER',
+  )
+  assert.equal(
+    result.results.find((item) => item.id === 'store-merchandising')?.status,
     'ADAPTER',
   )
   const commerce = result.results.find((item) => item.id === 'commerce-future')
