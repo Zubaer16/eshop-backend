@@ -1,6 +1,6 @@
 import { parseMediaReconcileOptions } from './reconcile-options'
 
-describe('03C-3 media reconciliation CLI safety', () => {
+describe('media reconciliation media reconciliation CLI safety', () => {
   it('starts in read-only mode and accepts only explicit apply', () => {
     expect(parseMediaReconcileOptions([])).toEqual({ apply: false, limit: 50 })
     expect(parseMediaReconcileOptions(['--limit=10'])).toEqual({

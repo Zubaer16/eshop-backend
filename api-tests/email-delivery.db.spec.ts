@@ -9,7 +9,7 @@ import {
 import { preferenceInput } from './notifications-test-support'
 import { EmailSubmissionError } from '../src/email/email.provider'
 
-test('G7 DB: encrypted action to unique email job, concurrent submission, accepted state and one-time verification (G12)', async ({
+test('email delivery DB: encrypted action to unique email job, concurrent submission, accepted state and one-time verification (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request)
@@ -91,7 +91,7 @@ test('G7 DB: encrypted action to unique email job, concurrent submission, accept
   }
 })
 
-test('G7 DB: consumed/replaced/legacy action tokens are suppressed before SMTP (G12)', async ({
+test('email delivery DB: consumed/replaced/legacy action tokens are suppressed before SMTP (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request)
@@ -136,7 +136,7 @@ test('G7 DB: consumed/replaced/legacy action tokens are suppressed before SMTP (
   }
 })
 
-test('G7 DB: mandatory security, controlled allowlist and independent operational email opt-in (G12)', async ({
+test('email delivery DB: mandatory security, controlled allowlist and independent operational email opt-in (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request)
@@ -200,7 +200,7 @@ test('G7 DB: mandatory security, controlled allowlist and independent operationa
   }
 })
 
-test('G7 DB: backoff, uncertain SMTP results and abandoned leases never automatically resubmit (G12)', async ({
+test('email delivery DB: backoff, uncertain SMTP results and abandoned leases never automatically resubmit (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request)
@@ -268,7 +268,7 @@ test('G7 DB: backoff, uncertain SMTP results and abandoned leases never automati
   }
 })
 
-test('G7 DB: password recovery reaches fake provider, resets once and revokes the previous session (G12)', async ({
+test('email delivery DB: password recovery reaches fake provider, resets once and revokes the previous session (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request)
@@ -291,7 +291,7 @@ test('G7 DB: password recovery reaches fake provider, resets once and revokes th
     const token = new URLSearchParams(new URL(link).hash.slice(1)).get(
         'token',
       )!,
-      newPassword = 'G7-Recovered-password-2!'
+      newPassword = 'email delivery-Recovered-password-2!'
     expect(
       (
         await request.post('/v1/auth/password-reset/confirm', {
@@ -323,7 +323,7 @@ test('G7 DB: password recovery reaches fake provider, resets once and revokes th
   }
 })
 
-test('G7 DB: known pre-submission failures stop after five attempts with durable history (G12)', async ({
+test('email delivery DB: known pre-submission failures stop after five attempts with durable history (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request)

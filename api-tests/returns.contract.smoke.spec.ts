@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04D-2A Swagger contract: JWT-protected return inspection and no refund endpoints', async ({
+test('returns and restock Swagger contract: JWT-protected return inspection and no refund endpoints', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

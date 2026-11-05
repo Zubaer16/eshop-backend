@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { openSwagger, swaggerExecute } from './swagger-helper'
-test('03C Swagger media UI rejects unauthenticated upload before DB', async ({
+test('media Swagger media UI rejects unauthenticated upload before DB', async ({
   page,
 }) => {
   await openSwagger(page)

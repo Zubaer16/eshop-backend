@@ -7,7 +7,7 @@ import {
   bearer,
 } from './catalog-test-support'
 
-/** Phase 03A dedicated regression security tests against REAL HTTP and
+/** Catalog dedicated regression security tests against REAL HTTP and
  * isolated local PostgreSQL. Added alongside, not instead of, Auth tests.
  */
 async function invoke(
@@ -24,7 +24,7 @@ async function invoke(
   })
 }
 
-test.describe('Phase 03A Catalog negative/security — isolated PostgreSQL', () => {
+test.describe('Catalog Catalog negative/security — isolated PostgreSQL', () => {
   test('Every Admin Catalog route denies missing/invalid bearer credentials', async ({
     request,
   }) => {

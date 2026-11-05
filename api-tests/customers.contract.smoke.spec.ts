@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('05A-3 OpenAPI: Customers / Admin has 2 protected, typed read operations', async ({
+test('customer administration OpenAPI: Customers / Admin has 2 protected, typed read operations', async ({
   request,
 }) => {
   const result = await request.get('/docs-json')

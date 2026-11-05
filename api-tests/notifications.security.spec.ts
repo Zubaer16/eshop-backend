@@ -6,7 +6,7 @@ import {
 } from './notifications-test-support'
 import { assertSafeError, bearer } from './catalog-test-support'
 
-test('G6 security: every notification API requires auth; template/failure control is OWNER-only (G12)', async ({
+test('notifications security: every notification API requires auth; template/failure control is OWNER-only (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request)
@@ -85,7 +85,7 @@ test('G6 security: every notification API requires auth; template/failure contro
   }
 })
 
-test('G6 security: current staff permission revocation hides persisted alerts and their targets (G12)', async ({
+test('notifications security: current staff permission revocation hides persisted alerts and their targets (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request)
@@ -158,7 +158,7 @@ test('G6 security: current staff permission revocation hides persisted alerts an
   }
 })
 
-test('G6 security: template revision conflicts, plain text and placeholder validation (G12)', async ({
+test('notifications security: template revision conflicts, plain text and placeholder validation (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request)

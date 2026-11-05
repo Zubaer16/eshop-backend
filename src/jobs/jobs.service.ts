@@ -31,7 +31,7 @@ import {
 } from './jobs.policy'
 
 /**
- * G10 scheduler is a coordinator, not a second financial or delivery ledger.
+ * The durable jobs scheduler is a coordinator, not a second financial or delivery ledger.
  * Every lane invokes the already guarded bounded domain worker. A DB-token lease
  * serializes scheduled invocations; the domain worker owns its own idempotency.
  */
@@ -179,7 +179,7 @@ export class JobsService {
     apply = false,
   ) {
     if (lane && !isJobLane(lane))
-      throw new BadRequestException('Invalid G10 lane')
+      throw new BadRequestException('Invalid job lane')
     const ready = await this.preview(lane)
     if (!apply) return { apply: false, lanes: ready }
     const candidates = ready

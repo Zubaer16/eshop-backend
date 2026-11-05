@@ -11,7 +11,7 @@ const errors = (input: Record<string, unknown>) =>
     forbidNonWhitelisted: true,
   })
 
-describe('G3/05B-3 Store Branding media binding DTO', () => {
+describe('store branding Store Branding media binding DTO', () => {
   it('accepts canonical UUID and explicit null detach', async () => {
     expect(await errors(valid)).toHaveLength(0)
     expect(

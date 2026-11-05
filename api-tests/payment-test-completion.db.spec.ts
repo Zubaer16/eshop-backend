@@ -21,7 +21,7 @@ const address = {
   countryCode,
 }
 
-test('04C-2B2B real DB: test-only confirm/capture, exactly-once and held stock until signed settlement', async ({
+test('test payment confirmation real DB: test-only confirm/capture, exactly-once and held stock until signed settlement', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

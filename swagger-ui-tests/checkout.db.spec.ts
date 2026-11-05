@@ -6,7 +6,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04B-1 Swagger Chromium: owner policy configuration and customer live estimate', async ({
+test('checkout estimate Swagger Chromium: owner policy configuration and customer live estimate', async ({
   page,
   request,
 }) => {

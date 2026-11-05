@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-test('G10 OpenAPI owner operations; cron secret never appears in schema (execution G12)', async ({
+test('durable jobs OpenAPI owner operations; cron secret never appears in schema (execution release acceptance)', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

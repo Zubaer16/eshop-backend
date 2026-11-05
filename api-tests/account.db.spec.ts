@@ -10,7 +10,7 @@ const a = (suffix: string) => ({
   countryCode: 'US',
 })
 
-test('05A-2 real DB: customer profile and private address CRUD, defaults, audit', async ({
+test('customer account real DB: customer profile and private address CRUD, defaults, audit', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -134,7 +134,7 @@ test('05A-2 real DB: customer profile and private address CRUD, defaults, audit'
   }
 })
 
-test('05A-2 real DB: concurrent insert and default changes obey 10-item limit', async ({
+test('customer account real DB: concurrent insert and default changes obey 10-item limit', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

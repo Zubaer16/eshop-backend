@@ -10,7 +10,7 @@ const namespace = 'projects/kookaburra/products'
 const assetUrl = (id: string) =>
   `https://cdn.example.test/${namespace}/${id}.png`
 
-test('05B-3 PostgreSQL: verified branding, protected media, stale revision and pending-delete rescue', async ({
+test('store branding PostgreSQL: verified branding, protected media, stale revision and pending-delete rescue', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

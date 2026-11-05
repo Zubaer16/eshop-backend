@@ -1,0 +1,85 @@
+name: release acceptance Backend isolated regression (NOT release acceptance)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/**'
+      - 'api-tests/**'
+      - 'swagger-ui-tests/**'
+      - 'prisma/**'
+      - 'scripts/**'
+      - '.github/workflows/backend-regression-ci.yml'
+      - 'package*.json'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'api-tests/**'
+      - 'swagger-ui-tests/**'
+      - 'prisma/**'
+      - 'scripts/**'
+      - 'package*.json'
+permissions:
+  contents: read
+jobs:
+  local-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: kb_ci
+          POSTGRES_PASSWORD: ci_ephemeral_password_only
+          POSTGRES_DB: kookaburra_api_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kb_ci -d kookaburra_api_test"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      API_TEST_DATABASE_URL: postgresql://kb_ci:ci_ephemeral_password_only@127.0.0.1:5432/kookaburra_api_test
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Dependencies
+        run: npm ci
+      - name: Unit, Nest E2E, static, lint, build
+        run: npm run check
+      - name: API smoke
+        run: npm run test:api:smoke
+      - name: Apply migrations to isolated disposable CI database
+        run: npm run test:api:db:deploy
+      - name: Database API regression
+        run: npm run test:api:db
+      - name: API security regression
+        run: npm run test:api:security
+      - name: Install Chromium and OS dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Full Chromium Swagger regression (virtual desktop)
+        run: xvfb-run -a npm run test:api:visual:all
+      - name: durable jobs source wiring and release acceptance tooling tests
+        run: |
+          npm run jobs:verify:source
+          npm run release:tooling:test
+      - name: Canonical OpenAPI handoff and contract guard
+        run: |
+          npm run release:openapi
+          npm run release:openapi:check
+      - name: Upload regression artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-ci-regression-failure
+          path: |
+            playwright-api-report/
+            playwright-swagger-report/
+            test-results-api/
+            test-results-swagger/
+          if-no-files-found: ignore
+          retention-days: 7
+# External SMTP/FCM/Stripe/media/deployment/restore testing is intentionally NOT
+# in public CI. A green job alone cannot certify release security or release acceptance RC acceptance.

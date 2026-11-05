@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('05B-4 OpenAPI: public typed bootstrap, no bearer and no update endpoint', async ({
+test('store bootstrap OpenAPI: public typed bootstrap, no bearer and no update endpoint', async ({
   request,
 }) => {
   const res = await request.get('/docs-json')

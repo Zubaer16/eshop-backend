@@ -30,7 +30,7 @@ export function jobsConfiguration(raw: Record<string, unknown>): JobsConfig {
     new Set(names).size !== names.length ||
     names.some((x) => !isJobLane(x))
   )
-    throw new Error('Invalid/duplicate G10 allowed lane')
+    throw new Error('Invalid/duplicate durable jobs allowed lane')
   if ((enabled === true || enabled === 'true') && (!secret || !names.length))
     throw new Error('Cron requires secret and explicit allowed lanes')
   return {

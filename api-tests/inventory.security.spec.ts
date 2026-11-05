@@ -7,7 +7,7 @@ import {
   bearer,
 } from './catalog-test-support'
 
-test('Phase 03B: all Inventory endpoints require valid Admin bearer; STAFF reads only', async ({
+test('Inventory: all Inventory endpoints require valid Admin bearer; STAFF reads only', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -103,7 +103,7 @@ test('Phase 03B: all Inventory endpoints require valid Admin bearer; STAFF reads
   }
 })
 
-test('Phase 03B: mass-assignment, malformed and forbidden adjustments do not mutate balances', async ({
+test('Inventory: mass-assignment, malformed and forbidden adjustments do not mutate balances', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

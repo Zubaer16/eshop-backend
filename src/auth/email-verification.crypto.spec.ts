@@ -4,7 +4,7 @@ import {
   decryptEmailActionToken,
 } from './email-verification.crypto'
 
-describe('G2-5 encrypted outbox handoff', () => {
+describe('email verification encrypted outbox handoff', () => {
   const key = randomBytes(32).toString('hex')
   it('roundtrips only with correct key and binding', () => {
     const data = encryptEmailActionToken(

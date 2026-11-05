@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04D-2B-3 Swagger Chromium: Admin unpaid cancellation permission-scoped Execute', async ({
+test('Admin unpaid cancellation Swagger Chromium: Admin unpaid cancellation permission-scoped Execute', async ({
   page,
   request,
 }) => {

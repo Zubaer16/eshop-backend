@@ -26,7 +26,7 @@ const provider = () =>
   new FcmPushProvider({
     get: (key: string) => values[key],
   } as unknown as ConfigService<Environment, true>)
-describe('G8 FCM HTTP v1 adapter (mocked fetch; execution G12)', () => {
+describe('push messaging FCM HTTP v1 adapter (mocked fetch; execution release acceptance)', () => {
   afterEach(() => jest.restoreAllMocks())
   it('uses a valid scoped RS256 service assertion and caches only short-lived access credentials', async () => {
     const mock = jest

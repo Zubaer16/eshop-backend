@@ -6,7 +6,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('G10 Chromium: owner job status Swagger guarded and read-only (execution G12)', async ({
+test('durable jobs Chromium: owner job status Swagger guarded and read-only (execution release acceptance)', async ({
   page,
   request,
 }) => {

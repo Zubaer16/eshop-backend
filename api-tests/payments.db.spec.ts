@@ -18,7 +18,7 @@ const address = {
   countryCode,
 }
 
-test('04C-2A real DB: one prepared test intent, safe replay, duplicate signed receipt, no stock or order change', async ({
+test('Stripe TEST payment preparation real DB: one prepared test intent, safe replay, duplicate signed receipt, no stock or order change', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

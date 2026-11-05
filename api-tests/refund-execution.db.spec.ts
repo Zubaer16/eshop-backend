@@ -10,7 +10,7 @@ import {
 } from '../src/payments/stripe-gateway'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04C-2B2C2 real DB: verified Stripe TEST refund, replay, failed refund ceiling, mismatch review, no restock', async ({
+test('Stripe TEST refund execution real DB: verified Stripe TEST refund, replay, failed refund ceiling, mismatch review, no restock', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

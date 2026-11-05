@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04D-2B-3 admin cancellation requires JWT, Admin role, orders.manage and valid order UUID', async ({
+test('Admin unpaid cancellation admin cancellation requires JWT, Admin role, orders.manage and valid order UUID', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

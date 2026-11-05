@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { orderRequestFingerprint } from './orders.service'
 import { CreateOrderDto } from './orders.dto'
 
-describe('04C-1 order idempotency fingerprint', () => {
+describe('orders order idempotency fingerprint', () => {
   const payload: CreateOrderDto = {
     requestId: randomUUID(),
     reservationId: randomUUID(),

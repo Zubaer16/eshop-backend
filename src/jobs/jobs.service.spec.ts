@@ -5,23 +5,34 @@ import type { JobLane } from './jobs.policy'
 /** Mock-only tests. Never contact Stripe, SMTP, FCM or PostgreSQL. */
 function make(lanes: JobLane[] = ['notifications.dispatch']) {
   const state = { count: 0 }
-  const db = {
-    client: {
-      jobSchedule: {
-        findMany: jest.fn().mockResolvedValue([]),
-        findUnique: jest.fn().mockResolvedValue({ consecutiveFailures: 0 }),
-        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-      },
-      jobRun: {
-        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
-        create: jest.fn().mockResolvedValue({ id: 'job-run' }),
-      },
-      $queryRaw: jest.fn().mockResolvedValue([]),
-      $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
-        fn(db.client),
-      ),
+  const client: {
+    jobSchedule: {
+      findMany: jest.Mock
+      findUnique: jest.Mock
+      updateMany: jest.Mock
+    }
+    jobRun: {
+      updateMany: jest.Mock
+      create: jest.Mock
+    }
+    $queryRaw: jest.Mock
+    $transaction: jest.Mock
+  } = {
+    jobSchedule: {
+      findMany: jest.fn().mockResolvedValue([]),
+      findUnique: jest.fn().mockResolvedValue({ consecutiveFailures: 0 }),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
+    jobRun: {
+      updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+      create: jest.fn().mockResolvedValue({ id: 'job-run' }),
+    },
+    $queryRaw: jest.fn().mockResolvedValue([]),
+    $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+      fn(client),
+    ),
   }
+  const db = { client }
   const config = {
     get: jest.fn((key: string) =>
       key === 'JOBS_ALLOWED_LANES' ? lanes : 'disabled',
@@ -53,7 +64,7 @@ function make(lanes: JobLane[] = ['notifications.dispatch']) {
   )
   return { jobs, db, config, notifications, state }
 }
-describe('G10 native-worker coordination (deferred to G12)', () => {
+describe('durable jobs native-worker coordination (deferred to release acceptance)', () => {
   it('does not do writes or invoke workers in preview', async () => {
     const { jobs, db, notifications } = make()
     expect(await jobs.tick('WORKER', undefined, false)).toMatchObject({

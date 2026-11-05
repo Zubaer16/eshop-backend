@@ -7,7 +7,7 @@ import { DatabaseService } from '../src/database/database.service'
 const countryCode = 'CK'
 const currency = 'USD'
 
-test('04B-2 real DB: concurrent customers, idempotent hold, inventory guard, expiry and release', async ({
+test('reservation real DB: concurrent customers, idempotent hold, inventory guard, expiry and release', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -209,7 +209,7 @@ test('04B-2 real DB: concurrent customers, idempotent hold, inventory guard, exp
   }
 })
 
-test('04B-2 real DB: variant holds are independent and never mutate physical SKU mirrors', async ({
+test('reservation real DB: variant holds are independent and never mutate physical SKU mirrors', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

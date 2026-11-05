@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('Phase 03B Swagger Chromium: Inventory CRUD, real DB, invalid data and RBAC through Try it out → Execute', async ({
+test('Inventory Swagger Chromium: Inventory CRUD, real DB, invalid data and RBAC through Try it out → Execute', async ({
   page,
   request,
 }) => {

@@ -20,7 +20,7 @@ function errors<T extends object>(
   return validateSync(Object.assign(new cls(), data))
 }
 
-describe('05A-2 account DTO boundaries', () => {
+describe('customer account account DTO boundaries', () => {
   it('accepts valid profile and optional address details', () => {
     expect(errors(UpdateCustomerProfileDto, { displayName: 'A' })).toHaveLength(
       0,

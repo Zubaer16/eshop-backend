@@ -9,7 +9,7 @@ import {
   openSwagger,
   swaggerExecute,
 } from './swagger-helper'
-test('G9 Swagger Chromium: verified financial/SKU dashboard reports, audit metadata and protected export (execution G12)', async ({
+test('reporting Swagger Chromium: verified financial/SKU dashboard reports, audit metadata and protected export (execution release acceptance)', async ({
   page,
   request,
 }) => {

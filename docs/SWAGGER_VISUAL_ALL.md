@@ -1,4 +1,4 @@
-# Visual Swagger API Tests — Kookaburra v2 Phase 02 + 03A
+# Visual Swagger API Tests — Kookaburra v2 Core API + catalog
 
 This patch **supersedes** `kookaburra-api-swagger-ui-headed-playwright-20261020.tar.gz`. Do not apply the old visual patch.
 
@@ -6,7 +6,7 @@ This patch **supersedes** `kookaburra-api-swagger-ui-headed-playwright-20261020.
 
 A headed Chromium browser opens a real Swagger UI and automatically performs **Try it out → Execute**. It validates actual HTTP responses and Swagger's rendered status. Tests pause between steps, and the terminal also prints endpoint/status logs.
 
-Phase 02 endpoint inventory (**8 authentication/health endpoints**):
+Core API endpoint inventory (**8 authentication/health endpoints**):
 
 1. `GET /v1/health`
 2. `POST /v1/auth/register`
@@ -17,7 +17,7 @@ Phase 02 endpoint inventory (**8 authentication/health endpoints**):
 7. `POST /v1/admin/auth/login`
 8. `GET /v1/admin/auth/me`
 
-Phase 03A adds **15 Catalog operations**, exercised in `swagger-ui-tests/catalog.db.spec.ts` with positive and negative/boundary Chromium Swagger Execute tests. Total current route inventory is 23 (8 Phase 02 + 15 Catalog). Orders/Payments/Inventory/Media remain future phases.
+Catalog adds **15 Catalog operations**, exercised in `swagger-ui-tests/catalog.db.spec.ts` with positive and negative/boundary Chromium Swagger Execute tests. Total current route inventory is 23 (8 Core API + 15 Catalog). Orders/Payments/Inventory/Media remain future phases.
 
 ## Quick visual smoke — does not need PostgreSQL
 
@@ -44,11 +44,11 @@ The test server runs automatically on **4101**; don't manually start it. Port 41
 
 **Safety and limitations:** One random customer and one random temporary STAFF account may be created. The suite never changes your real OWNER credentials, never invokes an existing user, and never writes test data to the development database. Test tokens/passwords appear transiently inside your local Swagger browser as part of the demonstration; don't screen-share or save traces publicly. On test failure, screenshots and traces are kept locally. Network/install/run validation still needs to occur on your Windows computer.
 
-## Phase 03A negative / boundary / RBAC coverage
+## Catalog negative / boundary / RBAC coverage
 
 `npm run test:api:visual:all` now also drives Swagger UI PATCH/DELETE and path/query parameters, tests negative and oversized data, duplicate SKU, wrong roles and rejected requests with an isolated local PostgreSQL backend. `npm run test:api:security` adds dedicated Catalog security tests. `npm run test:api:smoke` adds a no-DB OpenAPI route/authorization/DTO contract test. See `docs/PHASE03A_TEST_COVERAGE.md`.
 
-## Single visual DB strategy (Phase 03A cleanup)
+## Single visual DB strategy (Catalog cleanup)
 
 `test:api:visual:all` is the sole DB-connected Swagger UI browser suite.
 It now runs the Auth negative UI scenarios formerly unique to `visual:dev`

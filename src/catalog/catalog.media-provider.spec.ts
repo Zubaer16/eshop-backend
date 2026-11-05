@@ -34,7 +34,7 @@ const product = (provider: 'cloudinary' | 's3') => ({
   ],
 })
 
-describe('03C-2C1 catalog queries retain image storage provider', () => {
+describe('media source selection catalog queries retain image storage provider', () => {
   it('includes provider in public detail, Admin detail and paginated catalog queries', async () => {
     const findFirst = jest.fn().mockResolvedValue(product('cloudinary'))
     const findUnique = jest.fn().mockResolvedValue(product('cloudinary'))

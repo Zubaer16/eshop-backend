@@ -1,4 +1,4 @@
-/** G10 coordinates existing workers. It does NOT replace their dedupe or provider state machines. */
+/** durable jobs coordinates existing workers. It does NOT replace their dedupe or provider state machines. */
 export const jobLanes = [
   'checkout.reservations',
   'checkout.orders',
@@ -52,10 +52,10 @@ export function parseWorkerOptions(args: string[]) {
     else if (arg === '--loop') loop = true
     else if (arg === '--lane') {
       const value = args[++i] ?? ''
-      if (!isJobLane(value)) throw new Error('Unknown G10 job lane')
+      if (!isJobLane(value)) throw new Error('Unknown job lane')
       lane = value
     } else if (arg === '--interval') interval = Number(args[++i])
-    else throw new Error('Unknown G10 worker option')
+    else throw new Error('Unknown jobs worker option')
   }
   if (!Number.isInteger(interval) || interval < 15 || interval > 3600)
     throw new Error('Use --interval 15..3600')
@@ -63,7 +63,7 @@ export function parseWorkerOptions(args: string[]) {
   return { apply, loop, lane, interval }
 }
 
-/** Only bounded nonnegative counts may appear in G10 run metadata. */
+/** Only bounded nonnegative counts may appear in durable jobs run metadata. */
 export function countProcessed(result: unknown): number {
   if (typeof result === 'number')
     return Number.isSafeInteger(result) && result > 0 ? result : 0

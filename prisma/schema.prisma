@@ -1,4 +1,4 @@
-// Phase 02: canonical identities, accounts/sessions, skeleton catalog, durable outbox.
+// Core API: canonical identities, accounts/sessions, skeleton catalog, durable outbox.
 // DO NOT import mismatched Storefront/Admin demo fixtures as production truth.
 generator client {
   provider     = "prisma-client"
@@ -68,7 +68,7 @@ model User {
   @@index([role,createdAt,id])
 }
 
-// G2 / 05A-5: one revocable, time-limited email verification challenge
+// customer identity / email verification: one revocable, time-limited email verification challenge
 // per customer. Only a SHA-256 digest is persisted; delivery payload is AEAD-encrypted.
 model EmailVerificationChallenge {
   userId       String    @id @map("user_id") @db.Uuid
@@ -82,8 +82,8 @@ model EmailVerificationChallenge {
   @@map("email_verification_challenges")
 }
 
-// G2 / 05A-6: one revocable password recovery token per customer.
-// Only a SHA-256 digest persists. The G7 delivery token is encrypted in outbox.
+// customer identity / password recovery: one revocable password recovery token per customer.
+// Only a SHA-256 digest persists. The email delivery delivery token is encrypted in outbox.
 model PasswordResetChallenge {
   userId        String    @id @map("user_id") @db.Uuid
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -198,7 +198,7 @@ model ProductVariant {
   @@map("product_variants")
 }
 
-// 05A-1: Persistent customer-only product bookmarks. Never records money, stock,
+// wishlist: Persistent customer-only product bookmarks. Never records money, stock,
 // order, price promises or anonymous capability tokens.
 model WishlistItem {
   userId     String   @map("user_id") @db.Uuid
@@ -212,7 +212,7 @@ model WishlistItem {
   @@map("wishlist_items")
 }
 
-// 05A-2: private, customer-owned address book. Order shipping snapshots are separate.
+// customer account: private, customer-owned address book. Order shipping snapshots are separate.
 // Only a customer-profile API uses this table; it never updates existing orders.
 model CustomerAddress {
   id            String   @id @default(uuid()) @db.Uuid
@@ -359,7 +359,7 @@ model StaffRoleAssignment {
   @@map("staff_role_assignments")
 }
 
-// Phase 03C: media metadata, non-public provider identities and shared references.
+// Media: media metadata, non-public provider identities and shared references.
 enum MediaAssetStatus {
   PENDING_UPLOAD
   ACTIVE
@@ -390,7 +390,7 @@ model MediaAsset {
   width              Int               @default(0)
   height             Int               @default(0)
   publicUrl          String?           @map("public_url") @db.Text
-  renditions         Json?             @db.JsonB // Phase 03C-2C2: READY widths only
+  renditions         Json?             @db.JsonB // Media-2C2: READY widths only
   status             MediaAssetStatus  @default(PENDING_UPLOAD)
   uploadExpiresAt    DateTime          @map("upload_expires_at")
   createdAt          DateTime          @default(now()) @map("created_at")
@@ -434,7 +434,7 @@ model MediaDeletionJob {
   @@map("media_deletion_jobs")
 }
 
-// Phase 04A-1: customer-owned, persistent cart. A cart is not a stock hold.
+// CommerceA-1: customer-owned, persistent cart. A cart is not a stock hold.
 // Guest ownership, address, taxes, delivery and order creation arrive later.
 model Cart {
   id        String     @id @default(uuid()) @db.Uuid
@@ -503,7 +503,7 @@ model GuestCartItem {
   @@map("guest_cart_items")
 }
 
-// 04B-1: Explicit, owner-maintained country/currency checkout estimate policy.
+// checkout estimate: Explicit, owner-maintained country/currency checkout estimate policy.
 // No default jurisdiction, no implicit free shipping, no stock hold or order.
 model CheckoutRate {
   id                     String   @id @default(uuid()) @db.Uuid
@@ -520,7 +520,7 @@ model CheckoutRate {
   @@map("checkout_rates")
 }
 
-// 04B-2: time-limited stock holds; not an order or payment intent.
+// reservation: time-limited stock holds; not an order or payment intent.
 enum CheckoutReservationStatus {
   ACTIVE
   RELEASED
@@ -574,7 +574,7 @@ model CheckoutReservationLine {
   @@map("checkout_reservation_lines")
 }
 
-// 04C-1: unpaid order intent owns the former reservation allocation.
+// orders: unpaid order intent owns the former reservation allocation.
 // Stock stays physically onHand until a future verified payment/fulfillment step.
 // reservedQuantity covers ACTIVE holds plus PENDING_PAYMENT order allocations.
 enum OrderStatus {
@@ -659,7 +659,7 @@ model OrderStatusEvent {
   @@map("order_status_events")
 }
 
-// 04C-2A: test-mode Stripe intent is PREPARATION ONLY, never a payable checkout.
+// Stripe TEST payment preparation: test-mode Stripe intent is PREPARATION ONLY, never a payable checkout.
 // Future settlement must reconcile a verified intent before touching orders or stock.
 enum PaymentAttemptStatus {
   CREATING
@@ -719,7 +719,7 @@ model PaymentWebhookReceipt {
   @@map("payment_webhook_receipts")
 }
 
-// 04C-2B1: recorded only after a freshly retrieved TEST payment intent is
+// verified payment settlement: recorded only after a freshly retrieved TEST payment intent is
 // provider-confirmed succeeded and inventory + order commit together.
 model PaymentTransaction {
   id               String @id @default(uuid()) @db.Uuid
@@ -738,7 +738,7 @@ model PaymentTransaction {
   @@index([createdAt,currency])
 }
 
-// 04C-2B2C2: OWNER-approved amount allocations are executed by an explicit
+// Stripe TEST refund execution: OWNER-approved amount allocations are executed by an explicit
 // Stripe TEST worker; provider-refetched status determines success. No restock.
 enum RefundRequestStatus {
   REQUESTED
@@ -778,7 +778,7 @@ model RefundRequest {
   @@index([status,confirmedAt,currency])
 }
 
-// 04D-1: One all-lines shipment per PAID order; no partial fulfillment or carrier integration.
+// fulfillment: One all-lines shipment per PAID order; no partial fulfillment or carrier integration.
 // Shipment status is separate from payment/order status and NEVER mutates inventory.
 enum FulfillmentStatus {
   PROCESSING
@@ -819,7 +819,7 @@ model OrderShipmentEvent {
   @@map("order_shipment_events")
 }
 
-// 04D-2A: Returns are separate from financial refunds. Receipt alone never
+// returns and restock: Returns are separate from financial refunds. Receipt alone never
 // increases stock; only inspection-approved RESTOCKABLE units may be restocked.
 enum OrderReturnStatus {
   REQUESTED
@@ -869,7 +869,7 @@ model OrderReturnEvent {
   @@map("order_return_events")
 }
 
-// 04D-2B / G1 increment: free, same-SKU replacement authorization/dispatch.
+// 04D-2B / fulfillment increment: free, same-SKU replacement authorization/dispatch.
 // This is NOT a new paid Order, nor a refund, nor an automatic return restock.
 // Shipment records and payment/financial snapshots of the original Order are immutable.
 enum ReplacementStatus {
@@ -920,7 +920,7 @@ model OrderReplacementEvent {
   @@map("order_replacement_events")
 }
 
-// G3/05B-1: exactly one profile per independently deployed single-tenant shop.
+// store profile: exactly one profile per independently deployed single-tenant shop.
 // This is NOT a tenant registry and must not be seeded from Admin preview fixtures.
 model StoreProfile {
   key           String   @id @db.VarChar(20)
@@ -936,7 +936,7 @@ model StoreProfile {
 }
 
 
-// G3/05B-2. Optional public plain-text content; keep out of checkout/order/payment.
+// store content. Optional public plain-text content; keep out of checkout/order/payment.
 // Explicit no-content response when absent; no demo-brand data seed.
 model StoreContent {
   key            String   @id @db.VarChar(20)
@@ -953,7 +953,7 @@ model StoreContent {
   @@map("store_contents")
 }
 
-// G3/05B-3: verified media bindings. Both references protect shared provider assets
+// store branding: verified media bindings. Both references protect shared provider assets
 // against cleanup. One single-tenant store; never accept raw provider URLs.
 model StoreBranding {
   key           String      @id @db.VarChar(20)
@@ -970,7 +970,7 @@ model StoreBranding {
   @@map("store_brandings")
 }
 
-// G3/05B-5: public presentation metadata. Never authorizes CORS or payment.
+// store operations: public presentation metadata. Never authorizes CORS or payment.
 // Per-installation origins remain deployment-managed CORS_ORIGINS.
 model StoreOperations {
   key               String   @id @db.VarChar(20)
@@ -1037,7 +1037,7 @@ model DeliveryZoneService {
   @@map("delivery_zone_services")
 }
 
-// G4: revisioned promotion rules and a durable reservation-linked quota ledger.
+// promotions: revisioned promotion rules and a durable reservation-linked quota ledger.
 enum CouponKind {
   PERCENT
   FIXED
@@ -1101,7 +1101,7 @@ model CouponRedemption {
   @@map("coupon_redemptions")
 }
 
-// G5: scheduled public merchandising; draft references still protect shared media.
+// merchandising: scheduled public merchandising; draft references still protect shared media.
 enum ContentPublicationStatus {
   DRAFT
   PUBLISHED
@@ -1157,7 +1157,7 @@ model FeaturedCollectionProduct {
 }
 
 
-// G6: independent subscriber receipt; never consumes another worker's outbox status.
+// notifications: independent subscriber receipt; never consumes another worker's outbox status.
 model NotificationEventReceipt {
   eventId String @id @map("event_id") @db.Uuid
   event OutboxEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -1231,7 +1231,7 @@ model NotificationTemplate {
 }
 
 
-// G7 independent email subscription and SMTP submission history. No plaintext token/address persisted.
+// email delivery independent email subscription and SMTP submission history. No plaintext token/address persisted.
 model EmailEventReceipt {
  eventId String @id @map("event_id") @db.Uuid
  event OutboxEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -1295,7 +1295,7 @@ model EmailTemplate {
 }
 
 
-// G8 encrypted device registration, independent push subscriber and approved campaigns.
+// push messaging encrypted device registration, independent push subscriber and approved campaigns.
 model PushDevice {
  id String @id @default(uuid()) @db.Uuid
  userId String @map("user_id") @db.Uuid
@@ -1428,7 +1428,7 @@ model PushDeliveryAttempt {
  @@map("push_delivery_attempts")
 }
 
-// G10: independent scheduler lease and bounded outcome metadata (no customer data).
+// durable jobs: independent scheduler lease and bounded outcome metadata (no customer data).
 // Native payment/email/push domain ledgers remain authoritative.
 model JobSchedule {
   lane String @id @db.VarChar(48)
@@ -1459,7 +1459,7 @@ model JobRun {
   @@map("job_runs")
 }
 
-// G11 / 05J. One DB-shared rate-limit bucket per HMAC(route category, client IP).
+// release security / 05J. One DB-shared rate-limit bucket per HMAC(route category, client IP).
 // No relationship to Users: it cannot reveal account existence.
 model AuthAbuseBucket {
   keyHash     String   @id @map("key_hash") @db.VarChar(64)

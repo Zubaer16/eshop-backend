@@ -50,7 +50,7 @@ export class CustomerAuthController {
   @Post('register')
   @ApiOperation({
     summary:
-      'Register customer (verification delivery becomes available in G7)',
+      'Register customer (email verification delivery requires a configured email worker)',
   })
   @ApiCreatedResponse({ type: TokenPairDto })
   register(@Body() dto: CredentialsDto): Promise<TokenPairDto> {
@@ -104,7 +104,7 @@ export class CustomerAuthController {
   @ApiOperation({
     summary: 'Request email verification for the signed-in customer',
     description:
-      'Queues an encrypted, recipient-bound email event. Delivery requires configured G7 workers; token is never returned. 60-second resend cooldown.',
+      'Queues an encrypted, recipient-bound email event. Delivery requires configured email workers; token is never returned. 60-second resend cooldown.',
   })
   @ApiAcceptedResponse({ type: EmailVerificationResultDto })
   requestEmailVerification(
@@ -133,7 +133,7 @@ export class CustomerAuthController {
   @ApiOperation({
     summary: 'Request customer password recovery (non-enumerating)',
     description:
-      'Always accepted for valid email input. A one-time recipient-bound token is queued encrypted for configured G7 delivery; no token or account existence is returned.',
+      'Always accepted for valid email input. A one-time recipient-bound token is queued encrypted for configured email delivery; no token or account existence is returned.',
   })
   @ApiAcceptedResponse({ type: PasswordResetRequestResultDto })
   requestPasswordReset(

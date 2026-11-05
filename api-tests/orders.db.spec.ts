@@ -14,7 +14,7 @@ const address = {
   countryCode,
 }
 
-test('04C-1 real DB: order allocation, immutable snapshot, replay, competition, cancel and expiry', async ({
+test('orders real DB: order allocation, immutable snapshot, replay, competition, cancel and expiry', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

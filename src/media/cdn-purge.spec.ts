@@ -15,7 +15,7 @@ const cfg = (override: Record<string, string> = {}) =>
       })[name],
   }) as ConfigService<Environment, true>
 
-describe('03C-2C CDN purge with durable-job-friendly failure semantics', () => {
+describe('responsive media/CDN CDN purge with durable-job-friendly failure semantics', () => {
   const id = '42ee5ff8-5bb7-489c-8b0f-6db5a13ed159'
   const key = `projects/kookaburra/products/${id}`
   const url = `https://cdn.example.com/${key}`

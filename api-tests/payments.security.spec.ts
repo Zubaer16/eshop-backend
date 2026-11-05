@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 const uuid = '10000000-0000-4000-8000-000000000000'
 
-test('04C-2A disabled Stripe cannot call provider, JWT & ownership enforced', async ({
+test('Stripe TEST payment preparation disabled Stripe cannot call provider, JWT & ownership enforced', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

@@ -6,7 +6,7 @@ import {
   openSwagger,
   swaggerExecute,
 } from './swagger-helper'
-test('G8 Swagger Chromium: device lifecycle, campaign preview/approval and cancellation without provider calls (execution G12)', async ({
+test('push messaging Swagger Chromium: device lifecycle, campaign preview/approval and cancellation without provider calls (execution release acceptance)', async ({
   page,
   request,
 }) => {
@@ -49,7 +49,7 @@ test('G8 Swagger Chromium: device lifecycle, campaign preview/approval and cance
       201,
       {
         expectedRevision: 0,
-        title: 'G8 Browser campaign',
+        title: 'push messaging Browser campaign',
         body: 'Selected new arrivals.',
         audience: 'ALL_OPTED_IN_CUSTOMERS',
         targetType: 'HOME',

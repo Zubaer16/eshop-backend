@@ -9,7 +9,7 @@ const profile = {
   supportNotice: 'Contact support for order questions.',
 }
 
-test('05B-1 real PostgreSQL: persisted OWNER profile, public projection, audit and preservation', async ({
+test('store profile real PostgreSQL: persisted OWNER profile, public projection, audit and preservation', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

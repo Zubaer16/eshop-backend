@@ -1,6 +1,6 @@
 # Rename guide — kookaburra-api → kookaburra-backend
 
-This is a **repository/package/folder rename only**. The underlying service remains a NestJS REST API. API paths and database names must stay unchanged for the current Phase 02 setup.
+This is a **repository/package/folder rename only**. The underlying service remains a NestJS REST API. API paths and database names must stay unchanged for the current Core API setup.
 
 ## Already done manually
 

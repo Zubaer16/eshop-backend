@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture } from './catalog-test-support'
 
-test('05B-4 PostgreSQL: bootstrap reflects current authoritative public projections, never admin fields', async ({
+test('store bootstrap PostgreSQL: bootstrap reflects current authoritative public projections, never admin fields', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

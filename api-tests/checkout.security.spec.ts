@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04B-1 role gates, country validation and rate configuration mass assignment', async ({
+test('checkout estimate role gates, country validation and rate configuration mass assignment', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

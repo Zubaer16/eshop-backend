@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04D-2A return access boundary and mass-assignment rejection', async ({
+test('returns and restock return access boundary and mass-assignment rejection', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

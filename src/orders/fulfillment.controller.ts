@@ -59,7 +59,7 @@ export class FulfillmentAdminController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Read order and its shipment (one shipment per order in 04D-1)',
+    summary: 'Read order and its shipment (one shipment per order in fulfillment)',
   })
   @ApiNotFoundResponse({ description: 'Order not found' })
   get(@Param('id', ParseUUIDPipe) id: string) {

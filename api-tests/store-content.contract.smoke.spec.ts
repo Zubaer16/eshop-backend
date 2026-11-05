@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('05B-2 OpenAPI: public and OWNER content, strict revision, safe schemas', async ({
+test('store content OpenAPI: public and OWNER content, strict revision, safe schemas', async ({
   request,
 }) => {
   const res = await request.get('/docs-json')

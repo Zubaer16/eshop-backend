@@ -1,6 +1,6 @@
 import { sortedTrackingEvents } from './tracking.service'
 
-describe('04D-2B-2 tracking timeline', () => {
+describe('tracking tracking timeline', () => {
   it('sorts events deterministically without changing their historical statuses', () => {
     const now = new Date('2026-10-29T07:00:00.000Z')
     const earlier = new Date('2026-10-29T06:00:00.000Z')

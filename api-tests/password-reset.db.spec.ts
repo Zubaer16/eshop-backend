@@ -39,7 +39,7 @@ async function cleanup(f: CatalogTestFixture, userId: string) {
   })
 }
 
-test('05A-6 DB: encrypted token, no enumeration, one-time reset revokes all sessions', async ({
+test('password recovery DB: encrypted token, no enumeration, one-time reset revokes all sessions', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -151,7 +151,7 @@ test('05A-6 DB: encrypted token, no enumeration, one-time reset revokes all sess
   }
 })
 
-test('05A-6 DB: resend invalidates older token, expiry, rate window, concurrency', async ({
+test('password recovery DB: resend invalidates older token, expiry, rate window, concurrency', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -237,7 +237,7 @@ test('05A-6 DB: resend invalidates older token, expiry, rate window, concurrency
   }
 })
 
-test('05A-6 DB: normal password change revokes outstanding reset token', async ({
+test('password recovery DB: normal password change revokes outstanding reset token', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

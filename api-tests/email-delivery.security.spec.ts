@@ -1,7 +1,7 @@
 import { test } from '@playwright/test'
 import { EmailFixture, expect, bearer } from './email-delivery-test-support'
 import { assertSafeError } from './catalog-test-support'
-test('G7 security: every email administration route is OWNER-only and never exposes secrets or action content (G12)', async ({
+test('email delivery security: every email administration route is OWNER-only and never exposes secrets or action content (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request)
@@ -60,7 +60,7 @@ test('G7 security: every email administration route is OWNER-only and never expo
     await f.close()
   }
 })
-test('G7 security: safe template overrides have current revisions; token/link/sender injection is forbidden (G12)', async ({
+test('email delivery security: safe template overrides have current revisions; token/link/sender injection is forbidden (release acceptance)', async ({
   request,
 }) => {
   const f = new EmailFixture(request),

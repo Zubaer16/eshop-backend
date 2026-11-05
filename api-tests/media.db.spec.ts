@@ -6,7 +6,7 @@ import {
   assertSafeError,
 } from './catalog-test-support'
 
-test('03C gallery ordering, shared references, detachment and durable cleanup job in isolated PostgreSQL', async ({
+test('media gallery ordering, shared references, detachment and durable cleanup job in isolated PostgreSQL', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -16,7 +16,7 @@ test('03C gallery ordering, shared references, detachment and durable cleanup jo
       headers = bearer(owner.token)
     const category = await request.post('/v1/admin/categories', {
       headers,
-      data: { name: '03C', slug: f.slug('cat') },
+      data: { name: 'media', slug: f.slug('cat') },
     })
     expect(category.status()).toBe(201)
     const categoryId = (await category.json()).id as string
@@ -156,7 +156,7 @@ test('03C gallery ordering, shared references, detachment and durable cleanup jo
   }
 })
 
-test('03C-2A provider switching: gallery accepts stored S3 asset and schedules safe deletion without rewriting provider', async ({
+test('S3/R2 media provider provider switching: gallery accepts stored S3 asset and schedules safe deletion without rewriting provider', async ({
   request,
 }) => {
   const fixture = new CatalogTestFixture(request)
@@ -244,7 +244,7 @@ test('03C-2A provider switching: gallery accepts stored S3 asset and schedules s
   }
 })
 
-test('03C-2C2 DB contract: only a stored READY rendition manifest publishes S3 srcSet', async ({
+test('media renditions DB contract: only a stored READY rendition manifest publishes S3 srcSet', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

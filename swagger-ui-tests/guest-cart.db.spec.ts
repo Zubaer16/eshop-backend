@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from '../api-tests/catalog-test-support'
 import { authorizeGuestCartInSwagger, authorizeInSwagger, openSwagger, swaggerExecute } from './swagger-helper'
 
-test('04A-2 Swagger Chromium: guest capability, validation, merge with JWT and replay safety', async ({ page, request }) => {
+test('guest cart Swagger Chromium: guest capability, validation, merge with JWT and replay safety', async ({ page, request }) => {
   test.setTimeout(240_000)
   const f = new CatalogTestFixture(request)
   let guestId: string | null = null

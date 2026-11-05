@@ -6,7 +6,7 @@ import {
   assertSafeError,
 } from './catalog-test-support'
 
-test('05B-3 security: no anonymous/non-owner mutations, raw URLs, forged fields or unverified assets', async ({
+test('store branding security: no anonymous/non-owner mutations, raw URLs, forged fields or unverified assets', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

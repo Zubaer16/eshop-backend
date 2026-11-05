@@ -5,7 +5,7 @@ import { CatalogTestFixture, bearer } from './catalog-test-support'
 const countryCode = 'XT'
 const currency = 'USD'
 
-test('04D-2B-2 real DB: customer-owned timeline joins shipment, inspected return and replacement without exposing PII', async ({
+test('tracking real DB: customer-owned timeline joins shipment, inspected return and replacement without exposing PII', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

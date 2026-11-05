@@ -9,7 +9,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('G5 Swagger Chromium: content authoring, public projection and revision-checked archive (execution G12)', async ({
+test('merchandising Swagger Chromium: content authoring, public projection and revision-checked archive (execution release acceptance)', async ({
   page,
   request,
 }) => {
@@ -33,7 +33,7 @@ test('G5 Swagger Chromium: content authoring, public projection and revision-che
       {
         ...bannerInput,
         status: 'PUBLISHED',
-        headline: 'G5 Browser banner',
+        headline: 'merchandising Browser banner',
       },
     )
     const banner = await created.json()
@@ -42,7 +42,7 @@ test('G5 Swagger Chromium: content authoring, public projection and revision-che
       ...bannerInput,
       expectedRevision: 1,
       status: 'PUBLISHED',
-      headline: 'G5 Updated banner',
+      headline: 'merchandising Updated banner',
     }
     await swaggerExecute(
       page,
@@ -67,7 +67,7 @@ test('G5 Swagger Chromium: content authoring, public projection and revision-che
       201,
       {
         expectedRevision: 0,
-        title: 'G5 Browser ' + f.key,
+        title: 'merchandising Browser ' + f.key,
         slug: f.slug('browser-collection'),
         description: '',
         status: 'PUBLISHED',
@@ -82,7 +82,7 @@ test('G5 Swagger Chromium: content authoring, public projection and revision-che
       expect.arrayContaining([
         expect.objectContaining({
           id: banner.id,
-          headline: 'G5 Updated banner',
+          headline: 'merchandising Updated banner',
         }),
       ]),
     )

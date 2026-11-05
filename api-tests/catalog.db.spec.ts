@@ -17,7 +17,7 @@ function database(): PrismaClient {
 
 const bearer = (token: string) => ({ Authorization: `Bearer ${token}` })
 
-test('Phase 03A: categories, products, variants, publication and authorization', async ({ request }) => {
+test('Catalog: categories, products, variants, publication and authorization', async ({ request }) => {
   const db = database()
   const suffix = randomUUID().slice(0, 8)
   const email = `catalog-${randomUUID()}@example.test`

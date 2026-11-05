@@ -100,13 +100,13 @@ export class ReportingFixture extends PromotionsFixture {
       headers = bearer(owner.token)
     const category = await this.http.post('/v1/admin/categories', {
       headers,
-      data: { name: 'G9 Category', slug: this.slug('report-cat-' + n) },
+      data: { name: 'reporting Category', slug: this.slug('report-cat-' + n) },
     })
     expect(category.status()).toBe(201)
     const product = await this.http.post('/v1/admin/products', {
       headers,
       data: {
-        title: 'G9 Snapshot ' + n,
+        title: 'reporting Snapshot ' + n,
         slug: this.slug('report-product-' + n),
         sku: this.sku('report-' + n),
         currency,
@@ -142,7 +142,7 @@ export class ReportingFixture extends PromotionsFixture {
         requestId: randomUUID(),
         reservationId: (await hold.json()).id,
         shippingAddress: {
-          recipientName: 'G9 Customer',
+          recipientName: 'reporting Customer',
           phone: '+12025550123',
           addressLine1: '9 Test Road',
           city: 'Testville',

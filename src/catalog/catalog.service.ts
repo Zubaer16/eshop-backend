@@ -630,7 +630,7 @@ export class CatalogService {
             'Variant has inventory history; archive product instead',
           )
         }
-        // Phase 04 will require archive/retention once orders can reference variants.
+        // Deletion is allowed only for zero-stock draft variants without inventory history; FK protections still apply.
         await tx.productVariant.delete({ where: { id: variantId } })
         const remaining = await tx.productVariant.count({
           where: { productId },

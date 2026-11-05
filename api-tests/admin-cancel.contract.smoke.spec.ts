@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04D-2B-3 Swagger contract: admin cancel only unpaid order, no refund or input body', async ({
+test('Admin unpaid cancellation Swagger contract: admin cancel only unpaid order, no refund or input body', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

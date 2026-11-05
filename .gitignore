@@ -19,6 +19,9 @@ test-results-api/
 playwright-swagger-report/
 test-results-swagger/
 
-# G12 local release-evidence receipts and generated OpenAPI (never commit)
+# release acceptance local release-evidence receipts and generated OpenAPI (never commit)
+validation/release-*/
+artifacts/release/
+# Historic local receipts (if present) must also remain untracked.
 validation/g12-*/
 artifacts/g12/

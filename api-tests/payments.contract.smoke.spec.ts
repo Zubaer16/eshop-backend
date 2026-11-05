@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2A Swagger: test-only preparation, signed public receipt and no payability', async ({ request }) => {
+test('Stripe TEST payment preparation Swagger: test-only preparation, signed public receipt and no payability', async ({ request }) => {
   const response = await request.get('/docs-json')
   expect(response.status()).toBe(200)
   const doc = await response.json()

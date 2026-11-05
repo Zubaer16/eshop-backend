@@ -29,7 +29,7 @@ const collection = {
   productIds: ['00000000-0000-4000-8000-000000000001'],
 }
 
-describe('G5 strict merchandising DTOs (execution deferred to G12)', () => {
+describe('merchandising strict merchandising DTOs (execution deferred to release acceptance)', () => {
   it('accepts canonical bounded banner/collection editor fields', async () => {
     expect(
       await validate(plainToInstance(SaveStoreBannerDto, banner), rules),

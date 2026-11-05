@@ -9,7 +9,7 @@ const config = {
 } as unknown as ConfigService<Environment, true>
 const id = '43d638d0-504e-4023-a4f4-914e29b76a31'
 
-describe('G3/05B-3 branding service', () => {
+describe('store branding branding service', () => {
   it('has no fixture logo or secret when branding absent', async () => {
     const service = new StoreBrandingService(
       {

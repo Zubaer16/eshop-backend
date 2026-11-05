@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('05A-6 OpenAPI: anonymous recovery, non-enumerating DTOs and password secrecy', async ({
+test('password recovery OpenAPI: anonymous recovery, non-enumerating DTOs and password secrecy', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

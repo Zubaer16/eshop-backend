@@ -18,7 +18,7 @@ const errs = (payload: Record<string, unknown>) =>
     forbidNonWhitelisted: true,
   })
 
-describe('G3/05B-2 store public content DTO', () => {
+describe('store content store public content DTO', () => {
   it('accepts plain-text line breaks and an empty policy document', async () => {
     expect(await errs(good)).toHaveLength(0)
     expect(await errs({ ...good, termsOfService: '' })).toHaveLength(0)

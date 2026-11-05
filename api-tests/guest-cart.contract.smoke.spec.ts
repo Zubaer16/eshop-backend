@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04A-2 OpenAPI: guest capability is not JWT, merge stays JWT-only', async ({
+test('guest cart OpenAPI: guest capability is not JWT, merge stays JWT-only', async ({
   request,
 }) => {
   const res = await request.get('/docs-json')

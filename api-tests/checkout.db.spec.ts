@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04B-1 isolated DB: configured country estimate, threshold, live repricing, no reservations', async ({ request }) => {
+test('checkout estimate isolated DB: configured country estimate, threshold, live repricing, no reservations', async ({ request }) => {
   const f = new CatalogTestFixture(request)
   const countryCode = 'CK'
   const currency = 'USD'

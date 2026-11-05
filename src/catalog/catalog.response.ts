@@ -38,7 +38,7 @@ export class CatalogGalleryImageResponseDto {
 }
 
 /** Existing response properties remain available; only integration-critical
- * projection fields are documented here. Media fields follow in Phase 03C.
+ * projection fields are documented here. Media fields are composed by the catalog/media projection.
  */
 export class CatalogProductResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string

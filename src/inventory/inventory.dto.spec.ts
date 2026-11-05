@@ -15,7 +15,7 @@ const valid = {
 const invalid = (value: object) =>
   validateSync(plainToInstance(AdjustInventoryDto, value)).length > 0
 
-describe('Phase 03B inventory DTO boundaries', () => {
+describe('Inventory inventory DTO boundaries', () => {
   it('requires UUID idempotency keys and signed nonzero integer delta', () => {
     expect(invalid(valid)).toBe(false)
     for (const item of [

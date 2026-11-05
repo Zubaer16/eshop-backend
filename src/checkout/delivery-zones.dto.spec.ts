@@ -32,7 +32,7 @@ const errors = (data: Record<string, unknown>) =>
     forbidNonWhitelisted: true,
   })
 
-describe('G3/05B-5 strict delivery zone DTO', () => {
+describe('store operations strict delivery zone DTO', () => {
   it('accepts two complete nested services', async () => {
     expect(await errors(validZone)).toHaveLength(0)
   })

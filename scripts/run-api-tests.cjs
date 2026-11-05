@@ -301,83 +301,83 @@ try {
           '--config=playwright.swagger.config.mjs',
           '--project=visual-db',
           ...(mode === 'visual-guest'
-            ? ['--grep', '04A-2 Swagger Chromium: guest capability']
+            ? ['--grep', 'guest cart Swagger Chromium: guest capability']
             : []),
           ...(mode === 'visual-checkout'
-            ? ['--grep', '04B-1 Swagger Chromium: owner policy configuration']
+            ? ['--grep', 'checkout estimate Swagger Chromium: owner policy configuration']
             : []),
           ...(mode === 'visual-reservation'
-            ? ['--grep', '04B-2 Swagger Chromium: reservation']
+            ? ['--grep', 'reservation Swagger Chromium: reservation']
             : []),
           ...(mode === 'visual-orders'
-            ? ['--grep', '04C-1 Swagger Chromium: unpaid order']
+            ? ['--grep', 'orders Swagger Chromium: unpaid order']
             : []),
           ...(mode === 'visual-payments'
-            ? ['--grep', '04C-2A Swagger Chromium: test payment']
+            ? ['--grep', 'Stripe TEST payment preparation Swagger Chromium: test payment']
             : []),
           ...(mode === 'visual-fulfillment'
-            ? ['--grep', '04D-1 Swagger Chromium: orders admin']
+            ? ['--grep', 'fulfillment Swagger Chromium: orders admin']
             : []),
           ...(mode === 'visual-returns'
-            ? ['--grep', '04D-2A Swagger Chromium: returns']
+            ? ['--grep', 'returns and restock Swagger Chromium: returns']
             : []),
           ...(mode === 'visual-replacements'
-            ? ['--grep', '04D-2B-1 Swagger Chromium: replacement']
+            ? ['--grep', 'replacement Swagger Chromium: replacement']
             : []),
           ...(mode === 'visual-tracking'
-            ? ['--grep', '04D-2B-2 Swagger Chromium: tracking']
+            ? ['--grep', 'tracking Swagger Chromium: tracking']
             : []),
           ...(mode === 'visual-admin-cancel'
-            ? ['--grep', '04D-2B-3 Swagger Chromium: Admin unpaid cancellation']
+            ? ['--grep', 'Admin unpaid cancellation Swagger Chromium: Admin unpaid cancellation']
             : []),
           ...(mode === 'visual-wishlist'
-            ? ['--grep', '05A-1 Swagger Chromium: JWT wishlist']
+            ? ['--grep', 'wishlist Swagger Chromium: JWT wishlist']
             : []),
           ...(mode === 'visual-account'
-            ? ['--grep', '05A-2 Swagger Chromium: customer account']
+            ? ['--grep', 'customer account Swagger Chromium: customer account']
             : []),
           ...(mode === 'visual-customers'
-            ? ['--grep', '05A-3 Swagger Chromium: admin customer directory']
+            ? ['--grep', 'customer administration Swagger Chromium: admin customer directory']
             : []),
           ...(mode === 'visual-password-change'
-            ? ['--grep', '05A-4 Swagger Chromium: customer password change']
+            ? ['--grep', 'password change Swagger Chromium: customer password change']
             : []),
           ...(mode === 'visual-email-verification'
-            ? ['--grep', '05A-5 Swagger Chromium: email verification']
+            ? ['--grep', 'email verification Swagger Chromium: email verification']
             : []),
           ...(mode === 'visual-password-reset'
-            ? ['--grep', '05A-6 Swagger Chromium: password recovery']
+            ? ['--grep', 'password recovery Swagger Chromium: password recovery']
             : []),
           ...(mode === 'visual-store-profile'
-            ? ['--grep', '05B-1 Swagger Chromium: OWNER store identity']
+            ? ['--grep', 'store profile Swagger Chromium: OWNER store identity']
             : []),
           ...(mode === 'visual-store-content'
-            ? ['--grep', '05B-2 Swagger Chromium: OWNER store content']
+            ? ['--grep', 'store content Swagger Chromium: OWNER store content']
             : []),
           ...(mode === 'visual-store-branding'
-            ? ['--grep', '05B-3 Swagger Chromium: media-backed store branding']
+            ? ['--grep', 'store branding Swagger Chromium: media-backed store branding']
             : []),
           ...(mode === 'visual-store-bootstrap'
-            ? ['--grep', '05B-4 Swagger Chromium: public store bootstrap']
+            ? ['--grep', 'store bootstrap Swagger Chromium: public store bootstrap']
             : []),
           ...(mode === 'visual-store-gate'
-            ? ['--grep', '05B-5 Swagger Chromium: OWNER store ops']
+            ? ['--grep', 'store operations Swagger Chromium: OWNER store ops']
             : []),
           ...(mode === 'visual-promotions'
-            ? ['--grep', 'G4 Swagger Chromium:']
+            ? ['--grep', 'promotions Swagger Chromium:']
             : []),
           ...(mode === 'visual-reporting'
-            ? ['--grep', 'G9 Swagger Chromium:']
+            ? ['--grep', 'reporting Swagger Chromium:']
             : []),
-          ...(mode === 'visual-push' ? ['--grep', 'G8 Swagger Chromium:'] : []),
+          ...(mode === 'visual-push' ? ['--grep', 'push messaging Swagger Chromium:'] : []),
           ...(mode === 'visual-email-delivery'
-            ? ['--grep', 'G7 Swagger Chromium:']
+            ? ['--grep', 'email delivery Swagger Chromium:']
             : []),
           ...(mode === 'visual-notifications'
-            ? ['--grep', 'G6 Swagger Chromium:']
+            ? ['--grep', 'notifications Swagger Chromium:']
             : []),
           ...(mode === 'visual-merchandising'
-            ? ['--grep', 'G5 Swagger Chromium:']
+            ? ['--grep', 'merchandising Swagger Chromium:']
             : []),
         ]
       : mode === 'security'

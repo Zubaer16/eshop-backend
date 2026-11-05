@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /** No database configured: these must fail in the ValidationPipe/Guard. */
-test.describe('Phase 02 security validation smoke (database not required)', () => {
+test.describe('Core API security validation smoke (database not required)', () => {
   test('Register rejects missing email and password', async ({ request }) => {
     const response = await request.post('/v1/auth/register', { data: {} })
     expect(response.status()).toBe(400)

@@ -12,7 +12,7 @@ const address = {
   countryCode,
 }
 
-test('04C-2B2C1 real PostgreSQL: partial refunds, ceilings, concurrent requests, replay and immutable PAID stock', async ({
+test('refund ledger real PostgreSQL: partial refunds, ceilings, concurrent requests, replay and immutable PAID stock', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

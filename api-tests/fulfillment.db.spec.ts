@@ -5,7 +5,7 @@ import { CatalogTestFixture, bearer } from './catalog-test-support'
 const countryCode = 'CK'
 const currency = 'USD'
 
-test('04D-1 real DB: paid-only one-shipment lifecycle, idempotency, cross-customer, no stock mutation', async ({
+test('fulfillment real DB: paid-only one-shipment lifecycle, idempotency, cross-customer, no stock mutation', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

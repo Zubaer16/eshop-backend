@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { Environment } from '../config/environment'
 
-describe('05A-4 customer password change transaction protections', () => {
+describe('password change customer password change transaction protections', () => {
   async function setup(changedCount = 1) {
     const original = 'Current-password-long-1!'
     const passwordHash = await hashPassword(original)

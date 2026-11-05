@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from 'express'
 import type { DatabaseService } from '../database/database.service'
 
 /**
- * G11: shared single-tenant PostgreSQL fixed-window abuse limiter. Only exact
+ * release security: shared single-tenant PostgreSQL fixed-window abuse limiter. Only exact
  * unauthenticated / credential-action routes are included: no financial or
  * provider webhook route is intercepted. PostgreSQL's clock and atomic upsert
  * keep enforcement consistent across serverless/VPS replicas.

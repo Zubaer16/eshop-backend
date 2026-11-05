@@ -10,7 +10,7 @@ import {
  * Each request uses Try it out -> Execute and verifies Swagger's live status.
  * An isolated random namespace is cleaned up even after assertion failures.
  */
-test('Phase 03A Catalog: execute every new endpoint via actual Swagger UI', async ({
+test('Catalog Catalog: execute every new endpoint via actual Swagger UI', async ({
   page,
   request,
 }) => {
@@ -188,7 +188,7 @@ test('Phase 03A Catalog: execute every new endpoint via actual Swagger UI', asyn
   }
 })
 
-test('Phase 03A Catalog: Swagger UI rejects invalid, duplicate, missing-token and forbidden changes', async ({
+test('Catalog Catalog: Swagger UI rejects invalid, duplicate, missing-token and forbidden changes', async ({
   page,
   request,
 }) => {

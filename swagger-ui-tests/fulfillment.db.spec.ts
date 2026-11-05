@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04D-1 Swagger Chromium: orders admin paid-only fulfillment guard', async ({
+test('fulfillment Swagger Chromium: orders admin paid-only fulfillment guard', async ({
   page,
   request,
 }) => {

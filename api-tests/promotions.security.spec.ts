@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { assertSafeError, bearer } from './catalog-test-support'
 import { couponInput, PromotionsFixture } from './promotions-test-support'
 
-test('G4 security: every administrative route requires staff JWT and current marketing.manage; grants revoke without JWT refresh', async ({
+test('promotions security: every administrative route requires staff JWT and current marketing.manage; grants revoke without JWT refresh', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)
@@ -82,7 +82,7 @@ test('G4 security: every administrative route requires staff JWT and current mar
   }
 })
 
-test('G4 security: strict DTOs, UUID/revision bounds, forged totals/ledger fields and guest checkout are rejected without writes', async ({
+test('promotions security: strict DTOs, UUID/revision bounds, forged totals/ledger fields and guest checkout are rejected without writes', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)

@@ -6,7 +6,7 @@ import { CatalogTestFixture, bearer } from './catalog-test-support'
 
 export const bannerInput = {
   expectedRevision: 0,
-  headline: 'G5 New arrivals',
+  headline: 'merchandising New arrivals',
   subtitle: 'Curated picks',
   ctaText: 'Shop now',
   ctaHref: '/shop?tag=new',
@@ -46,14 +46,14 @@ export class MerchandisingFixture extends CatalogTestFixture {
   async product(token: string, label: string, status = 'ACTIVE') {
     const category = await this.http.post('/v1/admin/categories', {
       headers: bearer(token),
-      data: { name: 'G5 Category', slug: this.slug(label + '-category') },
+      data: { name: 'merchandising Category', slug: this.slug(label + '-category') },
     })
     expect(category.status()).toBe(201)
     const categoryId = (await category.json()).id as string
     const response = await this.http.post('/v1/admin/products', {
       headers: bearer(token),
       data: {
-        title: 'G5 ' + label,
+        title: 'merchandising ' + label,
         slug: this.slug(label),
         sku: this.sku(label),
         priceMinor: 1299,
@@ -73,7 +73,7 @@ export class MerchandisingFixture extends CatalogTestFixture {
   ) {
     const input = {
       expectedRevision: 0,
-      title: 'G5 Collection ' + this.key + this.collectionIds.length,
+      title: 'merchandising Collection ' + this.key + this.collectionIds.length,
       slug: this.slug('collection-' + this.collectionIds.length),
       description: 'Curated products',
       position: 1,

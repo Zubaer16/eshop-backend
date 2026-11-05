@@ -9,7 +9,7 @@ const operations = [
   ['post', '/v1/admin/media-deletion-jobs/{id}/retry'],
 ] as const
 
-test('03C OpenAPI documents media/gallery JWT-only operations', async ({
+test('media OpenAPI documents media/gallery JWT-only operations', async ({
   request,
 }) => {
   const doc = await (await request.get('/docs-json')).json()
@@ -50,7 +50,7 @@ test('03C OpenAPI documents media/gallery JWT-only operations', async ({
   ).not.toContain('srcSet')
 })
 
-test('03C-2B disk upload and public delivery expose documented semantics, without JWT session fallback', async ({
+test('VPS disk media disk upload and public delivery expose documented semantics, without JWT session fallback', async ({
   request,
 }) => {
   const doc = await (await request.get('/docs-json')).json()

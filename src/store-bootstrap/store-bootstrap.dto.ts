@@ -3,7 +3,7 @@ import { PublicStoreProfileDto } from '../store-profile/store-profile.dto'
 import { PublicStoreContentDto } from '../store-content/store-content.dto'
 import { PublicStoreBrandingDto } from '../store-branding/store-branding.dto'
 
-/** A read-only composition of three already public G3 contracts.
+/** A read-only composition of three already public store configuration contracts.
  * Internal revisions, audit history and provider secrets are never included.
  */
 export class PublicStoreBootstrapDto {

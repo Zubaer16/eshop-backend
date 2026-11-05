@@ -29,7 +29,7 @@ const createPNG = () =>
     'base64',
   )
 
-describe('03C-2A AWS S3 / R2 signature and provider routing', () => {
+describe('S3/R2 media provider AWS S3 / R2 signature and provider routing', () => {
   it('presigns upload with MIME bound, expiry and no secret', () => {
     const provider = new S3MediaProvider(config())
     const result = provider.signedUpload('projects/sample/123', 'image/png')

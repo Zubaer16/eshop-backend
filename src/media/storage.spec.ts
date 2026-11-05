@@ -12,7 +12,7 @@ const factory = () =>
         }) as Record<string, string>
       )[key],
   } as ConfigService<Environment, true>)
-describe('03C Cloudinary provider adapter', () => {
+describe('media Cloudinary provider adapter', () => {
   it('signs upload without exposing provider secret', () => {
     const result = factory().signedUpload('projects/sample/products/test-id')
     expect(result.uploadUrl).toBe(

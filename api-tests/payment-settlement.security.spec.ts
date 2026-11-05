@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2B1 security: no public/owner payment-settlement mutation endpoint', async ({
+test('verified payment settlement security: no public/owner payment-settlement mutation endpoint', async ({
   request,
 }) => {
   for (const path of [

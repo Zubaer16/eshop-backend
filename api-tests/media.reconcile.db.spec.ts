@@ -10,7 +10,7 @@ import type { DiskMediaProvider } from '../src/media/disk.storage'
 import type { MediaCdnPurgeService } from '../src/media/cdn-purge.service'
 import type { S3MediaProvider } from '../src/media/s3.storage'
 
-test('03C-3 reconciliation: dry-run, retention, shared protection, orphan scheduling and deletion-job repair', async ({ request }) => {
+test('media reconciliation reconciliation: dry-run, retention, shared protection, orphan scheduling and deletion-job repair', async ({ request }) => {
   const fixture = new CatalogTestFixture(request)
   const namespace = 'projects/kookaburra/products'
   const ids = Array.from({ length: 8 }, () => randomUUID())

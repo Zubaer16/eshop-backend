@@ -7,7 +7,7 @@ import {
   FinancialReportQueryDto,
   ReportExportQueryDto,
 } from './reporting.dto'
-describe('G9 report input contracts (execution G12)', () => {
+describe('reporting report input contracts (execution release acceptance)', () => {
   it('requires an explicit currency on granular performance and series queries', async () => {
     for (const type of [
       CustomerPerformanceQueryDto,

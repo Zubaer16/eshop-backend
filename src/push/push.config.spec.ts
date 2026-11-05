@@ -14,7 +14,7 @@ const configured = {
   PUSH_STOREFRONT_ORIGIN: 'https://store.example.test',
   PUSH_ADMIN_ORIGIN: 'https://admin.example.test',
 }
-describe('G8 push deployment/campaign controls (execution G12)', () => {
+describe('push messaging push deployment/campaign controls (execution release acceptance)', () => {
   it('defaults disabled and requires complete isolated controlled configuration', () => {
     expect(pushConfiguration({}, 'development').PUSH_DELIVERY_MODE).toBe(
       'disabled',

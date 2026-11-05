@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('03C Swagger Chromium: JWT, gallery changes, shared asset rejection and DB cleanup', async ({
+test('media Swagger Chromium: JWT, gallery changes, shared asset rejection and DB cleanup', async ({
   page,
   request,
 }) => {
@@ -36,7 +36,7 @@ test('03C Swagger Chromium: JWT, gallery changes, shared asset rejection and DB 
     await authorizeInSwagger(page, owner.token)
     const category = await request.post('/v1/admin/categories', {
       headers: bearer(owner.token),
-      data: { name: '03C', slug: f.slug('cat') },
+      data: { name: 'media', slug: f.slug('cat') },
     })
     expect(category.status()).toBe(201)
     const product = await request.post('/v1/admin/products', {

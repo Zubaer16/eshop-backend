@@ -23,7 +23,7 @@ async function main() {
         console.log(JSON.stringify(result))
       } catch {
         console.error(
-          'G10 worker tick failed; inspect safe admin status/run records',
+          'durable jobs worker tick failed; inspect safe admin status/run records',
         )
         if (!args.loop) process.exitCode = 1
       }
@@ -43,7 +43,7 @@ async function main() {
 }
 void main().catch(() => {
   console.error(
-    'G10 worker failed. Verify env, migrations and job lane allowlist.',
+    'durable jobs worker failed. Verify env, migrations and job lane allowlist.',
   )
   process.exitCode = 1
 })

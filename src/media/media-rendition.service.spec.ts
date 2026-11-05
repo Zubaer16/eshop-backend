@@ -6,7 +6,7 @@ import type { DiskMediaProvider } from './disk.storage'
 import type { S3MediaProvider } from './s3.storage'
 import { MediaRenditionService } from './media-rendition.service'
 
-describe('03C-2C2 actual image processing and durable outbox', () => {
+describe('media renditions actual image processing and durable outbox', () => {
   it('writes byte-backed WebP widths and publishes manifest only after all writes succeed', async () => {
     const source = await sharp({
       create: { width: 640, height: 480, channels: 3, background: '#345678' },

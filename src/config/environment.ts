@@ -139,6 +139,9 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
   if ((mode === 'production' || db.length > 0) && secret.length < 32) {
     throw new Error('JWT_ACCESS_SECRET requires at least 32 characters')
   }
+  if (mode === 'production' && !db) {
+    throw new Error('Production requires DATABASE_URL')
+  }
   if (abuseEnabled && (!db || secret.length < 32))
     throw new Error(
       'AUTH_ABUSE_LIMIT_ENABLED requires PostgreSQL and a strong JWT secret',
@@ -151,9 +154,6 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
     throw new Error(
       'AUTH_ACTION_TOKEN_ENCRYPTION_KEY must be 32 random bytes as 64 hex characters',
     )
-  }
-  if (mode === 'production' && !db) {
-    throw new Error('Production requires DATABASE_URL')
   }
   const cloudName = String(raw.MEDIA_CLOUD_NAME ?? '').trim()
   const apiKey = String(raw.MEDIA_API_KEY ?? '').trim()

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-test('G8 OpenAPI: device token is write-only; approved campaigns and provider history are guarded/redacted (execution G12)', async ({
+test('push messaging OpenAPI: device token is write-only; approved campaigns and provider history are guarded/redacted (execution release acceptance)', async ({
   request,
 }) => {
   const doc = await (await request.get('/docs-json')).json()

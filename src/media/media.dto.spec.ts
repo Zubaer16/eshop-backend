@@ -7,7 +7,7 @@ const errors = async <T extends object>(
   klass: ClassConstructor<T>,
 ) => validate(plainToInstance(klass, obj))
 
-describe('03C upload and gallery validation', () => {
+describe('media upload and gallery validation', () => {
   it('accepts valid image upload and rejects oversized/non-image', async () => {
     expect(
       await errors(

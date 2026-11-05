@@ -1,6 +1,6 @@
 import { estimateConfiguredCharges } from './checkout.pricing'
 
-describe('04B-1 configured checkout estimate arithmetic', () => {
+describe('checkout estimate configured checkout estimate arithmetic', () => {
   it('keeps integer minor units; tax applies to subtotal only', () => {
     expect(estimateConfiguredCharges(1299, 500, null, 750)).toEqual({
       shippingMinor: 500,

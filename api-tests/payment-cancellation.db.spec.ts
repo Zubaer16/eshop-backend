@@ -21,7 +21,7 @@ const address = {
   countryCode,
 }
 
-test('04C-2B2A real DB: closed-order Stripe TEST intent cancellation, replay, review and recovery', async ({
+test('payment cancellation real DB: closed-order Stripe TEST intent cancellation, replay, review and recovery', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

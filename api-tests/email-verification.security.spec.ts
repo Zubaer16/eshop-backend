@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('05A-5 security: no unauthenticated/staff issuance, no token in response, invalid payload rejected', async ({
+test('email verification security: no unauthenticated/staff issuance, no token in response, invalid payload rejected', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

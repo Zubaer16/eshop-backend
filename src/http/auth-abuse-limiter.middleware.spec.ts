@@ -6,7 +6,7 @@ import {
   authAbusePolicy,
 } from './auth-abuse-limiter.middleware'
 
-describe('G11 credential abuse limiter (deferred execution to G12)', () => {
+describe('release security credential abuse limiter (deferred execution to release acceptance)', () => {
   it('only protects exact credential routes and never touches payment/webhook/worker routes', () => {
     expect(authAbusePolicy('POST', '/v1/auth/login')?.limit).toBe(15)
     expect(authAbusePolicy('POST', '/v1/AUTH/LOGIN/')?.limit).toBe(15)

@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture } from './catalog-test-support'
 
-test('05A-6 security: no enumeration for missing/staff/disabled and no privilege escalation', async ({
+test('password recovery security: no enumeration for missing/staff/disabled and no privilege escalation', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

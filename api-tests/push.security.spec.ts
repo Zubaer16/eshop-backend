@@ -3,7 +3,7 @@ import { test } from '@playwright/test'
 import { PushFixture, bearer, expect } from './push-test-support'
 import { assertSafeError } from './catalog-test-support'
 
-test('G8 security: registration is authenticated, ownership-bound, redacted and isolated by surface/project (G12)', async ({
+test('push messaging security: registration is authenticated, ownership-bound, redacted and isolated by surface/project (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
@@ -80,7 +80,7 @@ test('G8 security: registration is authenticated, ownership-bound, redacted and 
   }
 })
 
-test('G8 security: current marketing grant controls campaigns; OWNER alone approves and sees provider history (G12)', async ({
+test('push messaging security: current marketing grant controls campaigns; OWNER alone approves and sees provider history (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request),
@@ -161,7 +161,7 @@ test('G8 security: current marketing grant controls campaigns; OWNER alone appro
   }
 })
 
-test('G8 security: campaigns reject raw redirects/media/markup, private-wide targets and invalid audiences (G12)', async ({
+test('push messaging security: campaigns reject raw redirects/media/markup, private-wide targets and invalid audiences (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
@@ -170,7 +170,7 @@ test('G8 security: campaigns reject raw redirects/media/markup, private-wide tar
       headers = bearer(owner.token),
       base = {
         expectedRevision: 0,
-        title: 'G8 Promotion',
+        title: 'push messaging Promotion',
         body: 'Curated picks',
         audience: 'ALL_OPTED_IN_CUSTOMERS',
         targetType: 'HOME',
@@ -242,7 +242,7 @@ test('G8 security: campaigns reject raw redirects/media/markup, private-wide tar
   }
 })
 
-test('G8 security: active device cap cannot be bypassed by reactivating an eleventh revoked installation (G12)', async ({
+test('push messaging security: active device cap cannot be bypassed by reactivating an eleventh revoked installation (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)

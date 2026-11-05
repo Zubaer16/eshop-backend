@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { ReportingFixture, bearer } from './reporting-test-support'
 
-test('G10 owner job surfaces fail closed to anonymous, customer and staff (execution G12)', async ({
+test('durable jobs owner job surfaces fail closed to anonymous, customer and staff (execution release acceptance)', async ({
   request,
 }) => {
   const fixture = new ReportingFixture(request)
@@ -44,7 +44,7 @@ test('G10 owner job surfaces fail closed to anonymous, customer and staff (execu
   }
 })
 
-test('G10 cron does not allow unauthenticated scheduled execution (execution G12)', async ({
+test('durable jobs cron does not allow unauthenticated scheduled execution (execution release acceptance)', async ({
   request,
 }) => {
   const response = await request.get('/v1/internal/jobs/tick')

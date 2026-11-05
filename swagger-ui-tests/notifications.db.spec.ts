@@ -8,7 +8,7 @@ import {
   openSwagger,
   swaggerExecute,
 } from './swagger-helper'
-test('G6 Swagger Chromium: inbox preferences, security notification and owned read/target (execution G12)', async ({
+test('notifications Swagger Chromium: inbox preferences, security notification and owned read/target (execution release acceptance)', async ({
   page,
   request,
 }) => {

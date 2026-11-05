@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04C-1 Swagger Chromium: unpaid order create/replay/read/cancel with strict DTO validation', async ({
+test('orders Swagger Chromium: unpaid order create/replay/read/cancel with strict DTO validation', async ({
   page,
   request,
 }) => {

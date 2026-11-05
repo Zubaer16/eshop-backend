@@ -66,7 +66,7 @@ export class RefundLedgerService {
           throw new ConflictException(
             'Only verified paid orders are eligible for refund requests',
           )
-        // G1: never allow a financial refund to race an already-authorized
+        // fulfillment: never allow a financial refund to race an already-authorized
         // physical replacement. Both decisions lock the original order first.
         const replacement = await tx.orderReplacement.findFirst({
           where: { orderId, status: { not: 'CANCELLED' } },

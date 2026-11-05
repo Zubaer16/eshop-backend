@@ -16,13 +16,15 @@ export function safeContentHref(value: string): boolean {
   } catch {
     return false
   }
+/* eslint-disable no-control-regex -- Reject navigation controls. */
   if (
     decoded.includes('%') ||
     decoded.includes('\\') ||
     decoded.startsWith('//') ||
     /[\u0000-\u001f\u007f]/.test(decoded)
   )
-    return false // eslint-disable-line no-control-regex -- Reject navigation controls.
+    return false
+  /* eslint-enable no-control-regex */
   const pathname = decoded.split(/[?#]/)[0]!
   if (
     pathname.includes('//') ||

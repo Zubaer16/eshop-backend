@@ -6,7 +6,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('05B-5 Swagger Chromium: OWNER store ops and zone permission Try it out Execute', async ({
+test('store operations Swagger Chromium: OWNER store ops and zone permission Try it out Execute', async ({
   page,
   request,
 }) => {

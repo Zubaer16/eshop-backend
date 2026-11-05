@@ -87,7 +87,7 @@ export class PushFixture extends MerchandisingFixture {
   ) {
     const input = {
       expectedRevision: 0,
-      title: 'G8 new collection',
+      title: 'push messaging new collection',
       body: 'Discover our latest picks.',
       audience: 'ALL_OPTED_IN_CUSTOMERS',
       targetType: 'HOME',

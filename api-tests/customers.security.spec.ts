@@ -5,7 +5,7 @@ import {
   assertSafeError,
 } from './catalog-test-support'
 
-test('05A-3 security: bearer, backend RBAC, validation, no staff identity leakage', async ({
+test('customer administration security: bearer, backend RBAC, validation, no staff identity leakage', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

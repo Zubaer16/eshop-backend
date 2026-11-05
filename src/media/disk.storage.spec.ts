@@ -27,7 +27,7 @@ const settings = (root: string) => {
   } as ConfigService<Environment, true>
 }
 
-describe('03C-2B persistent VPS media (no provider account required)', () => {
+describe('VPS disk media persistent VPS media (no provider account required)', () => {
   let directory: string
   let disk: DiskMediaProvider
   beforeEach(async () => {
@@ -173,7 +173,7 @@ describe('03C-2B persistent VPS media (no provider account required)', () => {
   })
 })
 
-describe('03C-2C2 derived files remain separate from the original', () => {
+describe('media renditions derived files remain separate from the original', () => {
   let directory: string
   let disk: DiskMediaProvider
   beforeEach(async () => {

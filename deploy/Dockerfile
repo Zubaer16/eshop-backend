@@ -1,4 +1,4 @@
-# G11 VPS/Docker candidate (not deployed or verified in owner environment).
+# release security VPS/Docker candidate (not deployed or verified in owner environment).
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
 COPY package*.json ./

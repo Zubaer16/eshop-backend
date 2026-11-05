@@ -7,7 +7,7 @@ const endpoints = [
   ['delete', '/v1/wishlist/{productId}'],
 ] as const
 
-test('05A-1 OpenAPI: private wishlist routes and strict merge schema', async ({
+test('wishlist OpenAPI: private wishlist routes and strict merge schema', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

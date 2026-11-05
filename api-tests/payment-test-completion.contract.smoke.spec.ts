@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2B2B TEST-only card completion documented without raw card or settlement manipulation', async ({
+test('test payment confirmation TEST-only card completion documented without raw card or settlement manipulation', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

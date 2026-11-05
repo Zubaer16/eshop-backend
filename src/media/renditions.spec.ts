@@ -6,7 +6,7 @@ import {
 } from './renditions'
 import { responsiveImage } from './responsive'
 
-describe('03C-2C2 truthful derived image manifest', () => {
+describe('media renditions truthful derived image manifest', () => {
   const original =
     'https://cdn.example.test/projects/kookaburra/products/cd9de786-6d18-4d8e-b0a1-595b96d99a10'
   it('publishes only real, recorded variants and never upscales', () => {

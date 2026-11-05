@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-test('G7 OpenAPI: owner email status, safe history and templates without send/debug/secret endpoints (execution G12)', async ({
+test('email delivery OpenAPI: owner email status, safe history and templates without send/debug/secret endpoints (execution release acceptance)', async ({
   request,
 }) => {
   const doc = await (await request.get('/docs-json')).json()

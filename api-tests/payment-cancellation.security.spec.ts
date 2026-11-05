@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2B2A security: cancellation is never exposed as a public HTTP mutation', async ({
+test('payment cancellation security: cancellation is never exposed as a public HTTP mutation', async ({
   request,
 }) => {
   for (const route of [

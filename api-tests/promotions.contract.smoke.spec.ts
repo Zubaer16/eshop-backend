@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('G4 OpenAPI: coupon/campaign RBAC, single-code checkout, discount snapshots and private campaign notes', async ({
+test('promotions OpenAPI: coupon/campaign RBAC, single-code checkout, discount snapshots and private campaign notes', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

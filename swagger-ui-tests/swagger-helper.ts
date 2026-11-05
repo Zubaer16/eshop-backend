@@ -5,7 +5,7 @@ export type SwaggerMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
 type Params = Record<string, string | number>
 
 /** Execute a real Swagger UI operation and assert the browser's network
- * response AND the status shown by Swagger. Existing Phase 02 call sites are
+ * response AND the status shown by Swagger. Existing Core API call sites are
  * backward-compatible; the optional params handle templated path/query APIs.
  */
 export async function swaggerExecute(
@@ -61,7 +61,10 @@ export async function swaggerExecute(
         // Commit that edit before Execute; other parameter flows stay intact.
         if (location === 'header') {
           await input.press('Tab')
-          await expect(input, `header ${key} must retain its value`).toHaveValue(String(value))
+          await expect(
+            input,
+            `header ${key} must retain its value`,
+          ).toHaveValue(String(value))
         }
       }
     }
@@ -128,9 +131,20 @@ export async function swaggerExecute(
     ]).catch(async (error: unknown) => {
       // Collect safe form diagnostics without printing capability/JWT values.
       // The Playwright screenshot/trace retains full UI state locally.
-      const invalidFields = await operation.locator('input:invalid, textarea:invalid, select:invalid, [aria-invalid="true"]').count().catch(() => -1)
-      const validationRows = await operation.locator('.errors-wrapper, .parameter__error, .validation-errors').count().catch(() => -1)
-      const disabledExecute = await operation.getByRole('button', { name: 'Execute', exact: true }).isDisabled().catch(() => false)
+      const invalidFields = await operation
+        .locator(
+          'input:invalid, textarea:invalid, select:invalid, [aria-invalid="true"]',
+        )
+        .count()
+        .catch(() => -1)
+      const validationRows = await operation
+        .locator('.errors-wrapper, .parameter__error, .validation-errors')
+        .count()
+        .catch(() => -1)
+      const disabledExecute = await operation
+        .getByRole('button', { name: 'Execute', exact: true })
+        .isDisabled()
+        .catch(() => false)
       const details = observed.length
         ? observed.join('; ')
         : `No matching-path response; invalidFields=${invalidFields}, validationRows=${validationRows}, executeDisabled=${disabledExecute}. See local Playwright screenshot/trace for Swagger form validation.`
@@ -165,7 +179,7 @@ export async function swaggerExecute(
 export async function openSwagger(page: Page): Promise<void> {
   const response = await page.goto('/docs', { waitUntil: 'domcontentloaded' })
   expect(response?.status()).toBe(200)
-  // Future API milestones may add operations; never hardcode Phase 02's 8.
+  // Future API milestones may add operations; never hardcode Core API's 8.
   await expect(page.locator('.swagger-ui .opblock').first()).toBeVisible()
 }
 
@@ -181,7 +195,9 @@ async function authorizeSchemeInSwagger(
   await page.locator('.swagger-ui .scheme-container button.authorize').click()
   const modal = page.locator('.dialog-ux')
   await expect(modal).toBeVisible()
-  const scheme = modal.locator('.auth-container').filter({ hasText: schemeName })
+  const scheme = modal
+    .locator('.auth-container')
+    .filter({ hasText: schemeName })
   await expect(scheme, `Authorize ${schemeName} independently`).toHaveCount(1)
   // Swagger's authorization modal shows Logout for a scheme that already
   // has a token. Clear it before entering a replacement invalid/valid token.
@@ -199,17 +215,26 @@ async function authorizeSchemeInSwagger(
   await expect(input).toBeVisible({ timeout: 5_000 })
   await input.fill(token)
   const submit = scheme.locator('button.authorize')
-  await expect(submit, `${schemeName} credential submit control`).toHaveCount(1, { timeout: 5_000 })
+  await expect(submit, `${schemeName} credential submit control`).toHaveCount(
+    1,
+    { timeout: 5_000 },
+  )
   await expect(submit).toBeVisible({ timeout: 5_000 })
   await expect(submit).toBeEnabled({ timeout: 5_000 })
   await submit.click({ timeout: 5_000 })
   await modal.locator('button.close-modal').click({ timeout: 5_000 })
 }
 
-export async function authorizeInSwagger(page: Page, token: string): Promise<void> {
+export async function authorizeInSwagger(
+  page: Page,
+  token: string,
+): Promise<void> {
   await authorizeSchemeInSwagger(page, 'access-token', token)
 }
 
-export async function authorizeGuestCartInSwagger(page: Page, token: string): Promise<void> {
+export async function authorizeGuestCartInSwagger(
+  page: Page,
+  token: string,
+): Promise<void> {
   await authorizeSchemeInSwagger(page, 'guest-cart-token', token)
 }

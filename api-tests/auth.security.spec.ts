@@ -92,7 +92,7 @@ async function signedAccessToken(
 const bearer = (token: string) => ({ Authorization: `Bearer ${token}` })
 
 // These are separate tests, so the HTML report identifies *which* rule failed.
-test.describe('Phase 02 security and negative cases — isolated real PostgreSQL', () => {
+test.describe('Core API security and negative cases — isolated real PostgreSQL', () => {
   test('Customer registration returns limited identity data, not password hash', async ({ request }) => {
     await withRegisteredCustomer(request, async (_account, tokens) => {
       expect(tokens.user.role).toBe('CUSTOMER')

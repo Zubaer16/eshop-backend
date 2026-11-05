@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04D-2B-2 tracking: JWT, customer role, UUID and staff RBAC', async ({
+test('tracking tracking: JWT, customer role, UUID and staff RBAC', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

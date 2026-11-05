@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04D-1 Swagger contract: admin fulfillment is permission-gated, customer order includes tracking', async ({
+test('fulfillment Swagger contract: admin fulfillment is permission-gated, customer order includes tracking', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

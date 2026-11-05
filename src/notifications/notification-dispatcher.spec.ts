@@ -48,7 +48,7 @@ function setup(verified = true) {
     } as unknown as DatabaseService),
   }
 }
-describe('G6 verified-settlement dispatcher (execution G12)', () => {
+describe('notifications verified-settlement dispatcher (execution release acceptance)', () => {
   it('never creates payment-success inbox content without a committed verified transaction', async () => {
     const { tx, service } = setup(false)
     expect(await service.dispatch(new Date(0), 1, true)).toMatchObject({

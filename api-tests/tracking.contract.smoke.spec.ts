@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04D-2B-2 Swagger contract: protected PII-free tracking read projection', async ({ request }) => {
+test('tracking Swagger contract: protected PII-free tracking read projection', async ({ request }) => {
   const res = await request.get('/docs-json')
   expect(res.status()).toBe(200)
   const doc = await res.json()

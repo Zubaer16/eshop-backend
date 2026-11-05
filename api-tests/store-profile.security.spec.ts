@@ -13,7 +13,7 @@ const valid = {
   supportNotice: '',
 }
 
-test('05B-1 security: JWT, OWNER authorization, strict DTO and immutable state on denials', async ({
+test('store profile security: JWT, OWNER authorization, strict DTO and immutable state on denials', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

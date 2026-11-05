@@ -1,4 +1,4 @@
-# Phase 02 — Automated HTTP API tests (Playwright)
+# Core API — Automated HTTP API tests (Playwright)
 
 The existing NestJS `npm run test` / `npm run test:e2e` remain in place.
 This patch adds optional **Playwright API-only tests** without downloading a browser.

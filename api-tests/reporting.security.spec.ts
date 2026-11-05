@@ -17,7 +17,7 @@ const reportPaths = [
   '/v1/admin/activity',
   '/v1/admin/dashboard/overview',
 ]
-test('G9 security: every report/export requires staff auth; granular grants are current and dashboard sections fail closed (G12)', async ({
+test('reporting security: every report/export requires staff auth; granular grants are current and dashboard sections fail closed (release acceptance)', async ({
   request,
 }) => {
   const f = new ReportingFixture(request),
@@ -142,7 +142,7 @@ test('G9 security: every report/export requires staff auth; granular grants are 
     await f.close()
   }
 })
-test('G9 security: ranges, filters, currency, query injection and export bounds are validated without secret projections (G12)', async ({
+test('reporting security: ranges, filters, currency, query injection and export bounds are validated without secret projections (release acceptance)', async ({
   request,
 }) => {
   const f = new ReportingFixture(request)

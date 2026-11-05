@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('05B-3 OpenAPI: media-backed branding has separate public and OWNER-only contracts', async ({
+test('store branding OpenAPI: media-backed branding has separate public and OWNER-only contracts', async ({
   request,
 }) => {
   const res = await request.get('/docs-json')

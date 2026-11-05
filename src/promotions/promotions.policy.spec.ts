@@ -1,7 +1,7 @@
 import { allocateDiscount } from './promotions.policy'
 import { estimateConfiguredCharges } from '../checkout/checkout.pricing'
 
-describe('G4 exact discount allocation and charge arithmetic', () => {
+describe('promotions exact discount allocation and charge arithmetic', () => {
   it('rounds percentage once, allocates largest remainders deterministically and excludes ineligible lines', () => {
     const lines = [
       { id: 'b', amountMinor: 5, eligible: true },

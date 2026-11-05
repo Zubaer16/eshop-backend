@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common'
 import request from 'supertest'
 import { createHttpApp } from '../src/bootstrap'
 
-describe('Phase 03B API smoke tests (no real database)', () => {
+describe('Inventory API smoke tests (no real database)', () => {
   let app: INestApplication
   beforeAll(async () => {
     app = await createHttpApp()
@@ -31,6 +31,7 @@ describe('Phase 03B API smoke tests (no real database)', () => {
       response.body.tags?.map((tag: { name: string }) => tag.name),
     ).toEqual([
       'System / Health',
+      'Jobs / Admin',
       'Reports / Admin',
       'Dashboard / Admin',
       'Activity / Admin',
@@ -80,7 +81,7 @@ describe('Phase 03B API smoke tests (no real database)', () => {
       'Workspace / Admin',
     ])
   })
-  it('publishes Phase 03A catalog routes without requiring a database', async () => {
+  it('publishes Catalog catalog routes without requiring a database', async () => {
     const response = await request(app.getHttpServer())
       .get('/docs-json')
       .expect(200)
@@ -95,7 +96,7 @@ describe('Phase 03B API smoke tests (no real database)', () => {
     }
   })
 
-  it('publishes all Phase 03B Inventory routes in OpenAPI without a database', async () => {
+  it('publishes all Inventory Inventory routes in OpenAPI without a database', async () => {
     const response = await request(app.getHttpServer())
       .get('/docs-json')
       .expect(200)

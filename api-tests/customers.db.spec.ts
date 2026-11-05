@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('05A-3 DB: directory search/status/page/detail project only customer rows', async ({ request }) => {
+test('customer administration DB: directory search/status/page/detail project only customer rows', async ({ request }) => {
   const f = new CatalogTestFixture(request)
   try {
     const owner = await f.account('OWNER')

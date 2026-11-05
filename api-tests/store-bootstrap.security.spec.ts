@@ -5,7 +5,7 @@ import {
   assertSafeError,
 } from './catalog-test-support'
 
-test('05B-4 security: anonymous projection, method surface locked, admin contracts remain protected', async ({
+test('store bootstrap security: anonymous projection, method surface locked, admin contracts remain protected', async ({
   request,
 }) => {
   const pub = await request.get('/v1/store/bootstrap', {

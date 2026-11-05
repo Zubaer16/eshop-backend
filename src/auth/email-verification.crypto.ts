@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
 
-/** G7-only delivery adapter will decrypt; never expose plaintext via HTTP/logs. */
+/** Email delivery adapter will decrypt; never expose plaintext via HTTP/logs. */
 export type EncryptedActionToken = {
   algorithm: 'aes-256-gcm'
   iv: string

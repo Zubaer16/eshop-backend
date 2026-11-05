@@ -83,7 +83,7 @@ export const windowDto = ({
   timeZone,
   paymentScope,
 }: ReportWindow) => ({ from, to, asOf, timeZone, paymentScope })
-// eslint-disable-next-line no-control-regex -- CSV leading controls must be treated as untrusted spreadsheet text.
+/* eslint-disable no-control-regex -- CSV leading controls must be treated as untrusted spreadsheet text. */
 export function csvCell(value: unknown) {
   let text =
     value == null
@@ -99,6 +99,7 @@ export function csvCell(value: unknown) {
     text = "'" + text
   return '"' + text.replace(/"/g, '""') + '"'
 }
+/* eslint-enable no-control-regex */
 export function reportCsv(headers: string[], rows: unknown[][]) {
   return (
     '\uFEFF' +

@@ -7,7 +7,7 @@ import {
 } from './catalog-test-support'
 import { hashPassword } from '../src/auth/password'
 
-test('05A-4 security: authentication, role isolation, secret validation and wrong password', async ({
+test('password change security: authentication, role isolation, secret validation and wrong password', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

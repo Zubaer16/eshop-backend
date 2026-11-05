@@ -6,7 +6,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('05A-3 Swagger Chromium: admin customer directory Try it out Execute', async ({
+test('customer administration Swagger Chromium: admin customer directory Try it out Execute', async ({
   page,
   request,
 }) => {

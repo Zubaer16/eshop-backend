@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2B1 contract: verified Stripe settlement has no customer-controlled capture or paid-status endpoint', async ({
+test('verified payment settlement contract: verified Stripe settlement has no customer-controlled capture or paid-status endpoint', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

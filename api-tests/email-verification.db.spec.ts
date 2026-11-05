@@ -43,7 +43,7 @@ async function cleanup(f: CatalogTestFixture, userId: string) {
   })
 }
 
-test('05A-5 real DB: encrypted outbox, durable cooldown, one-time consumption, profile flag', async ({
+test('email verification real DB: encrypted outbox, durable cooldown, one-time consumption, profile flag', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -129,7 +129,7 @@ test('05A-5 real DB: encrypted outbox, durable cooldown, one-time consumption, p
   }
 })
 
-test('05A-5 real DB: resend invalidates previous token; expired tokens cannot verify', async ({
+test('email verification real DB: resend invalidates previous token; expired tokens cannot verify', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -179,7 +179,7 @@ test('05A-5 real DB: resend invalidates previous token; expired tokens cannot ve
   }
 })
 
-test('05A-5 real DB: parallel verification token consumes once', async ({
+test('email verification real DB: parallel verification token consumes once', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

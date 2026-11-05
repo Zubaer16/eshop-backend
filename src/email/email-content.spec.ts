@@ -46,7 +46,7 @@ function setup() {
   } as unknown as ConfigService<Environment, true>)
   return { event, user, challenge, tx, content }
 }
-describe('G7 one-time action content (execution G12)', () => {
+describe('email delivery one-time action content (execution release acceptance)', () => {
   it('requires current authenticated ciphertext, challenge digest, expiry and recipient identity', async () => {
     const s = setup()
     expect(

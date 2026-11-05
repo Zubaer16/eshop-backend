@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('05A-1 security: JWT/customer-only and reject malformed or extra-fields merge', async ({
+test('wishlist security: JWT/customer-only and reject malformed or extra-fields merge', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

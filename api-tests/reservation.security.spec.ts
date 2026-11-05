@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04B-2: customers only, rejects forged price and cross-account hold access', async ({
+test('reservation: customers only, rejects forged price and cross-account hold access', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

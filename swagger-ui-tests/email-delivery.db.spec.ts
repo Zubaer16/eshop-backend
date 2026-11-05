@@ -8,7 +8,7 @@ import {
   openSwagger,
   swaggerExecute,
 } from './swagger-helper'
-test('G7 Swagger Chromium: owner readiness and safe delivery history with fake-provider acceptance (execution G12)', async ({
+test('email delivery Swagger Chromium: owner readiness and safe delivery history with fake-provider acceptance (execution release acceptance)', async ({
   page,
   request,
 }) => {

@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04B-2 Swagger Chromium: reservation create/read/replay/release and validation', async ({
+test('reservation Swagger Chromium: reservation create/read/replay/release and validation', async ({
   page,
   request,
 }) => {

@@ -32,7 +32,7 @@ export class PromotionsFixture extends CatalogTestFixture {
   }
 
   code(suffix = '') {
-    return ('G4_' + this.key + suffix).toUpperCase()
+    return ('PM_' + this.key + suffix).toUpperCase()
   }
 
   async rate() {
@@ -89,14 +89,14 @@ export class PromotionsFixture extends CatalogTestFixture {
   ) {
     const category = await this.http.post('/v1/admin/categories', {
       headers: bearer(token),
-      data: { name: 'G4 Category', slug: this.slug(label + '-cat') },
+      data: { name: 'promotions Category', slug: this.slug(label + '-cat') },
     })
     expect(category.status()).toBe(201)
     const categoryId = (await category.json()).id as string
     const response = await this.http.post('/v1/admin/products', {
       headers: bearer(token),
       data: {
-        title: 'G4 Product',
+        title: 'promotions Product',
         slug: this.slug(label),
         sku: this.sku(label),
         priceMinor,
@@ -133,7 +133,7 @@ export class PromotionsFixture extends CatalogTestFixture {
       headers: bearer(token),
       data: {
         expectedRevision: 0,
-        title: 'G4 Campaign',
+        title: 'promotions Campaign',
         slug: this.slug('campaign-' + this.campaignIds.length),
         description: 'Private campaign notes',
         status: 'ACTIVE',
@@ -150,7 +150,7 @@ export class PromotionsFixture extends CatalogTestFixture {
 
   address() {
     return {
-      recipientName: 'G4 Customer',
+      recipientName: 'promotions Customer',
       phone: '+12025550120',
       addressLine1: '5 Coupon Road',
       city: 'Example',

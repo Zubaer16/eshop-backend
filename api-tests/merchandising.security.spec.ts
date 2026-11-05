@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { assertSafeError, bearer } from './catalog-test-support'
 import { bannerInput, MerchandisingFixture } from './merchandising-test-support'
 
-test('G5 security: all content routes require current marketing.manage or OWNER; revoke is immediate (G12)', async ({
+test('merchandising security: all content routes require current marketing.manage or OWNER; revoke is immediate (release acceptance)', async ({
   request,
 }) => {
   const f = new MerchandisingFixture(request)
@@ -63,7 +63,7 @@ test('G5 security: all content routes require current marketing.manage or OWNER;
   }
 })
 
-test('G5 security: unsafe links/raw URLs/markup/window/ID/field injection rejected without content writes (G12)', async ({
+test('merchandising security: unsafe links/raw URLs/markup/window/ID/field injection rejected without content writes (release acceptance)', async ({
   request,
 }) => {
   const f = new MerchandisingFixture(request)

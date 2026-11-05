@@ -2,7 +2,7 @@
   "version": "1.15.0",
   "purpose": "Source-backed pre-integration contract baseline, NOT proof of runtime integration",
   "sourceBaselines": {
-    "backend": "Local working tree through G9 authoritative reporting/activity; G5-G9 static/build/migration evidence only, runtime tests deferred to G12",
+    "backend": "Local working tree through reporting authoritative reporting/activity; merchandising-reporting static/build/migration evidence only, runtime tests deferred to release acceptance",
     "admin": "kookaburra-admin-full-20261025-181323.zip",
     "storefront": "kookaburra-storefront-full-20261020-101939.zip"
   },
@@ -17,7 +17,7 @@
     "media": "Provider-tracked media IDs and ordered gallery; Cloudinary/S3/R2 and VPS disk signer/verify/delete adapters supported; responsive renditions and external CDN purge pending",
     "pagination": "Existing {items,total,page,limit,pages} needs a frontend adapter to ApiPage.pageSize or additive backend alias",
     "apiStability": "Keep /v1 and legacy endpoints stable; add new documented DTOs without breaking already-tested clients",
-    "cart": "04A-2 cart and merge implemented; 04B-1 country/currency live estimated shipping/tax implemented; 04B-2 customer stock holds now implemented (10-minute TTL); address-specific tax and payable checkout/payment remain deferred."
+    "cart": "guest cart cart and merge implemented; checkout estimate country/currency live estimated shipping/tax implemented; reservation customer stock holds now implemented (10-minute TTL); address-specific tax and payable checkout/payment remain deferred."
   },
   "findings": [
     {
@@ -115,8 +115,8 @@
       "id": "commerce-future",
       "priority": "P2",
       "status": "ADAPTER",
-      "summary": "Checkout, holds, orders, payments, G3 delivery zones and G4 coupon/campaign APIs are source-present; browser commerce adapters and acceptance remain pending",
-      "action": "Use one normalized couponCode on estimate/reservation/delivery-options; map percent to basis points and money to minor units. Preserve server discount snapshots and null/unlimited semantics. G11 external provider acceptance remains separate; G5 content is a separate gate."
+      "summary": "Checkout, holds, orders, payments, store configuration delivery zones and promotions coupon/campaign APIs are source-present; browser commerce adapters and acceptance remain pending",
+      "action": "Use one normalized couponCode on estimate/reservation/delivery-options; map percent to basis points and money to minor units. Preserve server discount snapshots and null/unlimited semantics. release security external provider acceptance remains separate; merchandising content is a separate integration area."
     },
     {
       "id": "status-shape",
@@ -143,35 +143,35 @@
       "id": "store-merchandising",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "G5 banner/curated collection/homepage APIs are source-present; current UIs remain preview-based and runtime validation is deferred to G12",
+      "summary": "merchandising banner/curated collection/homepage APIs are source-present; current UIs remain preview-based and runtime validation is deferred to release acceptance",
       "action": "Map enabled to publication status/window, imageUrl to verified Media Library ID, CTA field names and canonical product IDs/order. Use hasVariants and availability hints safely; add collection route/editor controls during integration. Do not claim live publication or test acceptance from source audit."
     },
     {
       "id": "notification-engine",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "G6 persisted inbox/read/preferences/templates and outbox subscriber are source-present; Admin bell remains a placeholder and Storefront has no operational inbox",
-      "action": "Implement authenticated own-inbox/preferences UI and typed target navigation. Staff alerts follow current permissions; security history remains mandatory; marketing channels default off. Activate bounded dispatcher after runtime validation. Email/push delivery remain G7/G8; no live browser acceptance from this audit."
+      "summary": "notifications persisted inbox/read/preferences/templates and outbox subscriber are source-present; Admin bell remains a placeholder and Storefront has no operational inbox",
+      "action": "Implement authenticated own-inbox/preferences UI and typed target navigation. Staff alerts follow current permissions; security history remains mandatory; marketing channels default off. Activate bounded dispatcher after runtime validation. Email/push delivery remain separate email and push transports; no live browser acceptance from this audit."
     },
     {
       "id": "email-delivery",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "G7 independent email queue, SMTP adapter, safe submission history and owner template/status APIs are source-present; live provider and browser action flows remain unaccepted",
-      "action": "Build OWNER readiness/template/history UI without exposing credentials. Add Storefront /verify-email and /reset-password fragment-token pages calling existing one-time confirmation APIs. SMTP ACCEPTED means submission only. Keep G2 email acceptance pending until controlled provider and token flows are validated; never publish SMTP secrets in either frontend."
+      "summary": "email delivery independent email queue, SMTP adapter, safe submission history and owner template/status APIs are source-present; live provider and browser action flows remain unaccepted",
+      "action": "Build OWNER readiness/template/history UI without exposing credentials. Add Storefront /verify-email and /reset-password fragment-token pages calling existing one-time confirmation APIs. SMTP ACCEPTED means submission only. Keep customer identity email acceptance pending until controlled provider and token flows are validated; never publish SMTP secrets in either frontend."
     },
     {
       "id": "push-campaigns",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "G8 owned encrypted device lifecycle, FCM provider and approved rich campaign/inbox contracts are source-present; both web apps still need push/service-worker integration",
+      "summary": "push messaging owned encrypted device lifecycle, FCM provider and approved rich campaign/inbox contracts are source-present; both web apps still need push/service-worker integration",
       "action": "Implement explicit browser permission, per-installation registration/refresh/revoke on sign-out, client token rotation on account switch, and authenticated typed target resolution. Build marketing composer/preview/OWNER approval/schedule/metrics. Provider acceptance is not device display; actual Firebase/worker/frontend validation remains pending. Flutter comes after full web E2E."
     },
     {
       "id": "authoritative-reporting",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "G9 ledger-aware financial/daily/order/payment/SKU/customer/inventory/audit/CSV and permission-aware dashboard APIs are source-present; Admin reports remain browser preview math",
+      "summary": "reporting ledger-aware financial/daily/order/payment/SKU/customer/inventory/audit/CSV and permission-aware dashboard APIs are source-present; Admin reports remain browser preview math",
       "action": "Replace booked/fulfillment-derived sample revenue with verified TEST collections and confirmed refunds on independent event dates. Preserve currency groups/exact minor-unit strings, UTC exclusive-to bounds and current inventory basis. Hide domain-restricted sections, require extra catalog/customer grants for performance data, and use bounded audited CSV. No live UI/runtime acceptance from source audit."
     }
   ]

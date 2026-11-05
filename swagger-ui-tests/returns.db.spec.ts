@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04D-2A Swagger Chromium: returns access and strict DTO validation', async ({
+test('returns and restock Swagger Chromium: returns access and strict DTO validation', async ({
   page,
   request,
 }) => {

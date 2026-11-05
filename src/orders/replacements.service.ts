@@ -55,7 +55,7 @@ function present(row: {
   }
 }
 
-/** G1 / 04D-2B-1. A replacement is a non-financial, separate fulfillment
+/** replacement. A replacement is a non-financial, separate fulfillment
  * document; never create a fake paid Order or re-settle a payment.
  * Lock order -> read return/replacement -> conditionally update inventory.
  */

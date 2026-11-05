@@ -12,7 +12,7 @@ const png = Buffer.from(
   'base64',
 )
 
-test('03C-2B real DB + signed VPS disk PUT, byte verification, public reference gate and cleanup scheduling', async ({
+test('VPS disk media real DB + signed VPS disk PUT, byte verification, public reference gate and cleanup scheduling', async ({
   request,
 }) => {
   expect(process.env.MEDIA_PROVIDER).toBe('disk')

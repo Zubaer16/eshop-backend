@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('05B-3 Swagger Chromium: media-backed store branding Try it out Execute', async ({
+test('store branding Swagger Chromium: media-backed store branding Try it out Execute', async ({
   page,
   request,
 }) => {

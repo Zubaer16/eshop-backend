@@ -83,7 +83,7 @@ export class CatalogTestFixture {
         select: { id: true },
       })
       const productIds = products.map((product) => product.id)
-      // G6 trigger/security events are durable; remove only this fixture's sources and inbox snapshots.
+      // notifications trigger/security events are durable; remove only this fixture's sources and inbox snapshots.
       const balances = await this.db.inventoryBalance.findMany({
         where: {
           OR: [
@@ -182,7 +182,7 @@ export class CatalogTestFixture {
             },
           })
         }
-        // Phase 04C-2A: FK-restricted payment attempts must be removed only
+        // CommerceC-2A: FK-restricted payment attempts must be removed only
         // for this fixture before deleting its orders (never global cleanup).
         await this.db.refundRequest.deleteMany({
           where: { order: { customerId: { in: fixtureUserIds } } },
@@ -195,7 +195,7 @@ export class CatalogTestFixture {
             order: { customerId: { in: fixtureUserIds } },
           },
         })
-        // G1: replacement FK to return/order must be cleared first.
+        // fulfillment: replacement FK to return/order must be cleared first.
         await this.db.orderReplacementEvent.deleteMany({
           where: {
             replacement: { order: { customerId: { in: fixtureUserIds } } },

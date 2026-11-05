@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2B2A contract: cancelled provider intents remain operator-only, no capture/refund endpoint', async ({
+test('payment cancellation contract: cancelled provider intents remain operator-only, no capture/refund endpoint', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

@@ -211,7 +211,7 @@ describe('environment configuration', () => {
   })
 })
 
-describe('G11 proxy and credential limiter deployment safety (G12 suite)', () => {
+describe('release security proxy and credential limiter deployment safety (release acceptance suite)', () => {
   const production = {
     NODE_ENV: 'production',
     CORS_ORIGINS: 'https://store.example.test',

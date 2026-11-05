@@ -1,4 +1,4 @@
-# Phase 03A — Retire Swagger visual:dev inspection mode
+# Catalog — Retire Swagger visual:dev inspection mode
 
 The old `test:api:visual:dev` created two persistent inspection accounts per
 run in the **local development** PostgreSQL DB (`kookaburra-api-dev`). It
@@ -8,7 +8,7 @@ All useful Auth negative Swagger execution steps were migrated to
 `swagger-ui-tests/all-endpoints.db.spec.ts`: invalid registration (400),
 duplicate registration (409), wrong password (401), logout/refresh rejection
 (401), customer denied Admin login (401), and customer JWT denied Admin
-profile (403). The existing positive Auth flows and Phase 03A Catalog browser
+profile (403). The existing positive Auth flows and Catalog Catalog browser
 tests remain in `test:api:visual:all`.
 
 ## Patch application / remove legacy test files

@@ -279,9 +279,9 @@ export class AuthService {
     })
   }
 
-  /** G2/05A-5: no public email enumeration and no secret in HTTP/DB plaintext.
+  /** email verification: no public email enumeration and no secret in HTTP/DB plaintext.
    * Per-user row lock serializes resend/confirmation; cooldown is durable.
-   * Actual SMTP transport deliberately waits for G7. */
+   * Configured email delivery workers handle outbound SMTP submission. */
   async requestEmailVerification(
     userId: string,
   ): Promise<{ accepted: boolean }> {
@@ -323,7 +323,7 @@ export class AuthService {
             recipientHash: hashToken(normalize(user.email)),
             token: encryptEmailActionToken(key, token, `${userId}:${eventId}`),
             expiresAt: expiresAt.toISOString(),
-            // G7 must verify the token hash is still current before sending.
+            // email delivery must verify the token hash is still current before sending.
           },
         },
       })
@@ -390,7 +390,7 @@ export class AuthService {
 
   /** Public recovery request. Response is identical for absent, disabled and staff
    * users; per-customer lock + 60s cooldown + five tokens/hour bound abuse.
-   * No token enters logs or HTTP. G7 sender MUST revalidate token hash, expiry
+   * No token enters logs or HTTP. email delivery sender MUST revalidate token hash, expiry
    * and recipient identity before using the encrypted outbox payload. */
   async requestPasswordReset(
     dto: PasswordResetRequestDto,

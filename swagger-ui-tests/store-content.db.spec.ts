@@ -6,7 +6,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('05B-2 Swagger Chromium: OWNER store content Try it out Execute', async ({
+test('store content Swagger Chromium: OWNER store content Try it out Execute', async ({
   page,
   request,
 }) => {

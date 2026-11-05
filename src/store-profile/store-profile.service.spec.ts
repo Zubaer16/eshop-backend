@@ -10,7 +10,7 @@ const dto = {
   supportNotice: ' Questions welcome. ',
 }
 
-describe('G3/05B-1 store profile service', () => {
+describe('store profile store profile service', () => {
   it('does not invent demo branding for an unconfigured installation', async () => {
     const db = {
       client: {

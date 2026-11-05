@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('05A-1 Swagger Chromium: JWT wishlist list/add/merge Execute', async ({
+test('wishlist Swagger Chromium: JWT wishlist list/add/merge Execute', async ({
   page,
   request,
 }) => {

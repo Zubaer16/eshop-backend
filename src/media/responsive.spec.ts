@@ -1,6 +1,6 @@
 import { responsiveImage } from './responsive'
 
-describe('03C-2C provider-correct responsive URLs', () => {
+describe('responsive media/CDN provider-correct responsive URLs', () => {
   const cloud =
     'https://res.cloudinary.com/shop1/image/upload/v1720012345/projects/store/products/abc.jpg'
   it('provides real Cloudinary transformations only up to the original width', () => {

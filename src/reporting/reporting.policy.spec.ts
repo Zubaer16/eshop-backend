@@ -5,7 +5,7 @@ import {
   literalSearch,
 } from './reporting.policy'
 const clock = new Date('2026-11-02T12:34:56Z')
-describe('G9 reporting date and export boundaries (execution G12)', () => {
+describe('reporting reporting date and export boundaries (execution release acceptance)', () => {
   it('defaults to current UTC 30-day window and treats to as exclusive', () => {
     expect(reportWindow({}, clock)).toMatchObject({
       from: '2026-10-04',

@@ -7,7 +7,7 @@ import {
 } from './jobs.policy'
 import { jobsConfiguration } from './jobs.config'
 
-describe('G10 bounded scheduler and config policy (deferred to G12)', () => {
+describe('durable jobs bounded scheduler and config policy (deferred to release acceptance)', () => {
   it('fails closed with no automatic lanes or cron authentication', () => {
     expect(jobsConfiguration({})).toMatchObject({
       JOBS_CRON_ENABLED: false,

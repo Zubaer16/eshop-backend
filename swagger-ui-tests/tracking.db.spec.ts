@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04D-2B-2 Swagger Chromium: tracking permission-scoped Execute', async ({
+test('tracking Swagger Chromium: tracking permission-scoped Execute', async ({
   page,
   request,
 }) => {

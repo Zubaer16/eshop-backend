@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('05A-1 real DB: independent customer persistence, duplicate-safe merge, unpublished hiding', async ({
+test('wishlist real DB: independent customer persistence, duplicate-safe merge, unpublished hiding', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -142,7 +142,7 @@ test('05A-1 real DB: independent customer persistence, duplicate-safe merge, unp
   }
 })
 
-test('05A-1 real DB: 100-item limit is transactional and does not partially merge', async ({
+test('wishlist real DB: 100-item limit is transactional and does not partially merge', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

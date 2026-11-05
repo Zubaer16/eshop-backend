@@ -4,7 +4,7 @@ import {
   safeContentHref,
 } from './merchandising.policy'
 
-describe('G5 same-site CTA and publication policy (execution deferred to G12)', () => {
+describe('merchandising same-site CTA and publication policy (execution deferred to release acceptance)', () => {
   it.each([
     '/',
     '/shop?tag=sale',

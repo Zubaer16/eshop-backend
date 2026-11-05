@@ -21,7 +21,7 @@ const address = {
 
 // Both PAYMENT and RECONCILIATION use mock provider doubles in the guarded
 // real-PostgreSQL API test DB, NEVER external Stripe or live credentials.
-test('04C-2B1 real DB: Stripe-confirmed settlement, ledger/mirrors, replay, late success review', async ({
+test('verified payment settlement real DB: Stripe-confirmed settlement, ledger/mirrors, replay, late success review', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

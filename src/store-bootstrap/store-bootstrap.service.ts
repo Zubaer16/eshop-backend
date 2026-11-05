@@ -6,7 +6,7 @@ import type { PublicStoreBootstrapDto } from './store-bootstrap.dto'
 
 /** Compose the existing public projections. Never query raw profile/content/media
  * rows here: each source service enforces its own public privacy contract.
- * G3 storefront presentation fields are not authority for payment/shipping/CORS.
+ * store configuration storefront presentation fields are not authority for payment/shipping/CORS.
  */
 @Injectable()
 export class StoreBootstrapService {

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('05A-5 OpenAPI: request is JWT protected, confirmation accepts one-time token', async ({
+test('email verification OpenAPI: request is JWT protected, confirmation accepts one-time token', async ({
   request,
 }) => {
   const res = await request.get('/docs-json')

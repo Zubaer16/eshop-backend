@@ -5,7 +5,7 @@ import { CatalogTestFixture, bearer } from './catalog-test-support'
 const countryCode = 'CK'
 const currency = 'USD'
 
-test('04D-2A real DB: return quantity ceiling, inspection, exactly-once restock, damaged isolation', async ({
+test('returns and restock real DB: return quantity ceiling, inspection, exactly-once restock, damaged isolation', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -172,7 +172,7 @@ test('04D-2A real DB: return quantity ceiling, inspection, exactly-once restock,
     })
     expect(retry.status()).toBe(200)
     expect((await retry.json()).id).toBe(returnId)
-    // G1-4: only pending returns can be withdrawn; no physical or money movement.
+    // pending return withdrawal: only pending returns can be withdrawn; no physical or money movement.
     const pendingData = {
       requestId: randomUUID(),
       orderLineId: lineId,
@@ -459,7 +459,7 @@ test('04D-2A real DB: return quantity ceiling, inspection, exactly-once restock,
         })
       ).onHand,
     ).toBe(4)
-    // G1/04D-2B-1: inspected return -> separate same-SKU replacement.
+    // replacement: inspected return -> separate same-SKU replacement.
     // No money, restock or inventory allocation at authorization.
     const replacementBase = `/v1/admin/orders/${orderId}/replacements`
     const authorize = { requestId: randomUUID() }

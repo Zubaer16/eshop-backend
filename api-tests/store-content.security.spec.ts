@@ -15,7 +15,7 @@ const valid = {
   returnPolicy: '',
 }
 
-test('05B-2 security: deny non-owner, HTML, mass assignment and invalid revision without mutation', async ({
+test('store content security: deny non-owner, HTML, mass assignment and invalid revision without mutation', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

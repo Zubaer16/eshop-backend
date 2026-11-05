@@ -1,7 +1,7 @@
 import { responsiveImage } from '../media/responsive'
 /** Additive read-model: legacy persistence fields remain unchanged.
  * The English-only frontends map title/description strings to {en: ...}.
- * Do NOT invent media URLs: image fields arrive with Phase 03C.
+ * Do NOT invent media URLs: image fields come from the media projection.
  */
 export type CatalogProductRecord = {
   status: string

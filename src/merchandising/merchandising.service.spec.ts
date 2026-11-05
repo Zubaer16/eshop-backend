@@ -3,7 +3,7 @@ import type { Environment } from '../config/environment'
 import { DatabaseService } from '../database/database.service'
 import { MerchandisingService } from './merchandising.service'
 
-describe('G5 public projection safety (execution deferred to G12)', () => {
+describe('merchandising public projection safety (execution deferred to release acceptance)', () => {
   it('has a deterministic public-only revision and never exposes admin/storage fields', async () => {
     const tx = {
       $queryRaw: jest

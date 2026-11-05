@@ -35,7 +35,7 @@ function setup(port = 465) {
     } as unknown as ConfigService<Environment, true>),
   }
 }
-describe('G7 SMTP submission adapter (mocked transport; execution G12)', () => {
+describe('email delivery SMTP submission adapter (mocked transport; execution release acceptance)', () => {
   it('uses authenticated TLS and excludes attachments, URLs and protocol logging', async () => {
     const { transport, provider } = setup()
     await provider.submit(message)

@@ -8,7 +8,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('05A-4 Swagger Chromium: customer password change Try it out Execute', async ({
+test('password change Swagger Chromium: customer password change Try it out Execute', async ({
   page,
   request,
 }) => {

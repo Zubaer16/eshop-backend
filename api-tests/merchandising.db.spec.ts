@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { bannerInput, MerchandisingFixture } from './merchandising-test-support'
 import { bearer } from './catalog-test-support'
 
-test('G5 DB: draft/public windows, ordering, safe projections and revisioned content events (G12)', async ({
+test('merchandising DB: draft/public windows, ordering, safe projections and revisioned content events (release acceptance)', async ({
   request,
 }) => {
   const f = new MerchandisingFixture(request)
@@ -108,7 +108,7 @@ test('G5 DB: draft/public windows, ordering, safe projections and revisioned con
   }
 })
 
-test('G5 DB: curated order, archived product filtering, unique slug/title, immutable IDs and archive (G12)', async ({
+test('merchandising DB: curated order, archived product filtering, unique slug/title, immutable IDs and archive (release acceptance)', async ({
   request,
 }) => {
   const f = new MerchandisingFixture(request)
@@ -205,7 +205,7 @@ test('G5 DB: curated order, archived product filtering, unique slug/title, immut
   }
 })
 
-test('G5 DB: draft/shared image protection, pending deletion rescue and PROCESSING refusal (G12)', async ({
+test('merchandising DB: draft/shared image protection, pending deletion rescue and PROCESSING refusal (release acceptance)', async ({
   request,
 }) => {
   const f = new MerchandisingFixture(request)
@@ -285,7 +285,7 @@ test('G5 DB: draft/shared image protection, pending deletion rescue and PROCESSI
   }
 })
 
-test('G5 DB: VPS disk bytes are public only for an effective published banner, not draft/future/expired/archived (G12)', async ({
+test('merchandising DB: VPS disk bytes are public only for an effective published banner, not draft/future/expired/archived (release acceptance)', async ({
   request,
 }) => {
   const f = new MerchandisingFixture(request)

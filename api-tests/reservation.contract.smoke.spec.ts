@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04B-2 OpenAPI exposes customer JWT-only stock holds and no payable promise', async ({
+test('reservation OpenAPI exposes customer JWT-only stock holds and no payable promise', async ({
   request,
 }) => {
   const res = await request.get('/docs-json')

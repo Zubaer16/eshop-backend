@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-1 Swagger exposes JWT-only unpaid orders with server prices', async ({
+test('orders Swagger exposes JWT-only unpaid orders with server prices', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

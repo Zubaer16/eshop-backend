@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { Environment } from '../config/environment'
 
-describe('05A-6 password recovery invariants', () => {
+describe('password recovery password recovery invariants', () => {
   const key = 'ab'.repeat(32)
   const make = (client: unknown) =>
     new AuthService(

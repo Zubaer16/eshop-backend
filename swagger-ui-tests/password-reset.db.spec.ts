@@ -6,7 +6,7 @@ import {
 } from '../src/auth/email-verification.crypto'
 import { openSwagger, swaggerExecute } from './swagger-helper'
 
-test('05A-6 Swagger Chromium: password recovery request/confirm Try it out Execute', async ({
+test('password recovery Swagger Chromium: password recovery request/confirm Try it out Execute', async ({
   page,
   request,
 }) => {

@@ -6,7 +6,7 @@ import {
   assertSafeError,
 } from './catalog-test-support'
 
-test.describe('Phase 03B stock balances / ledger — isolated real PostgreSQL', () => {
+test.describe('Inventory stock balances / ledger — isolated real PostgreSQL', () => {
   test('opening stock, SKU list, thresholds, idempotency, rollbacks and Catalog write-block', async ({
     request,
   }) => {

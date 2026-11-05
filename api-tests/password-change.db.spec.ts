@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 import { hashPassword, verifyPassword } from '../src/auth/password'
 
-test('05A-4 real DB: password change revokes all previous JWTs/refresh tokens atomically', async ({
+test('password change real DB: password change revokes all previous JWTs/refresh tokens atomically', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)
@@ -127,7 +127,7 @@ test('05A-4 real DB: password change revokes all previous JWTs/refresh tokens at
   }
 })
 
-test('05A-4 real DB: concurrent correct password changes permit exactly one write', async ({
+test('password change real DB: concurrent correct password changes permit exactly one write', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

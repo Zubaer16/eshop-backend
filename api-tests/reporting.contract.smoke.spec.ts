@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-test('G9 OpenAPI: guarded typed reports, exact aggregates and bounded audited CSV contract (execution G12)', async ({
+test('reporting OpenAPI: guarded typed reports, exact aggregates and bounded audited CSV contract (execution release acceptance)', async ({
   request,
 }) => {
   const doc = await (await request.get('/docs-json')).json()

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04B-1 Swagger: checkout estimates and owner rate configuration are JWT-only', async ({ request }) => {
+test('checkout estimate Swagger: checkout estimates and owner rate configuration are JWT-only', async ({ request }) => {
   const res = await request.get('/docs-json')
   expect(res.status()).toBe(200)
   const doc = await res.json()

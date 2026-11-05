@@ -1,37 +1,28 @@
-# Kookaburra Backend Phase 03B — E2E / API Smoke Test Hotfix
+# Kookaburra Backend
 
-**Base:** `kookaburra-backend-full-20261025-194420.zip` plus Phase 03B Inventory patch and Phase 03B TypeScript hotfix. Apply this patch *after* both.
+Single-tenant, white-label e-commerce REST API built with NestJS, TypeScript, Prisma and PostgreSQL. The API uses the `/v1` prefix and server-side JWT/RBAC controls. Commerce, inventory, payments, fulfillment, media, store configuration, marketing, notifications, email, push and reporting share one modular backend.
 
-## What changed
+## Project workflow
 
-- `test/health.e2e-spec.ts`: add the `Inventory / Admin` Swagger tag to the expected order, assert all five Inventory OpenAPI operations and bearer security, and check missing JWT returns HTTP 401 for all five routes.
-- `api-tests/system.smoke.spec.ts`: update the expected Swagger tag list, assert all five Inventory paths, and check all five routes return HTTP 401 for unauthenticated callers.
+- Use Node.js **24.11+** and `npm ci`. Set deployment-owned environment variables using `.env.example` as a reference; do not commit actual secrets.
+- `npm run check:static`: Prisma generate/validate, TypeScript, Swagger syntax, lint and build (does **not** run the deferred regression suites).
+- `npm run alignment:audit`: read-only multi-repo frontend/backend contract audit; Admin and Storefront remain separate client applications.
+- `npm run jobs:verify:source`: read-only job coordinator source wiring audit.
+- For acceptance, the Node 24 local release runner (`npm run release:local`) runs all configured unit, API, DB, security and Chromium test suites and writes a source-bound receipt. Requires an isolated local PostgreSQL API test database. See [Release operations](docs/RELEASE_OPERATIONS.md).
 
-Only test files changed. No application code, Prisma migrations, database records, npm scripts, or auth policy changes.
+### Operational safety
 
-## Apply in PowerShell (from backend repository root)
+Never apply database changes without confirming the exact dev/test database identities, previously applied migration SHA-256 checksums, and separate verified backups. **Do not rename or remove Prisma migration folders or SQL**, even if their historical names mention implementation milestones. Do not run destructive migrations or production credential/provider operations as part of repository cleanup. Financial settlement, idempotency, reservations, staff permissions, and provider retry ambiguity must remain server-authoritative.
 
-```powershell
-cd "C:\Users\zubaer.ahmed\Desktop\git\kookaburra-backend"
-tar -xzf "$env:USERPROFILE\Downloads\kookaburra-backend-phase03b-e2e-smoke-hotfix-20261025.tar.gz" -C .
-npm run check
-npm run test:api:smoke
-```
+### Release state
 
-## Finish Phase 03B acceptance
+Implementation source is present through the release candidate tooling, but **full local and external release verification is pending**. A green static build, source audit, uploaded ZIP or CI job is **not** acceptance. The final decision depends on reviewed provider, database restore and deployment evidence as well as complete local regressions.
 
-The isolated test database must have the Phase 03B migration applied before running DB-connected tests:
+## Documentation
 
-```powershell
-npm run test:api:db:deploy
-npm run test:api:db
-npm run test:api:security
-npm run test:api:visual:smoke
-npm run test:api:visual:all
-```
+- [Release operations and acceptance](docs/RELEASE_OPERATIONS.md)
+- [API automated testing](docs/API_AUTOMATED_TESTING.md)
+- [Frontend/backend handoff](docs/FRONTEND_HANDOFF.md)
+- [Deployment decisions](docs/DEPLOYMENT_DECISIONS.md)
 
-Verification in the authoring environment: patch paths and archive integrity checked. **Full Node 24 / NestJS / PostgreSQL / Chromium tests were not run here** and must be verified locally.
-
-### Phase 03C-3 operator reconciliation
-
-For media lifecycle drift, run `npm run media:reconcile` (read-only). After reviewing the report, `npm run media:reconcile -- --apply` schedules missing/orphan deletion jobs without deleting provider files. See `docs/PHASE03C3_MEDIA_RECONCILIATION.md`.
+Historical milestone and patch notes have been removed from the active source tree during documentation hygiene. They are preserved in a **separate history archive outside this repository**. The three owner-held master documents also remain outside all repositories.

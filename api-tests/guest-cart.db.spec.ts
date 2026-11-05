@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04A-2: anonymous quantity, private ownership, exactly-once customer merge and live repricing', async ({ request }) => {
+test('guest cart: anonymous quantity, private ownership, exactly-once customer merge and live repricing', async ({ request }) => {
   const f = new CatalogTestFixture(request)
   const guestIds: string[] = []
   try {
@@ -57,7 +57,7 @@ test('04A-2: anonymous quantity, private ownership, exactly-once customer merge 
   }
 })
 
-test('04A-2: overstock/mixed-currency merge rolls back atomically; capability revocation', async ({ request }) => {
+test('guest cart: overstock/mixed-currency merge rolls back atomically; capability revocation', async ({ request }) => {
   const f = new CatalogTestFixture(request)
   const guestIds: string[] = []
   try {

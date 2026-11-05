@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 const uuid = '10000000-0000-4000-8000-000000000000'
-test('04C-2B2B test completion disabled, JWT protected, owner forbidden', async ({
+test('test payment confirmation test completion disabled, JWT protected, owner forbidden', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

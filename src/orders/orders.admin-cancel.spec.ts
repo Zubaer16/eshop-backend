@@ -21,7 +21,7 @@ const order = {
   lines: [],
 }
 
-describe('G1-3 Admin unpaid-order cancellation safety', () => {
+describe('unpaid-order cancellation Admin unpaid-order cancellation safety', () => {
   it('rejects a paid order before any inventory, audit or order mutation', async () => {
     const tx = {
       $queryRaw: jest.fn().mockResolvedValue([{ id: order.id }]),

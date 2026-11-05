@@ -3,7 +3,7 @@ import { CatalogTestFixture } from '../api-tests/catalog-test-support'
 import { decryptEmailActionToken, type EncryptedActionToken } from '../src/auth/email-verification.crypto'
 import { openSwagger, authorizeInSwagger, swaggerExecute } from './swagger-helper'
 
-test('05A-5 Swagger Chromium: email verification request and confirm Try it out Execute',async ({page, request})=>{
+test('email verification Swagger Chromium: email verification request and confirm Try it out Execute',async ({page, request})=>{
   const f=new CatalogTestFixture(request)
   let userId=''
   try {

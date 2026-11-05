@@ -11,7 +11,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('G4 Swagger Chromium: marketing coupon/campaign CRUD, revision, privacy and soft deletion', async ({
+test('promotions Swagger Chromium: marketing coupon/campaign CRUD, revision, privacy and soft deletion', async ({
   page,
   request,
 }) => {
@@ -81,7 +81,7 @@ test('G4 Swagger Chromium: marketing coupon/campaign CRUD, revision, privacy and
       201,
       {
         expectedRevision: 0,
-        title: 'G4 Browser Sale',
+        title: 'promotions Browser Sale',
         slug: f.slug('browser-sale'),
         description: 'Private campaign notes',
         status: 'SCHEDULED',
@@ -136,7 +136,7 @@ test('G4 Swagger Chromium: marketing coupon/campaign CRUD, revision, privacy and
   }
 })
 
-test('G4 Swagger Chromium: customer discounted delivery quote, hold/retry/order and forged total rejection', async ({
+test('promotions Swagger Chromium: customer discounted delivery quote, hold/retry/order and forged total rejection', async ({
   page,
   request,
 }) => {

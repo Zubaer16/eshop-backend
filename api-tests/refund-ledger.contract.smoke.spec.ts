@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2B2C1 refund request ledger OpenAPI: OWNER-only, amount safety, no provider refund endpoint', async ({
+test('refund ledger refund request ledger OpenAPI: OWNER-only, amount safety, no provider refund endpoint', async ({
   request,
 }) => {
   const r = await request.get('/docs-json')

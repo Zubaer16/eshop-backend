@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { openSwagger, swaggerExecute } from './swagger-helper'
 
-test('05B-4 Swagger Chromium: public store bootstrap Try it out Execute', async ({
+test('store bootstrap Swagger Chromium: public store bootstrap Try it out Execute', async ({
   page,
 }) => {
   await openSwagger(page)

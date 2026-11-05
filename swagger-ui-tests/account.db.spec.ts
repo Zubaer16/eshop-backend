@@ -6,7 +6,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('05A-2 Swagger Chromium: customer account profile and address Try it out Execute', async ({
+test('customer account Swagger Chromium: customer account profile and address Try it out Execute', async ({
   page,
   request,
 }) => {

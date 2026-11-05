@@ -21,7 +21,7 @@ const errors = (data: Record<string, unknown>) =>
     forbidNonWhitelisted: true,
   })
 
-describe('G3/05B-5 store operations strict DTO', () => {
+describe('store operations store operations strict DTO', () => {
   it('accepts configured public origins, ISO currency and revision', async () => {
     expect(await errors(valid)).toHaveLength(0)
     expect(

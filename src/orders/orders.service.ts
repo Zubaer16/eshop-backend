@@ -507,7 +507,7 @@ export class OrdersService {
     return changed
   }
 
-  /** G1-3: same fenced cancellation path as customer; admin never cancels a paid
+  /** unpaid-order cancellation: same fenced cancellation path as customer; admin never cancels a paid
    * order through this route. The order row is locked before testing payment state,
    * then allocation release, status, event and audit commit atomically. Retries
    * on a closed order are read-only (no duplicate inventory/audit/outbox writes).

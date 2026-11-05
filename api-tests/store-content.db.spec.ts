@@ -10,7 +10,7 @@ const content = {
   returnPolicy: 'Return terms.',
 }
 
-test('05B-2 PostgreSQL: revision-safe OWNER publishing and public projection', async ({
+test('store content PostgreSQL: revision-safe OWNER publishing and public projection', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

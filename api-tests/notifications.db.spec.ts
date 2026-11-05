@@ -7,7 +7,7 @@ import {
 } from './notifications-test-support'
 import { bearer } from './catalog-test-support'
 
-test('G6 DB: independent subscription dedupe, concurrent workers, own inbox/read/target and no transport (G12)', async ({
+test('notifications DB: independent subscription dedupe, concurrent workers, own inbox/read/target and no transport (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request)
@@ -115,7 +115,7 @@ test('G6 DB: independent subscription dedupe, concurrent workers, own inbox/read
   }
 })
 
-test('G6 DB: defaults, distinct consent, mandatory security history and concurrent preference revisions (G12)', async ({
+test('notifications DB: defaults, distinct consent, mandatory security history and concurrent preference revisions (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request)
@@ -172,7 +172,7 @@ test('G6 DB: defaults, distinct consent, mandatory security history and concurre
   }
 })
 
-test('G6 DB: failed event backoff, bounded safe failure visibility and no unverified payment success (G12)', async ({
+test('notifications DB: failed event backoff, bounded safe failure visibility and no unverified payment success (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request)
@@ -232,7 +232,7 @@ test('G6 DB: failed event backoff, bounded safe failure visibility and no unveri
   }
 })
 
-test('G6 DB: atomic threshold crossing, rollback, dedupe and operational opt-out (G12)', async ({
+test('notifications DB: atomic threshold crossing, rollback, dedupe and operational opt-out (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request)
@@ -242,13 +242,13 @@ test('G6 DB: atomic threshold crossing, rollback, dedupe and operational opt-out
       headers = bearer(owner.token)
     const cat = await request.post('/v1/admin/categories', {
       headers,
-      data: { name: 'G6 Category', slug: f.slug('stock-category') },
+      data: { name: 'notifications Category', slug: f.slug('stock-category') },
     })
     expect(cat.status()).toBe(201)
     const product = await request.post('/v1/admin/products', {
       headers,
       data: {
-        title: 'G6 Stock',
+        title: 'notifications Stock',
         slug: f.slug('stock'),
         sku: f.sku('stock'),
         currency: 'USD',
@@ -366,7 +366,7 @@ test('G6 DB: atomic threshold crossing, rollback, dedupe and operational opt-out
   }
 })
 
-test('G6 DB: real order authority, owned target and forged unpaid settlement rejection (G12)', async ({
+test('notifications DB: real order authority, owned target and forged unpaid settlement rejection (release acceptance)', async ({
   request,
 }) => {
   const f = new NotificationsFixture(request),

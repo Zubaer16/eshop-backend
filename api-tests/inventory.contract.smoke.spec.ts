@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('Phase 03B OpenAPI contract exposes five secured inventory operations and schemas', async ({
+test('Inventory OpenAPI contract exposes five secured inventory operations and schemas', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

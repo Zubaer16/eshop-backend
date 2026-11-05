@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('05A-4 OpenAPI: change-password requires customer bearer and strongly typed secret fields', async ({
+test('password change OpenAPI: change-password requires customer bearer and strongly typed secret fields', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

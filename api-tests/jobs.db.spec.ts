@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { ReportingFixture } from './reporting-test-support'
 
-test('G10 DB: additive scheduler metadata and bounded telemetry are isolated (execution G12)', async ({
+test('durable jobs DB: additive scheduler metadata and bounded telemetry are isolated (execution release acceptance)', async ({
   request,
 }) => {
   const fixture = new ReportingFixture(request)
-  const lane = 'g10-db-contract-fixture'
+  const lane = 'jobs-db-contract-fixture'
   try {
     await fixture.db.jobSchedule.deleteMany({ where: { lane } })
     const inserted = await fixture.db.jobSchedule.create({

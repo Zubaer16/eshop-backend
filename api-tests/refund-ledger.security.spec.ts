@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04C-2B2C1 refund ledger protected by JWT/OWNER and customer ownership', async ({
+test('refund ledger refund ledger protected by JWT/OWNER and customer ownership', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

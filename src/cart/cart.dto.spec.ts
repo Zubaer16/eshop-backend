@@ -31,7 +31,7 @@ describe('04A cart input boundaries', () => {
   })
 })
 
-describe('04A-2 guest merge token validation', () => {
+describe('guest cart guest merge token validation', () => {
   const valid = 'A'.repeat(43)
   it('accepts an opaque 256-bit guest token shape', async () => {
     expect(

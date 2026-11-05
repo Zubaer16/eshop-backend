@@ -39,7 +39,7 @@ export async function activeNotificationStaff(
     take: 1001,
     orderBy: { id: 'asc' },
   })
-  // Do not silently truncate a large tenant. G10 can introduce paged durable fanout.
+  // Do not silently truncate a large tenant. A paged recipient strategy must be validated separately before claiming larger fanout.
   if (users.length > 1000)
     throw new NotificationEventError('STAFF_FANOUT_LIMIT')
   return users

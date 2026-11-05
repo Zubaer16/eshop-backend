@@ -10,7 +10,7 @@ const endpoints = [
   ['delete', '/v1/account/addresses/{addressId}', '200'],
 ] as const
 
-test('05A-2 OpenAPI: account endpoints protected, tagged, typed', async ({
+test('customer account OpenAPI: account endpoints protected, tagged, typed', async ({
   request,
 }) => {
   const res = await request.get('/docs-json')

@@ -23,7 +23,7 @@ const sample = {
   updatedAt: new Date('2026-10-30T00:00:00Z'),
 }
 
-describe('G3/05B-2 store public content service', () => {
+describe('store content store public content service', () => {
   it('returns explicit unconfigured content without branding or legal fiction', async () => {
     const service = new StoreContentService({
       client: {

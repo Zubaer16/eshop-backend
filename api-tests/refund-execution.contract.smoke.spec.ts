@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('04C-2B2C2 refund execution: no public mutation endpoint, existing owner/customer contract retained', async ({
+test('Stripe TEST refund execution refund execution: no public mutation endpoint, existing owner/customer contract retained', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

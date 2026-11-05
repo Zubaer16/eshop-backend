@@ -6,7 +6,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04C-2A Swagger Chromium: test payment preparation disabled safely and JWT protected', async ({
+test('Stripe TEST payment preparation Swagger Chromium: test payment preparation disabled safely and JWT protected', async ({
   page,
   request,
 }) => {

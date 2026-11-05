@@ -34,10 +34,10 @@ function temporaryCredentials() {
   }
 }
 
-// Exercises all 8 Phase 02 auth/health routes including negative cases via Swagger UI Execute.
-// The 15 Phase 03A Catalog routes live in catalog.db.spec.ts. Only randomly
+// Exercises all 8 Core API auth/health routes including negative cases via Swagger UI Execute.
+// The 15 Catalog Catalog routes live in catalog.db.spec.ts. Only randomly
 // created test accounts are used and deleted afterward.
-test('Watch Swagger Execute the 8 Phase 02 API endpoints', async ({ page }) => {
+test('Watch Swagger Execute the 8 Core API API endpoints', async ({ page }) => {
   const prisma = testPrisma()
   let customerId: string | undefined
   let staffId: string | undefined

@@ -10,7 +10,7 @@ const address = {
   countryCode: 'US',
 }
 
-test('04C-1 strict JWT, ownership and order input rejection', async ({
+test('orders strict JWT, ownership and order input rejection', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

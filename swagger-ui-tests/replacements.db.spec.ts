@@ -7,7 +7,7 @@ import {
   swaggerExecute,
 } from './swagger-helper'
 
-test('04D-2B-1 Swagger Chromium: replacement protected endpoints and strict action DTO', async ({
+test('replacement Swagger Chromium: replacement protected endpoints and strict action DTO', async ({
   page,
   request,
 }) => {

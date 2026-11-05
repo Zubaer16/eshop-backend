@@ -27,7 +27,7 @@ const money = (
     paidDiscountMinor: '0',
   }
 
-test('G9 DB: verified collections, discount snapshots, currency separation and completed-refund event timing (G12)', async ({
+test('reporting DB: verified collections, discount snapshots, currency separation and completed-refund event timing (release acceptance)', async ({
   request,
 }) => {
   test.setTimeout(90000)
@@ -115,7 +115,7 @@ test('G9 DB: verified collections, discount snapshots, currency separation and c
   }
 })
 
-test('G9 DB: paid SKU snapshots survive catalog archive; customer and order/payment pages project only approved fields (G12)', async ({
+test('reporting DB: paid SKU snapshots survive catalog archive; customer and order/payment pages project only approved fields (release acceptance)', async ({
   request,
 }) => {
   const f = new ReportingFixture(request)
@@ -138,7 +138,7 @@ test('G9 DB: paid SKU snapshots survive catalog archive; customer and order/paym
       items: [
         {
           productId: order.productId,
-          titleSnapshot: 'G9 Snapshot 0',
+          titleSnapshot: 'reporting Snapshot 0',
           unitsSold: '1',
           merchandiseGrossMinor: '1000',
           merchandiseNetMinor: '1000',
@@ -200,7 +200,7 @@ test('G9 DB: paid SKU snapshots survive catalog archive; customer and order/paym
   }
 })
 
-test('G9 DB: current physical/held stock, threshold semantics and no parent-mirror double counting (G12)', async ({
+test('reporting DB: current physical/held stock, threshold semantics and no parent-mirror double counting (release acceptance)', async ({
   request,
 }) => {
   const f = new ReportingFixture(request)
@@ -264,7 +264,7 @@ test('G9 DB: current physical/held stock, threshold semantics and no parent-mirr
   }
 })
 
-test('G9 DB: audit filtering is literal, exports are formula-neutralized/audited and oversized export fails closed (G12)', async ({
+test('reporting DB: audit filtering is literal, exports are formula-neutralized/audited and oversized export fails closed (release acceptance)', async ({
   request,
 }) => {
   const f = new ReportingFixture(request)

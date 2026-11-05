@@ -3,7 +3,7 @@ import {
   replacementTransitionAllowed,
 } from './replacements.policy'
 
-describe('04D-2B-1 non-financial replacement policy', () => {
+describe('replacement non-financial replacement policy', () => {
   it.each(['RECEIVED_DAMAGED', 'RECEIVED_RESTOCKABLE', 'RESTOCKED'])(
     'accepts physical inspection status %s',
     (status) => expect(isInspectedReturn(status)).toBe(true),

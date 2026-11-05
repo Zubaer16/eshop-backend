@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04A-2: guest token isolation, no JWT escalation, malformed capability, unknown fields and customer-only merge', async ({ request }) => {
+test('guest cart: guest token isolation, no JWT escalation, malformed capability, unknown fields and customer-only merge', async ({ request }) => {
   const f = new CatalogTestFixture(request)
   const guestIds: string[] = []
   try {

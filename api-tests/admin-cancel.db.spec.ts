@@ -6,7 +6,7 @@ const countryCode = 'XC'
 const currency = 'USD'
 
 /** Uses isolated guarded local test DB. Payment gateway is never called. */
-test('04D-2B-3 real DB: fenced Admin unpaid cancellation, exactly-once release/audit and paid-order refusal', async ({
+test('Admin unpaid cancellation real DB: fenced Admin unpaid cancellation, exactly-once release/audit and paid-order refusal', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

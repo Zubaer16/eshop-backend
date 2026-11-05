@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
-test('04D-1 fulfillment JWT, RBAC and mass-assignment boundary', async ({
+test('fulfillment fulfillment JWT, RBAC and mass-assignment boundary', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

@@ -5,7 +5,7 @@ import {
   assertSafeError,
   bearer,
 } from './catalog-test-support'
-test('03C Media Bearer RBAC, validation and untrusted identifiers', async ({
+test('media Media Bearer RBAC, validation and untrusted identifiers', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

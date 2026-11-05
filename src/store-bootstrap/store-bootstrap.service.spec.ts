@@ -3,7 +3,7 @@ import type { StoreContentService } from '../store-content/store-content.service
 import type { StoreBrandingService } from '../store-branding/store-branding.service'
 import { StoreBootstrapService } from './store-bootstrap.service'
 
-describe('G3/05B-4 public bootstrap: explicit allowlist and no independent state', () => {
+describe('store bootstrap public bootstrap: explicit allowlist and no independent state', () => {
   const profile = {
     configured: true,
     storeName: 'Example',

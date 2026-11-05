@@ -9,7 +9,7 @@ const configured = {
   EMAIL_ADMIN_ORIGIN: 'https://admin.example.test',
   EMAIL_RECIPIENT_ALLOWLIST: 'recipient@example.test',
 }
-describe('G7 deployment-only email configuration (execution G12)', () => {
+describe('email delivery deployment-only email configuration (execution release acceptance)', () => {
   it('defaults disabled; requires complete controlled configuration and explicit recipient list', () => {
     expect(emailConfiguration({}, 'development')).toMatchObject({
       EMAIL_DELIVERY_MODE: 'disabled',

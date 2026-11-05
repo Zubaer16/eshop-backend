@@ -7,7 +7,7 @@ function context(actor: unknown) {
   } as unknown as ExecutionContext
 }
 
-describe('04D-1 fulfillment server-side permission gate', () => {
+describe('fulfillment fulfillment server-side permission gate', () => {
   const guard = new FulfillmentManageGuard()
   it('allows OWNER and server-resolved orders.manage permission', () => {
     expect(guard.canActivate(context({ role: 'OWNER', permissions: [] }))).toBe(

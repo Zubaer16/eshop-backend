@@ -16,7 +16,7 @@ async function errors(data: Record<string, unknown>) {
     forbidNonWhitelisted: true,
   })
 }
-describe('G3/05B-1 profile DTO boundaries', () => {
+describe('store profile profile DTO boundaries', () => {
   it('accepts the five safe Admin preview fields', async () => {
     expect(await errors(valid)).toHaveLength(0)
     expect(await errors({ ...valid, websiteUrl: '' })).toHaveLength(0)

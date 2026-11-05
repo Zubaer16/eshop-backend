@@ -18,7 +18,7 @@ const coupon = {
   enabled: true,
 }
 
-describe('G4 strict coupon/campaign boundaries', () => {
+describe('promotions strict coupon/campaign boundaries', () => {
   it('normalizes a single code and accepts explicit unbounded optional rules', async () => {
     const dto = plainToInstance(SaveCouponDto, {
       ...coupon,

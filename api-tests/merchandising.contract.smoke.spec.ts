@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('G5 OpenAPI: public projections, strict content contracts and bearer RBAC (execution G12)', async ({
+test('merchandising OpenAPI: public projections, strict content contracts and bearer RBAC (execution release acceptance)', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

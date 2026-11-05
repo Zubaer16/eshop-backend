@@ -6,7 +6,7 @@ import {
   renderTemplate,
   validateTemplate,
 } from './notifications.policy'
-describe('G6 notification policy (execution G12)', () => {
+describe('notifications notification policy (execution release acceptance)', () => {
   it('accepts plain text with bounded canonical placeholders and rejects HTML/control/arbitrary fields', () => {
     expect(
       renderTemplate('Order {orderId}', { orderId: 'canonical-id' }, 160),

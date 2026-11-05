@@ -49,7 +49,7 @@ const inventory: Array<
   ],
 ]
 
-test('OpenAPI exposes all 15 Phase 03A Catalog operations, security and payload contracts', async ({
+test('OpenAPI exposes all 15 Catalog Catalog operations, security and payload contracts', async ({
   request,
 }) => {
   const response = await request.get('/docs-json')

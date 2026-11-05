@@ -14,7 +14,7 @@ const address = {
   countryCode: 'BD',
 }
 
-test('05A-2 security: no bearer, staff forbidden, ownership and no mass-assignment', async ({
+test('customer account security: no bearer, staff forbidden, ownership and no mass-assignment', async ({
   request,
 }) => {
   const f = new CatalogTestFixture(request)

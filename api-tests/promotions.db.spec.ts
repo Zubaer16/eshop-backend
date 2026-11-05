@@ -9,7 +9,7 @@ import { PaymentsService } from '../src/payments/payments.service'
 import { PaymentSettlementService } from '../src/payments/payment-settlement.service'
 import { StripeTestGateway } from '../src/payments/stripe-gateway'
 
-test('G4 DB: discount quote/hold/order snapshots, retry, post-discount tax/shipping and unpaid cancellation quota release', async ({
+test('promotions DB: discount quote/hold/order snapshots, retry, post-discount tax/shipping and unpaid cancellation quota release', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)
@@ -152,7 +152,7 @@ test('G4 DB: discount quote/hold/order snapshots, retry, post-discount tax/shipp
   }
 })
 
-test('G4 DB: last global coupon slot is serialized across customers; release and expiry recover capacity without delayed cleanup', async ({
+test('promotions DB: last global coupon slot is serialized across customers; release and expiry recover capacity without delayed cleanup', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)
@@ -221,7 +221,7 @@ test('G4 DB: last global coupon slot is serialized across customers; release and
   }
 })
 
-test('G4 DB: exact category eligibility, fixed cap, disabled/expired/currency/minimum checks, zero-total and stock fences', async ({
+test('promotions DB: exact category eligibility, fixed cap, disabled/expired/currency/minimum checks, zero-total and stock fences', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)
@@ -321,7 +321,7 @@ test('G4 DB: exact category eligibility, fixed cap, disabled/expired/currency/mi
   }
 })
 
-test('G4 DB: campaign scheduling/public privacy, linked coupon gating, revision conflicts, search and soft removal', async ({
+test('promotions DB: campaign scheduling/public privacy, linked coupon gating, revision conflicts, search and soft removal', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)
@@ -437,7 +437,7 @@ test('G4 DB: campaign scheduling/public privacy, linked coupon gating, revision 
   }
 })
 
-test('G4 DB: discounted amount drives verified settlement/refund ceiling; paid refund keeps usage and never restocks', async ({
+test('promotions DB: discounted amount drives verified settlement/refund ceiling; paid refund keeps usage and never restocks', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)
@@ -603,7 +603,7 @@ test('G4 DB: discounted amount drives verified settlement/refund ceiling; paid r
   }
 })
 
-test('G4 DB: competing discounted holds cannot oversell one SKU or leave a quota claim on the losing transaction', async ({
+test('promotions DB: competing discounted holds cannot oversell one SKU or leave a quota claim on the losing transaction', async ({
   request,
 }) => {
   const f = new PromotionsFixture(request)

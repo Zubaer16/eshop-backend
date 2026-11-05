@@ -9,7 +9,7 @@ import {
 import { preferenceInput } from './notifications-test-support'
 import { PushSubmissionError } from '../src/push/push.provider'
 
-test('G8 DB: encrypted owned web registration, heartbeat, rotation, stale revision and revoke (G12)', async ({
+test('push messaging DB: encrypted owned web registration, heartbeat, rotation, stale revision and revoke (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
@@ -76,7 +76,7 @@ test('G8 DB: encrypted owned web registration, heartbeat, rotation, stale revisi
   }
 })
 
-test('G8 DB: independent event subscriber, generic private push, concurrency and authenticated target isolation (G12)', async ({
+test('push messaging DB: independent event subscriber, generic private push, concurrency and authenticated target isolation (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
@@ -128,7 +128,7 @@ test('G8 DB: independent event subscriber, generic private push, concurrency and
   }
 })
 
-test('G8 DB: invalid registration cleanup, stale token fencing, preference/allowlist and uncertain recovery (G12)', async ({
+test('push messaging DB: invalid registration cleanup, stale token fencing, preference/allowlist and uncertain recovery (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
@@ -193,7 +193,7 @@ test('G8 DB: invalid registration cleanup, stale token fencing, preference/allow
   }
 })
 
-test('G8 DB: scheduled selected audience, consent, rich inbox publication, replay-safe campaign fanout and metrics (G12)', async ({
+test('push messaging DB: scheduled selected audience, consent, rich inbox publication, replay-safe campaign fanout and metrics (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
@@ -325,7 +325,7 @@ test('G8 DB: scheduled selected audience, consent, rich inbox publication, repla
   }
 })
 
-test('G8 DB: approval freezes campaign copy; cancellation and withdrawn consent suppress pending sends (G12)', async ({
+test('push messaging DB: approval freezes campaign copy; cancellation and withdrawn consent suppress pending sends (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
@@ -382,7 +382,7 @@ test('G8 DB: approval freezes campaign copy; cancellation and withdrawn consent 
   }
 })
 
-test('G8 DB: known failures exhaust at five attempts and abandoned leases enter review without resubmission (G12)', async ({
+test('push messaging DB: known failures exhaust at five attempts and abandoned leases enter review without resubmission (release acceptance)', async ({
   request,
 }) => {
   const f = new PushFixture(request)
