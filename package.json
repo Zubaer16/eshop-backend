@@ -74,7 +74,9 @@
     "push:dispatch": "npm run build && node -r dotenv/config dist/tools/push-dispatch.js",
     "push:campaigns": "npm run build && node -r dotenv/config dist/tools/push-campaigns.js",
     "test:api:visual:push": "npm run build && node scripts/run-api-tests.cjs visual-push",
-    "test:api:visual:reporting": "npm run build && node scripts/run-api-tests.cjs visual-reporting"
+    "test:api:visual:reporting": "npm run build && node scripts/run-api-tests.cjs visual-reporting",
+    "jobs:tick": "node -r dotenv/config dist/tools/jobs-worker.js",
+    "jobs:verify:source": "node scripts/check-g10-job-alignment.cjs"
   },
   "engines": {
     "node": ">=24.11.0 <25"

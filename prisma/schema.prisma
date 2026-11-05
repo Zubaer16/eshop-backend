@@ -1427,3 +1427,34 @@ model PushDeliveryAttempt {
  @@unique([deliveryId,number])
  @@map("push_delivery_attempts")
 }
+
+// G10: independent scheduler lease and bounded outcome metadata (no customer data).
+// Native payment/email/push domain ledgers remain authoritative.
+model JobSchedule {
+  lane String @id @db.VarChar(48)
+  leaseToken String? @map("lease_token") @db.Uuid
+  leaseExpiresAt DateTime? @map("lease_expires_at")
+  nextRunAt DateTime @default(now()) @map("next_run_at")
+  lastStartedAt DateTime? @map("last_started_at")
+  lastFinishedAt DateTime? @map("last_finished_at")
+  lastOutcome String? @map("last_outcome") @db.VarChar(16)
+  consecutiveFailures Int @default(0) @map("consecutive_failures")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@index([nextRunAt])
+  @@map("job_schedules")
+}
+
+model JobRun {
+  id String @id @default(uuid()) @db.Uuid
+  lane String @db.VarChar(48)
+  leaseToken String @map("lease_token") @db.Uuid
+  trigger String @db.VarChar(16)
+  status String @db.VarChar(20)
+  processed Int @default(0)
+  errorCode String? @map("error_code") @db.VarChar(48)
+  startedAt DateTime @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  @@index([lane,startedAt,id])
+  @@index([status,startedAt])
+  @@map("job_runs")
+}

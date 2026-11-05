@@ -76,6 +76,10 @@ export async function createHttpApp(): Promise<INestApplication> {
       )
       .addTag('System / Health', 'Health liveness and status')
       .addTag(
+        'Jobs / Admin',
+        'OWNER-only safe run status, failure visibility and in-app receipt recovery',
+      )
+      .addTag(
         'Reports / Admin',
         'Authoritative bounded TEST ledger, SKU/customer/inventory reports and audited CSV',
       )

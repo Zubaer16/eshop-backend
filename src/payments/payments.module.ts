@@ -35,5 +35,10 @@ import {
     RefundExecutionService,
     CustomerCartGuard,
   ],
+  exports: [
+    PaymentSettlementService,
+    PaymentCancellationService,
+    RefundExecutionService,
+  ],
 })
 export class PaymentsModule {}

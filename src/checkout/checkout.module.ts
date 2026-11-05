@@ -26,5 +26,6 @@ import { DeliveryZonesService } from './delivery-zones.service'
     CustomerCartGuard,
     DeliveryZonesService,
   ],
+  exports: [ReservationService],
 })
 export class CheckoutModule {}

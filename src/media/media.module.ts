@@ -24,6 +24,6 @@ import { MediaRenditionService } from './media-rendition.service'
     MediaRenditionService,
     CatalogWriteGuard,
   ],
-  exports: [MediaService],
+  exports: [MediaService, MediaRenditionService],
 })
 export class MediaModule {}

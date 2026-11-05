@@ -1,7 +1,9 @@
+import { jobsConfiguration, type JobsConfig } from '../jobs/jobs.config'
 import { pushConfiguration, type PushConfig } from '../push/push.config'
 import path from 'node:path'
 import { emailConfiguration, type EmailConfig } from '../email/email.config'
-export type Environment = PushConfig &
+export type Environment = JobsConfig &
+  PushConfig &
   EmailConfig & {
     STRIPE_TEST_ENABLED: boolean
     STRIPE_TEST_CHECKOUT_ENABLED: boolean
@@ -268,6 +270,7 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
   if (stripeEnabled && (!stripeKey || !stripeWebhook))
     throw new Error('Stripe TEST mode requires a test key and webhook secret')
   return {
+    ...jobsConfiguration(raw),
     ...emailConfiguration(raw, mode),
     ...pushConfiguration(raw, mode),
     STRIPE_TEST_ENABLED: stripeEnabled,

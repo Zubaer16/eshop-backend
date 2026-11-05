@@ -43,5 +43,6 @@ import {
     ReplacementsService,
     TrackingService,
   ],
+  exports: [OrdersService],
 })
 export class OrdersModule {}

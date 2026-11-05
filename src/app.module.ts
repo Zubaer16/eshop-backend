@@ -1,3 +1,4 @@
+import { JobsModule } from './jobs/jobs.module'
 import { ReportingModule } from './reporting/reporting.module'
 import { PushModule } from './push/push.module'
 import { EmailModule } from './email/email.module'
@@ -36,6 +37,7 @@ import { StoreOperationsModule } from './store-operations/store-operations.modul
     EmailModule,
     PushModule,
     ReportingModule,
+    JobsModule,
     DatabaseModule,
     AuthModule,
     CatalogModule,
