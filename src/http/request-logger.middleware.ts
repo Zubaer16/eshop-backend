@@ -14,9 +14,14 @@ export function requestLogger(
   res.setHeader('X-Request-Id', requestId)
   res.once('finish', () => {
     const elapsedMs = Number(process.hrtime.bigint() - started) / 1_000_000
+    // Express matched route template, e.g. /v1/orders/:id, rather than
+    // the actual URL: no UUIDs, reset fragments, paths or query PII in logs.
+    // Unmatched routes are deliberately collapsed to one safe label.
+    const template: unknown = req.route?.path
     const path =
-      (req.originalUrl || req.url).split('?')[0]?.replace(/[\r\n\t]/g, '') ??
-      '/'
+      typeof template === 'string' && template.startsWith('/')
+        ? template.slice(0, 160).replace(/[\r\n\t]/g, '')
+        : '/unmatched'
     logger.log(
       `${req.method} ${path} -> ${res.statusCode} (${elapsedMs.toFixed(0)}ms) [${requestId.slice(0, 8)}]`,
     )

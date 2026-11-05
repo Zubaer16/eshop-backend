@@ -7,6 +7,9 @@ import helmet from 'helmet'
 import { AppModule } from './app.module'
 import { Environment } from './config/environment'
 import { requestLogger } from './http/request-logger.middleware'
+import { authAbuseLimiter } from './http/auth-abuse-limiter.middleware'
+import { DatabaseService } from './database/database.service'
+import type { Express } from 'express'
 
 /** Identical bootstrap for Vercel, VPS, tests, and local development. */
 export async function createHttpApp(): Promise<INestApplication> {
@@ -17,6 +20,12 @@ export async function createHttpApp(): Promise<INestApplication> {
     .get('CORS_ORIGINS', { infer: true })
     .split(',')
     .filter(Boolean)
+
+  // Accept X-Forwarded-For only from operator-declared proxy IP ranges.
+  // NEVER set "trust proxy" to true (a client can spoof the chain).
+  const trustedProxies = config.get('TRUSTED_PROXY_CIDRS', { infer: true })
+  const expressApp = app.getHttpAdapter().getInstance() as Express
+  expressApp.set('trust proxy', trustedProxies.length ? trustedProxies : false)
 
   app.use(requestLogger)
   // Swagger UI requires inline assets locally. Production CSP stays enforced.
@@ -44,6 +53,15 @@ export async function createHttpApp(): Promise<INestApplication> {
       callback(null, !origin || origins.includes(origin))
     },
   })
+  // Run after Helmet/CORS so 429/503 responses preserve browser/security headers.
+  if (config.get('AUTH_ABUSE_LIMIT_ENABLED', { infer: true })) {
+    app.use(
+      authAbuseLimiter(
+        app.get(DatabaseService),
+        config.get('JWT_ACCESS_SECRET', { infer: true }),
+      ),
+    )
+  }
   app.setGlobalPrefix('v1')
   app.useGlobalPipes(
     new ValidationPipe({

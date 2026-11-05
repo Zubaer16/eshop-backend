@@ -13,6 +13,8 @@ import {
   ApiOkResponse,
   ApiAcceptedResponse,
   ApiBadRequestResponse,
+  ApiTooManyRequestsResponse,
+  ApiServiceUnavailableResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger'
@@ -35,6 +37,12 @@ import {
 } from './auth.dto'
 
 @ApiTags('Authentication / Customer')
+@ApiTooManyRequestsResponse({
+  description: 'Credential endpoint rate limited; Retry-After seconds header',
+})
+@ApiServiceUnavailableResponse({
+  description: 'Credential throttle database unavailable (fail closed)',
+})
 @Controller('auth')
 export class CustomerAuthController {
   constructor(private readonly auth: AuthService) {}

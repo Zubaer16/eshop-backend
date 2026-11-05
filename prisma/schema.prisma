@@ -1458,3 +1458,15 @@ model JobRun {
   @@index([status,startedAt])
   @@map("job_runs")
 }
+
+// G11 / 05J. One DB-shared rate-limit bucket per HMAC(route category, client IP).
+// No relationship to Users: it cannot reveal account existence.
+model AuthAbuseBucket {
+  keyHash     String   @id @map("key_hash") @db.VarChar(64)
+  windowStart DateTime @map("window_start") @db.Timestamptz(6)
+  attempts    Int      @default(1)
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(6)
+
+  @@index([expiresAt])
+  @@map("auth_abuse_buckets")
+}

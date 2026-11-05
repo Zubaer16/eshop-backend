@@ -1,0 +1,16 @@
+.git
+.gitignore
+node_modules
+**/.env
+**/.env.*
+.env
+.env.*
+*.dump
+*.sql.gz
+validation
+coverage
+playwright-api-report
+playwright-swagger-report
+test-results*
+*.tar.gz
+*.zip

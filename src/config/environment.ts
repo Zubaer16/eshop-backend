@@ -1,6 +1,7 @@
 import { jobsConfiguration, type JobsConfig } from '../jobs/jobs.config'
 import { pushConfiguration, type PushConfig } from '../push/push.config'
 import path from 'node:path'
+import { isIP } from 'node:net'
 import { emailConfiguration, type EmailConfig } from '../email/email.config'
 export type Environment = JobsConfig &
   PushConfig &
@@ -12,6 +13,8 @@ export type Environment = JobsConfig &
     STRIPE_TEST_WEBHOOK_SECRET: string
     NODE_ENV: 'development' | 'test' | 'production'
     PORT: number
+    AUTH_ABUSE_LIMIT_ENABLED: boolean
+    TRUSTED_PROXY_CIDRS: string[]
     CORS_ORIGINS: string
     SWAGGER_ENABLED: boolean
     DATABASE_URL: string
@@ -42,6 +45,40 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
   if (mode !== 'development' && mode !== 'test' && mode !== 'production') {
     throw new Error('NODE_ENV must be development, test or production')
   }
+  // Database-shared credential rate limiting is mandatory for production.
+  const abuseFlag =
+    raw.AUTH_ABUSE_LIMIT_ENABLED ?? (mode === 'production' ? 'true' : 'false')
+  if (![true, false, 'true', 'false'].includes(abuseFlag as string | boolean))
+    throw new Error('AUTH_ABUSE_LIMIT_ENABLED must be true or false')
+  const abuseEnabled = abuseFlag === true || abuseFlag === 'true'
+  if (mode === 'production' && !abuseEnabled)
+    throw new Error('Production requires AUTH_ABUSE_LIMIT_ENABLED')
+  if (
+    raw.TRUSTED_PROXY_CIDRS != null &&
+    typeof raw.TRUSTED_PROXY_CIDRS !== 'string'
+  )
+    throw new Error('TRUSTED_PROXY_CIDRS must be a comma-separated list')
+  const trustedProxies = String(raw.TRUSTED_PROXY_CIDRS ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+  if (
+    new Set(trustedProxies).size !== trustedProxies.length ||
+    trustedProxies.length > 16 ||
+    trustedProxies.some((value) => {
+      const [address, prefix, extra] = value.split('/')
+      const family = isIP(address ?? '')
+      return (
+        !family ||
+        extra !== undefined ||
+        (prefix !== undefined &&
+          (!/^(?:0|[1-9][0-9]{0,2})$/.test(prefix) ||
+            Number(prefix) > (family === 4 ? 32 : 128) ||
+            Number(prefix) < (family === 4 ? 16 : 48)))
+      )
+    })
+  )
+    throw new Error('TRUSTED_PROXY_CIDRS must list exact IPs or CIDRs')
   const port = Number(raw.PORT ?? 4000)
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error('PORT must be an integer between 1 and 65535')
@@ -102,6 +139,10 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
   if ((mode === 'production' || db.length > 0) && secret.length < 32) {
     throw new Error('JWT_ACCESS_SECRET requires at least 32 characters')
   }
+  if (abuseEnabled && (!db || secret.length < 32))
+    throw new Error(
+      'AUTH_ABUSE_LIMIT_ENABLED requires PostgreSQL and a strong JWT secret',
+    )
   const actionKey =
     typeof raw.AUTH_ACTION_TOKEN_ENCRYPTION_KEY === 'string'
       ? raw.AUTH_ACTION_TOKEN_ENCRYPTION_KEY.trim()
@@ -296,6 +337,8 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
     MEDIA_API_SECRET: apiSecret,
     MEDIA_NAMESPACE: namespace,
     NODE_ENV: mode,
+    AUTH_ABUSE_LIMIT_ENABLED: abuseEnabled,
+    TRUSTED_PROXY_CIDRS: trustedProxies,
     PORT: port,
     CORS_ORIGINS: origins.join(','),
     SWAGGER_ENABLED: enabled,

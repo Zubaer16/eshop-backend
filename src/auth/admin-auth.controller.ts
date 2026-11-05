@@ -11,6 +11,8 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiTooManyRequestsResponse,
+  ApiServiceUnavailableResponse,
   ApiTags,
 } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
@@ -20,6 +22,12 @@ import { AuthenticatedRequest } from './auth.types'
 import { CredentialsDto, SafeUserDto, TokenPairDto } from './auth.dto'
 
 @ApiTags('Authentication / Admin')
+@ApiTooManyRequestsResponse({
+  description: 'Staff login rate limited; Retry-After seconds header',
+})
+@ApiServiceUnavailableResponse({
+  description: 'Credential throttle database unavailable (fail closed)',
+})
 @Controller('admin/auth')
 export class AdminAuthController {
   constructor(private readonly auth: AuthService) {}

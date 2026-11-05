@@ -58,8 +58,13 @@ describe('environment configuration', () => {
     ).toBe(true)
   })
   it('validates the separate email action encryption key without exposing it', () => {
-    expect(() => validateEnvironment({ AUTH_ACTION_TOKEN_ENCRYPTION_KEY: 'wrong' })).toThrow('AUTH_ACTION_TOKEN_ENCRYPTION_KEY')
-    expect(validateEnvironment({ AUTH_ACTION_TOKEN_ENCRYPTION_KEY: 'ab'.repeat(32) }).AUTH_ACTION_TOKEN_ENCRYPTION_KEY).toBe('ab'.repeat(32))
+    expect(() =>
+      validateEnvironment({ AUTH_ACTION_TOKEN_ENCRYPTION_KEY: 'wrong' }),
+    ).toThrow('AUTH_ACTION_TOKEN_ENCRYPTION_KEY')
+    expect(
+      validateEnvironment({ AUTH_ACTION_TOKEN_ENCRYPTION_KEY: 'ab'.repeat(32) })
+        .AUTH_ACTION_TOKEN_ENCRYPTION_KEY,
+    ).toBe('ab'.repeat(32))
     expect(validateEnvironment({}).AUTH_ACTION_TOKEN_ENCRYPTION_KEY).toBe('')
   })
   it('uses restrictive defaults for local dev', () => {
@@ -203,5 +208,48 @@ describe('environment configuration', () => {
     expect(() =>
       validateEnvironment({ SWAGGER_ENABLED: 'sometimes' }),
     ).toThrow()
+  })
+})
+
+describe('G11 proxy and credential limiter deployment safety (G12 suite)', () => {
+  const production = {
+    NODE_ENV: 'production',
+    CORS_ORIGINS: 'https://store.example.test',
+    DATABASE_URL: 'postgresql://example.test/commerce',
+    JWT_ACCESS_SECRET: 'z'.repeat(48),
+  }
+  it('enforces production rate limiting and preserves disabled test/dev default', () => {
+    expect(validateEnvironment(production).AUTH_ABUSE_LIMIT_ENABLED).toBe(true)
+    expect(validateEnvironment({}).AUTH_ABUSE_LIMIT_ENABLED).toBe(false)
+    expect(() =>
+      validateEnvironment({ AUTH_ABUSE_LIMIT_ENABLED: 'true' }),
+    ).toThrow('AUTH_ABUSE_LIMIT_ENABLED')
+    expect(() =>
+      validateEnvironment({ ...production, AUTH_ABUSE_LIMIT_ENABLED: 'false' }),
+    ).toThrow('AUTH_ABUSE_LIMIT_ENABLED')
+    expect(() =>
+      validateEnvironment({ AUTH_ABUSE_LIMIT_ENABLED: 'wat' }),
+    ).toThrow('AUTH_ABUSE_LIMIT_ENABLED')
+  })
+  it('rejects arbitrary proxy trust, hostnames and malformed CIDR', () => {
+    expect(
+      validateEnvironment({
+        ...production,
+        TRUSTED_PROXY_CIDRS: '127.0.0.1/32,::1/128',
+      }).TRUSTED_PROXY_CIDRS,
+    ).toEqual(['127.0.0.1/32', '::1/128'])
+    for (const value of [
+      '*',
+      'true',
+      '0.0.0.0/0,0.0.0.0/0',
+      'example.org',
+      '127.0.0.1/33',
+      '::1/129',
+      '127.0.0.1/3/4',
+    ]) {
+      expect(() =>
+        validateEnvironment({ TRUSTED_PROXY_CIDRS: value }),
+      ).toThrow()
+    }
   })
 })
