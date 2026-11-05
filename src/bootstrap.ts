@@ -12,7 +12,16 @@ import { DatabaseService } from './database/database.service'
 import type { Express } from 'express'
 
 /** Identical bootstrap for Vercel, VPS, tests, and local development. */
-export async function createHttpApp(): Promise<INestApplication> {
+export interface HttpAppOptions {
+  /** Optional read-only capture of the exact normalized HTTP OpenAPI contract. */
+  onOpenApiDocument?: (
+    document: ReturnType<typeof SwaggerModule.createDocument>,
+  ) => void
+}
+
+export async function createHttpApp(
+  options: HttpAppOptions = {},
+): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule, { rawBody: true })
   const config = app.get(ConfigService<Environment, true>)
   const mode = config.get('NODE_ENV', { infer: true })
@@ -321,6 +330,7 @@ export async function createHttpApp(): Promise<INestApplication> {
       }
       operation.security = [{ 'guest-cart-token': [] }]
     }
+    options.onOpenApiDocument?.(document)
     SwaggerModule.setup('docs', app, document, {
       swaggerOptions: {
         persistAuthorization: false,

@@ -76,7 +76,12 @@
     "test:api:visual:push": "npm run build && node scripts/run-api-tests.cjs visual-push",
     "test:api:visual:reporting": "npm run build && node scripts/run-api-tests.cjs visual-reporting",
     "jobs:tick": "node -r dotenv/config dist/tools/jobs-worker.js",
-    "jobs:verify:source": "node scripts/check-g10-job-alignment.cjs"
+    "jobs:verify:source": "node scripts/check-g10-job-alignment.cjs",
+    "g12:openapi": "npm run build && node scripts/g12-export-openapi.cjs",
+    "g12:openapi:check": "node scripts/g12-openapi-check.cjs",
+    "g12:local": "node scripts/g12-run-local.cjs",
+    "g12:gate": "node scripts/g12-rc-gate.cjs",
+    "g12:tooling:test": "node --test scripts/g12-*.spec.cjs"
   },
   "engines": {
     "node": ">=24.11.0 <25"

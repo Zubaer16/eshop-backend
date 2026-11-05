@@ -18,3 +18,7 @@ test-results-api/
 # Headed Swagger visual test artifacts
 playwright-swagger-report/
 test-results-swagger/
+
+# G12 local release-evidence receipts and generated OpenAPI (never commit)
+validation/g12-*/
+artifacts/g12/
