@@ -186,7 +186,7 @@ export class ReportingExportService {
         : result.asOf.slice(0, 10)
     return {
       body,
-      filename: 'kookaburra-' + kind + '-' + stamp + '.csv',
+      filename: 'eshop-' + kind + '-' + stamp + '.csv',
       rowCount: rows.length,
     }
   }

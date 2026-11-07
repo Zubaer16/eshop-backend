@@ -3,11 +3,11 @@ import { expect, test } from '@playwright/test'
 import { ConfigService } from '@nestjs/config'
 import { DatabaseService } from '../src/database/database.service'
 import { Environment } from '../src/config/environment'
-import { RefundExecutionService } from '../src/payments/refund-execution.service'
+import { RefundExecutionService } from '../src/payments/refunds/refund-execution.service'
 import {
   StripeTestGateway,
   VerifiedStripeRefund,
-} from '../src/payments/stripe-gateway'
+} from '../src/payments/providers/stripe-gateway'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
 
 test('Stripe TEST refund execution real DB: verified Stripe TEST refund, replay, failed refund ceiling, mismatch review, no restock', async ({

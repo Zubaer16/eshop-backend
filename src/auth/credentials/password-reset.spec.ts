@@ -1,9 +1,9 @@
 import { BadRequestException } from '@nestjs/common'
-import { AuthService } from './auth.service'
-import { DatabaseService } from '../database/database.service'
+import { AuthService } from '../auth.service'
+import { DatabaseService } from '../../database/database.service'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
-import { Environment } from '../config/environment'
+import { Environment } from '../../config/environment'
 
 describe('password recovery password recovery invariants', () => {
   const key = 'ab'.repeat(32)

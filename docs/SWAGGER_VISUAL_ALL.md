@@ -1,4 +1,4 @@
-# Visual Swagger API Tests — Kookaburra v2 Core API + catalog
+# Visual Swagger API Tests — eShop v2 Core API + catalog
 
 This patch **supersedes** `kookaburra-api-swagger-ui-headed-playwright-20261020.tar.gz`. Do not apply the old visual patch.
 

@@ -1,8 +1,8 @@
 import { ConfigService } from '@nestjs/config'
-import { DatabaseService } from '../database/database.service'
-import { Environment } from '../config/environment'
+import { DatabaseService } from '../../database/database.service'
+import { Environment } from '../../config/environment'
 import { RefundExecutionService } from './refund-execution.service'
-import { StripeTestGateway } from './stripe-gateway'
+import { StripeTestGateway } from '../providers/stripe-gateway'
 
 describe('Stripe TEST refund worker safety gate', () => {
   it('refuses a refund without explicit opt-in, before any DB/provider operation', async () => {

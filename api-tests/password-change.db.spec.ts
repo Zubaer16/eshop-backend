@@ -1,7 +1,7 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
-import { hashPassword, verifyPassword } from '../src/auth/password'
+import { hashPassword, verifyPassword } from '../src/auth/credentials/password'
 
 test('password change real DB: password change revokes all previous JWTs/refresh tokens atomically', async ({
   request,

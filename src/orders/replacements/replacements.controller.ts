@@ -20,11 +20,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import { AccessGuard } from '../auth/access.guard'
-import { AdminGuard } from '../auth/admin.guard'
-import { AuthenticatedRequest } from '../auth/auth.types'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
-import { FulfillmentManageGuard } from './fulfillment.guard'
+import { AccessGuard } from '../../auth/access.guard'
+import { AdminGuard } from '../../auth/admin.guard'
+import { AuthenticatedRequest } from '../../auth/auth.types'
+import { CustomerCartGuard } from '../../cart/cart.customer.guard'
+import { FulfillmentManageGuard } from '../fulfillment/fulfillment.guard'
 import {
   ReplacementActionDto,
   ReplacementResponseDto,

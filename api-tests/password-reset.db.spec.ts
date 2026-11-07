@@ -1,11 +1,11 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture, bearer } from './catalog-test-support'
-import { hashPassword, verifyPassword } from '../src/auth/password'
+import { hashPassword, verifyPassword } from '../src/auth/credentials/password'
 import {
   decryptEmailActionToken,
   type EncryptedActionToken,
-} from '../src/auth/email-verification.crypto'
+} from '../src/auth/credentials/email-verification.crypto'
 
 async function issued(f: CatalogTestFixture, userId: string) {
   const events = await f.db.outboxEvent.findMany({

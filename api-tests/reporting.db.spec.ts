@@ -1,5 +1,5 @@
 import type { DatabaseService } from '../src/database/database.service'
-import { RefundLedgerService } from '../src/payments/refund-ledger.service'
+import { RefundLedgerService } from '../src/payments/refunds/refund-ledger.service'
 import { randomUUID } from 'node:crypto'
 import { test } from '@playwright/test'
 import {
@@ -284,7 +284,7 @@ test('reporting DB: audit filtering is literal, exports are formula-neutralized/
     expect(csv.status()).toBe(200)
     expect(csv.headers()['content-type']).toContain('text/csv')
     expect(csv.headers()['content-disposition']).toContain(
-      'attachment; filename="kookaburra-customers-',
+      'attachment; filename="eshop-customers-',
     )
     expect(csv.headers()['x-export-row-count']).toBe('1')
     expect(await csv.text()).toContain(

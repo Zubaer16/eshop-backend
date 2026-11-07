@@ -3,7 +3,7 @@ import { CatalogTestFixture } from '../api-tests/catalog-test-support'
 import {
   decryptEmailActionToken,
   type EncryptedActionToken,
-} from '../src/auth/email-verification.crypto'
+} from '../src/auth/credentials/email-verification.crypto'
 import { openSwagger, swaggerExecute } from './swagger-helper'
 
 test('password recovery Swagger Chromium: password recovery request/confirm Try it out Execute', async ({

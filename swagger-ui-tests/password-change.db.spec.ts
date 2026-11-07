@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture } from '../api-tests/catalog-test-support'
-import { hashPassword } from '../src/auth/password'
+import { hashPassword } from '../src/auth/credentials/password'
 import {
   openSwagger,
   authorizeInSwagger,

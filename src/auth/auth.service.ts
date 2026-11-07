@@ -20,9 +20,9 @@ import {
   RefreshDto,
   TokenPairDto,
 } from './auth.dto'
-import { hashPassword, verifyPassword } from './password'
+import { hashPassword, verifyPassword } from './credentials/password'
 import { SafeUser } from './auth.types'
-import { encryptEmailActionToken } from './email-verification.crypto'
+import { encryptEmailActionToken } from './credentials/email-verification.crypto'
 
 const REFRESH_MS = 30 * 24 * 60 * 60 * 1000
 const ACCESS_SECONDS = 15 * 60

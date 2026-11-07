@@ -7,7 +7,7 @@ import { DatabaseService } from '../src/database/database.service'
 import type { Environment } from '../src/config/environment'
 import { PaymentsService } from '../src/payments/payments.service'
 import { PaymentSettlementService } from '../src/payments/payment-settlement.service'
-import { StripeTestGateway } from '../src/payments/stripe-gateway'
+import { StripeTestGateway } from '../src/payments/providers/stripe-gateway'
 
 test('promotions DB: discount quote/hold/order snapshots, retry, post-discount tax/shipping and unpaid cancellation quota release', async ({
   request,

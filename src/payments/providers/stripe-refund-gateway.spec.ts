@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config'
-import { Environment } from '../config/environment'
+import { Environment } from '../../config/environment'
 import { StripeTestGateway } from './stripe-gateway'
 
 describe('Stripe TEST refund API adapter', () => {

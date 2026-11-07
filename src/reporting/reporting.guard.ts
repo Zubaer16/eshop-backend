@@ -7,8 +7,8 @@ import {
   SetMetadata,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { PermissionsService } from '../auth/permissions.service'
-import type { PermissionKey } from '../auth/permissions'
+import { PermissionsService } from '../auth/permissions/permissions.service'
+import type { PermissionKey } from '../auth/permissions/permissions'
 import type { AuthenticatedRequest } from '../auth/auth.types'
 import { reportPermissions, type ExportKind } from './reporting.policy'
 const key = 'report-required-permissions'

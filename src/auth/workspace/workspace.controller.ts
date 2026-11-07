@@ -22,10 +22,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import { AccessGuard } from './access.guard'
-import { AdminGuard } from './admin.guard'
-import { AuthenticatedRequest } from './auth.types'
-import { PermissionsService } from './permissions.service'
+import { AccessGuard } from '../access.guard'
+import { AdminGuard } from '../admin.guard'
+import { AuthenticatedRequest } from '../auth.types'
+import { PermissionsService } from '../permissions/permissions.service'
 import { WorkspaceService } from './workspace.service'
 import {
   RolePermissionUpdateDto,
@@ -34,7 +34,7 @@ import {
   StaffResponseDto,
   StaffUpdateDto,
 } from './workspace.dto'
-import { staffRoleKeys, StaffRoleKey } from './permissions'
+import { staffRoleKeys, StaffRoleKey } from '../permissions/permissions'
 
 @ApiTags('Workspace / Admin')
 @ApiBearerAuth('access-token')

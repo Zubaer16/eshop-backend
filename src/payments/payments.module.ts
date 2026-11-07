@@ -6,16 +6,16 @@ import {
   PaymentWebhookController,
 } from './payments.controller'
 import { PaymentsService } from './payments.service'
-import { StripeTestGateway } from './stripe-gateway'
+import { StripeTestGateway } from './providers/stripe-gateway'
 import { PaymentSettlementService } from './payment-settlement.service'
 import { PaymentCancellationService } from './payment-cancellation.service'
 import { PaymentTestCompletionService } from './payment-test-completion.service'
-import { RefundLedgerService } from './refund-ledger.service'
-import { RefundExecutionService } from './refund-execution.service'
+import { RefundLedgerService } from './refunds/refund-ledger.service'
+import { RefundExecutionService } from './refunds/refund-execution.service'
 import {
   RefundLedgerOwnerController,
   RefundLedgerCustomerController,
-} from './refund-ledger.controller'
+} from './refunds/refund-ledger.controller'
 
 @Module({
   imports: [AuthModule],

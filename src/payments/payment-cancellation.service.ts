@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { Prisma } from '../generated/prisma/client'
 import { DatabaseService } from '../database/database.service'
 import { Environment } from '../config/environment'
-import { StripeTestGateway, VerifiedStripeIntentState } from './stripe-gateway'
+import { StripeTestGateway, VerifiedStripeIntentState } from './providers/stripe-gateway'
 
 const LEASE_MS = 90_000
 const MAX_ATTEMPTS = 7

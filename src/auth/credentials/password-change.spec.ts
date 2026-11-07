@@ -3,12 +3,12 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common'
-import { AuthService } from './auth.service'
+import { AuthService } from '../auth.service'
 import { hashPassword } from './password'
-import { DatabaseService } from '../database/database.service'
+import { DatabaseService } from '../../database/database.service'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
-import { Environment } from '../config/environment'
+import { Environment } from '../../config/environment'
 
 describe('password change customer password change transaction protections', () => {
   async function setup(changedCount = 1) {

@@ -1,7 +1,7 @@
 {
-  "name": "kookaburra-backend",
+  "name": "eshop-backend",
   "version": "0.2.0",
-  "description": "Independent, white-label NestJS backend and REST API for Kookaburra ecommerce",
+  "description": "Independent, white-label NestJS backend and REST API for eShop ecommerce",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

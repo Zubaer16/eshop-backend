@@ -7,8 +7,8 @@ const keys = generateKeyPairSync('rsa', { modulusLength: 2048 }),
 const values: Record<string, unknown> = {
   PUSH_DELIVERY_MODE: 'controlled',
   PUSH_RECIPIENT_USER_IDS: userId,
-  FCM_PROJECT_ID: 'kookaburra-demo',
-  FCM_CLIENT_EMAIL: 'fixture@kookaburra-demo.iam.gserviceaccount.com',
+  FCM_PROJECT_ID: 'eshop-demo',
+  FCM_CLIENT_EMAIL: 'fixture@eshop-demo.iam.gserviceaccount.com',
   FCM_PRIVATE_KEY: keys.privateKey
     .export({ type: 'pkcs8', format: 'pem' })
     .toString(),
@@ -40,13 +40,13 @@ describe('push messaging FCM HTTP v1 adapter (mocked fetch; execution release ac
         async () =>
           new Response(
             JSON.stringify({
-              name: 'projects/kookaburra-demo/messages/test-id',
+              name: 'projects/eshop-demo/messages/test-id',
             }),
           ),
       )
     const p = provider()
     expect(await p.submit(message)).toEqual({
-      messageId: 'projects/kookaburra-demo/messages/test-id',
+      messageId: 'projects/eshop-demo/messages/test-id',
     })
     await p.submit(message)
     expect(mock).toHaveBeenCalledTimes(3)
@@ -75,7 +75,7 @@ describe('push messaging FCM HTTP v1 adapter (mocked fetch; execution release ac
     })
     expect(JSON.stringify(body)).not.toContain(userId)
     expect(mock.mock.calls[1]![0]).toBe(
-      'https://fcm.googleapis.com/v1/projects/kookaburra-demo/messages:send',
+      'https://fcm.googleapis.com/v1/projects/eshop-demo/messages:send',
     )
   })
   it('supports the current explicit FID target without guessing registration identity', async () => {
@@ -89,7 +89,7 @@ describe('push messaging FCM HTTP v1 adapter (mocked fetch; execution release ac
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
-            name: 'projects/kookaburra-demo/messages/fid-message',
+            name: 'projects/eshop-demo/messages/fid-message',
           }),
         ),
       )

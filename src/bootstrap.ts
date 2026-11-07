@@ -82,7 +82,7 @@ export async function createHttpApp(
 
   if (config.get('SWAGGER_ENABLED', { infer: true })) {
     const docConfig = new DocumentBuilder()
-      .setTitle('E-commerce API')
+      .setTitle('eShop API')
       .setDescription(
         'Module-grouped documentation. Only displayed routes are implemented; database-backed authentication requires DATABASE_URL.',
       )

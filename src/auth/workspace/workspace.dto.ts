@@ -17,7 +17,7 @@ import {
   staffRoleKeys,
   PermissionKey,
   StaffRoleKey,
-} from './permissions'
+} from '../permissions/permissions'
 
 const assignableRoles = staffRoleKeys.filter((role) => role !== 'OWNER')
 export class RolePermissionUpdateDto {

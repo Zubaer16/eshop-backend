@@ -6,8 +6,8 @@ const privateKey = generateKeyPairSync('rsa', { modulusLength: 2048 })
   .toString()
 const configured = {
   PUSH_DELIVERY_MODE: 'controlled',
-  FCM_PROJECT_ID: 'kookaburra-demo',
-  FCM_CLIENT_EMAIL: 'fixture@kookaburra-demo.iam.gserviceaccount.com',
+  FCM_PROJECT_ID: 'eshop-demo',
+  FCM_CLIENT_EMAIL: 'fixture@eshop-demo.iam.gserviceaccount.com',
   FCM_PRIVATE_KEY: privateKey,
   PUSH_TOKEN_ENCRYPTION_KEY: 'a'.repeat(64),
   PUSH_RECIPIENT_USER_IDS: '312ef601-3359-4884-983b-a6f04bdc92fb',
@@ -20,7 +20,7 @@ describe('push messaging push deployment/campaign controls (execution release ac
       'disabled',
     )
     expect(pushConfiguration(configured, 'development').FCM_PROJECT_ID).toBe(
-      'kookaburra-demo',
+      'eshop-demo',
     )
     for (const patch of [
       { FCM_PRIVATE_KEY: '' },

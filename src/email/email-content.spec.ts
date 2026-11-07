@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config'
 import { createHash } from 'node:crypto'
 import { Environment } from '../config/environment'
 import { Prisma } from '../generated/prisma/client'
-import { encryptEmailActionToken } from '../auth/email-verification.crypto'
+import { encryptEmailActionToken } from '../auth/credentials/email-verification.crypto'
 import { EmailContent } from './email-content'
 import { recipientHash, validatedEmailTemplate } from './email.policy'
 const userId = 'abf322c1-2c97-4ccb-8aa6-be261e855a69',

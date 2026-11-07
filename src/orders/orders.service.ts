@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
-import { presentShipment } from './fulfillment.service'
+import { presentShipment } from './fulfillment/fulfillment.service'
 import {
   CreateOrderDto,
   OrderQueryDto,

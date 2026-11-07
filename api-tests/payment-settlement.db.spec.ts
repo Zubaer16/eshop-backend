@@ -6,7 +6,7 @@ import { DatabaseService } from '../src/database/database.service'
 import { Environment } from '../src/config/environment'
 import { PaymentsService } from '../src/payments/payments.service'
 import { PaymentSettlementService } from '../src/payments/payment-settlement.service'
-import { StripeTestGateway } from '../src/payments/stripe-gateway'
+import { StripeTestGateway } from '../src/payments/providers/stripe-gateway'
 
 const countryCode = 'CK'
 const currency = 'USD'

@@ -19,7 +19,7 @@ import {
 import { AccessGuard } from '../auth/access.guard'
 import { AdminGuard } from '../auth/admin.guard'
 import type { AuthenticatedRequest } from '../auth/auth.types'
-import { PermissionsService } from '../auth/permissions.service'
+import { PermissionsService } from '../auth/permissions/permissions.service'
 import {
   AdminCustomerDetailDto,
   AdminCustomersPageDto,

@@ -4,10 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { DatabaseService } from '../database/database.service'
-import { hashPassword } from './password'
+import { DatabaseService } from '../../database/database.service'
+import { hashPassword } from '../credentials/password'
 import { StaffCreateDto, StaffUpdateDto } from './workspace.dto'
-import { defaultStaffRole } from './permissions'
+import { defaultStaffRole } from '../permissions/permissions'
 
 @Injectable()
 export class WorkspaceService {

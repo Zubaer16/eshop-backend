@@ -5,25 +5,16 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
-const { evaluate } = require('./check-frontend-alignment.cjs')
+const { evaluate, resolveRoots } = require('./check-frontend-alignment.cjs')
 
 test('cross-repo audit reports actual baseline without claiming runtime integration', (t) => {
-  const roots = {
-    backend:
-      process.env.KOOKABURRA_BACKEND_DIR || path.resolve(__dirname, '..'),
-    admin:
-      process.env.KOOKABURRA_ADMIN_DIR ||
-      path.resolve(__dirname, '../../kookaburra-admin'),
-    storefront:
-      process.env.KOOKABURRA_STOREFRONT_DIR ||
-      path.resolve(__dirname, '../../kookaburra-storefront'),
-  }
+  const roots = resolveRoots()
   if (
     !fs.existsSync(path.join(roots.admin, 'lib/types.ts')) ||
     !fs.existsSync(path.join(roots.storefront, 'lib/api/contracts.ts'))
   ) {
     t.skip(
-      'Set KOOKABURRA_ADMIN_DIR and KOOKABURRA_STOREFRONT_DIR for cross-repo checks',
+      'Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks',
     )
     return
   }
@@ -90,7 +81,7 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
 })
 
 test('missing projects are never treated as aligned', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kookaburra-alignment-'))
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eshop-alignment-'))
   try {
     const result = evaluate({ backend: dir, admin: dir, storefront: dir })
     assert.ok(result.missing.length >= 3)
@@ -98,4 +89,26 @@ test('missing projects are never treated as aligned', () => {
   } finally {
     fs.rmSync(dir, { recursive: true, force: true })
   }
+})
+
+test('eShop directory settings override compatible legacy settings', () => {
+  const roots = resolveRoots({
+    ESHOP_BACKEND_DIR: '/eshop/backend',
+    KOOKABURRA_BACKEND_DIR: '/legacy/backend',
+    ESHOP_ADMIN_DIR: '/eshop/admin',
+    ESHOP_STOREFRONT_DIR: '/eshop/storefront',
+    KOOKABURRA_ADMIN_DIR: '/legacy/admin',
+    KOOKABURRA_STOREFRONT_DIR: '/legacy/storefront',
+  })
+  assert.equal(roots.backend, path.resolve('/eshop/backend'))
+  assert.equal(roots.admin, path.resolve('/eshop/admin'))
+  assert.equal(roots.storefront, path.resolve('/eshop/storefront'))
+  const legacy = resolveRoots({
+    KOOKABURRA_BACKEND_DIR: '/legacy/backend',
+    KOOKABURRA_ADMIN_DIR: '/legacy/admin',
+    KOOKABURRA_STOREFRONT_DIR: '/legacy/storefront',
+  })
+  assert.equal(legacy.backend, path.resolve('/legacy/backend'))
+  assert.equal(legacy.admin, path.resolve('/legacy/admin'))
+  assert.equal(legacy.storefront, path.resolve('/legacy/storefront'))
 })

@@ -14,7 +14,7 @@ import {
   decryptEmailActionToken,
   encryptEmailActionToken,
   type EncryptedActionToken,
-} from '../auth/email-verification.crypto'
+} from '../auth/credentials/email-verification.crypto'
 import { RegisterPushDeviceDto } from './push.dto'
 import type { SafeUser } from '../auth/auth.types'
 const projection = {

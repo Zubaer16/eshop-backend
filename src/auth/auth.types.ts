@@ -1,5 +1,5 @@
 import type { UserRole } from '../generated/prisma/enums'
-import type { StaffRoleKey, PermissionKey } from './permissions'
+import type { StaffRoleKey, PermissionKey } from './permissions/permissions'
 
 export type SafeUser = {
   id: string

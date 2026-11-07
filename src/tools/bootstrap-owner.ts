@@ -2,7 +2,7 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../generated/prisma/client'
-import { hashPassword } from '../auth/password'
+import { hashPassword } from '../auth/credentials/password'
 
 async function main(): Promise<void> {
   const url = process.env.DATABASE_URL

@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt'
 import { DatabaseService } from '../database/database.service'
 import { Environment } from '../config/environment'
 import { AuthenticatedRequest } from './auth.types'
-import { PermissionsService } from './permissions.service'
+import { PermissionsService } from './permissions/permissions.service'
 
 @Injectable()
 export class AccessGuard implements CanActivate {

@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common'
-import { AuthenticatedRequest } from '../auth/auth.types'
+import { AuthenticatedRequest } from '../../auth/auth.types'
 
 @Injectable()
 export class FulfillmentManageGuard implements CanActivate {

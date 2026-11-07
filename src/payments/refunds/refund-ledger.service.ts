@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { Prisma } from '../generated/prisma/client'
-import { DatabaseService } from '../database/database.service'
+import { Prisma } from '../../generated/prisma/client'
+import { DatabaseService } from '../../database/database.service'
 import { CreateRefundRequestDto } from './refund-ledger.dto'
 
 const BLOCKING_STATUSES = [

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { CatalogTestFixture } from '../api-tests/catalog-test-support'
-import { decryptEmailActionToken, type EncryptedActionToken } from '../src/auth/email-verification.crypto'
+import { decryptEmailActionToken, type EncryptedActionToken } from '../src/auth/credentials/email-verification.crypto'
 import { openSwagger, authorizeInSwagger, swaggerExecute } from './swagger-helper'
 
 test('email verification Swagger Chromium: email verification request and confirm Try it out Execute',async ({page, request})=>{

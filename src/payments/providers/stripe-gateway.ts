@@ -1,6 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { Environment } from '../config/environment'
+import { Environment } from '../../config/environment'
 
 export type PreparedStripeIntent = { id: string; status: string }
 

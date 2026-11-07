@@ -72,7 +72,7 @@ function baseEnv() {
   return {
     ...env,
     PUSH_DELIVERY_MODE: 'disabled',
-    FCM_PROJECT_ID: 'kookaburra-api-test',
+    FCM_PROJECT_ID: 'eshop-api-test',
     FCM_CLIENT_EMAIL: '',
     FCM_PRIVATE_KEY: '',
     PUSH_TOKEN_ENCRYPTION_KEY: randomBytes(32).toString('hex'),

@@ -4,7 +4,7 @@ import { Environment } from '../config/environment'
 import {
   decryptEmailActionToken,
   type EncryptedActionToken,
-} from '../auth/email-verification.crypto'
+} from '../auth/credentials/email-verification.crypto'
 import {
   activeNotificationStaff,
   resolveNotificationEvent,

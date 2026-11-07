@@ -1,5 +1,5 @@
 import { Prisma } from '../generated/prisma/client'
-import { defaultStaffRole } from '../auth/permissions'
+import { defaultStaffRole } from '../auth/permissions/permissions'
 import {
   NotificationEventType,
   notificationRules,

@@ -4,7 +4,7 @@ import { CatalogTestFixture, bearer } from './catalog-test-support'
 import {
   decryptEmailActionToken,
   type EncryptedActionToken,
-} from '../src/auth/email-verification.crypto'
+} from '../src/auth/credentials/email-verification.crypto'
 
 const digest = (token: string) =>
   createHash('sha256').update(token).digest('hex')

@@ -5,7 +5,7 @@ import { Prisma } from '../generated/prisma/client'
 import {
   decryptEmailActionToken,
   type EncryptedActionToken,
-} from '../auth/email-verification.crypto'
+} from '../auth/credentials/email-verification.crypto'
 import {
   activeNotificationStaff,
   resolveNotificationEvent,

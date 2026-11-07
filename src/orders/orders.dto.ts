@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { OrderFulfillmentResponseDto } from './fulfillment.dto'
+import { OrderFulfillmentResponseDto } from './fulfillment/fulfillment.dto'
 import { Type } from 'class-transformer'
 import {
   IsDefined,

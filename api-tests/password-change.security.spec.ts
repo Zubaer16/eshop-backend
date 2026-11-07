@@ -5,7 +5,7 @@ import {
   bearer,
   assertSafeError,
 } from './catalog-test-support'
-import { hashPassword } from '../src/auth/password'
+import { hashPassword } from '../src/auth/credentials/password'
 
 test('password change security: authentication, role isolation, secret validation and wrong password', async ({
   request,

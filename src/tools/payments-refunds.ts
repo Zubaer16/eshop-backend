@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from '../app.module'
-import { RefundExecutionService } from '../payments/refund-execution.service'
+import { RefundExecutionService } from '../payments/refunds/refund-execution.service'
 
 async function main() {
   const app = await NestFactory.createApplicationContext(AppModule, {

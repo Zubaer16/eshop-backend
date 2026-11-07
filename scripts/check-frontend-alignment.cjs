@@ -299,16 +299,33 @@ function evaluate(roots) {
 }
 
 function resolveRoots(env = process.env) {
-  const backend = path.resolve(__dirname, '..')
+  const backend = path.resolve(
+    env.ESHOP_BACKEND_DIR ||
+      env.KOOKABURRA_BACKEND_DIR ||
+      path.join(__dirname, '..'),
+  )
   const parent = path.dirname(backend)
   return {
     backend,
     admin: path.resolve(
-      env.KOOKABURRA_ADMIN_DIR || path.join(parent, 'kookaburra-admin'),
+      env.ESHOP_ADMIN_DIR ||
+        env.KOOKABURRA_ADMIN_DIR ||
+        path.join(
+          parent,
+          fs.existsSync(path.join(parent, 'eshop-admin-frontend'))
+            ? 'eshop-admin-frontend'
+            : 'kookaburra-admin',
+        ),
     ),
     storefront: path.resolve(
-      env.KOOKABURRA_STOREFRONT_DIR ||
-        path.join(parent, 'kookaburra-storefront'),
+      env.ESHOP_STOREFRONT_DIR ||
+        env.KOOKABURRA_STOREFRONT_DIR ||
+        path.join(
+          parent,
+          fs.existsSync(path.join(parent, 'eshop-user-frontend'))
+            ? 'eshop-user-frontend'
+            : 'kookaburra-storefront',
+        ),
     ),
   }
 }

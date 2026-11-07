@@ -22,9 +22,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import { AccessGuard } from '../auth/access.guard'
-import { AdminGuard } from '../auth/admin.guard'
-import { AuthenticatedRequest } from '../auth/auth.types'
+import { AccessGuard } from '../../auth/access.guard'
+import { AdminGuard } from '../../auth/admin.guard'
+import { AuthenticatedRequest } from '../../auth/auth.types'
 import {
   FulfillmentActionDto,
   FulfillmentOrderQueryDto,
@@ -33,8 +33,8 @@ import {
 } from './fulfillment.dto'
 import { FulfillmentManageGuard } from './fulfillment.guard'
 import { FulfillmentService } from './fulfillment.service'
-import { OrdersService } from './orders.service'
-import { OrderResponseDto } from './orders.dto'
+import { OrdersService } from '../orders.service'
+import { OrderResponseDto } from '../orders.dto'
 
 @ApiTags('Orders / Admin')
 @ApiBearerAuth('access-token')

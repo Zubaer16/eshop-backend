@@ -1,6 +1,30 @@
-# Kookaburra Backend
+# eShop Backend
+
+Product name: **eShop**; package name: `eshop-backend`. Existing checkout folders and persisted technical identifiers remain compatible.
 
 Single-tenant, white-label e-commerce REST API built with NestJS, TypeScript, Prisma and PostgreSQL. The API uses the `/v1` prefix and server-side JWT/RBAC controls. Commerce, inventory, payments, fulfillment, media, store configuration, marketing, notifications, email, push and reporting share one modular backend.
+
+## Source structure
+
+Keep features in their own `src/<feature>/` module. Larger modules group related responsibilities into subfolders:
+
+```text
+src/
+  auth/
+    credentials/
+    permissions/
+    workspace/
+  orders/
+    fulfillment/
+    replacements/
+    returns/
+    tracking/
+  payments/
+    providers/
+    refunds/
+```
+
+Module wiring and core feature files stay at the module root. Keep unit `*.spec.ts` files beside the source they cover. API integration/security tests stay in `api-tests/`, Nest E2E tests in `test/`, and browser tests in `swagger-ui-tests/`. Smaller modules stay flat until grouping improves navigation; a subfolder does not require a new Nest module.
 
 ## Project workflow
 
@@ -16,7 +40,7 @@ Never apply database changes without confirming the exact dev/test database iden
 
 ### Release state
 
-Implementation source is present through the release candidate tooling, but **full local and external release verification is pending**. A green static build, source audit, uploaded ZIP or CI job is **not** acceptance. The final decision depends on reviewed provider, database restore and deployment evidence as well as complete local regressions.
+**Current local release verification passed on 2026-11-07:** all 12 runner steps exited zero, before removal of a temporary convenience command alias. The suite implementations are unchanged; this package-script change invalidates the prior source-bound receipt. See ignored `validation/release-local/receipt.json`; future source changes require fresh evidence. **External release verification remains pending:** the reviewed provider, database restore, deployment and security evidence manifest is not present. Local PASS does not replace the separate `npm run release:gate` decision.
 
 ## Documentation
 

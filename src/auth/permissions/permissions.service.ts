@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { DatabaseService } from '../database/database.service'
+import { DatabaseService } from '../../database/database.service'
 import {
   defaultStaffRole,
   isPermissionKey,
@@ -12,7 +12,7 @@ import {
   StaffRoleKey,
   PermissionKey,
 } from './permissions'
-import type { UserRole } from '../generated/prisma/enums'
+import type { UserRole } from '../../generated/prisma/enums'
 
 @Injectable()
 export class PermissionsService {

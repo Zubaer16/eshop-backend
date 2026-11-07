@@ -8,8 +8,8 @@ import { ConfigService } from '@nestjs/config'
 import { Prisma } from '../generated/prisma/client'
 import { DatabaseService } from '../database/database.service'
 import { Environment } from '../config/environment'
-import { StripeTestGateway } from './stripe-gateway'
-import { verifyStripeEvent } from './stripe-signature'
+import { StripeTestGateway } from './providers/stripe-gateway'
+import { verifyStripeEvent } from './providers/stripe-signature'
 
 const RETRY_LEASE_MS = 45_000
 // Stripe keys are ordinarily retained 24h. Fail closed earlier rather than

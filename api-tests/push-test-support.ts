@@ -16,8 +16,8 @@ export const pushConfig = (ids: string[]) =>
   new ConfigService<Environment, true>(
     validateEnvironment({
       PUSH_DELIVERY_MODE: 'controlled',
-      FCM_PROJECT_ID: 'kookaburra-api-test',
-      FCM_CLIENT_EMAIL: 'fixture@kookaburra-api-test.iam.gserviceaccount.com',
+      FCM_PROJECT_ID: 'eshop-api-test',
+      FCM_CLIENT_EMAIL: 'fixture@eshop-api-test.iam.gserviceaccount.com',
       FCM_PRIVATE_KEY: key,
       PUSH_TOKEN_ENCRYPTION_KEY: process.env.PUSH_TOKEN_ENCRYPTION_KEY,
       PUSH_RECIPIENT_USER_IDS: ids.join(','),
@@ -34,7 +34,7 @@ export class RecordingPushProvider extends PushProvider {
     if (this.failure) throw this.failure
     this.messages.push(message)
     return {
-      messageId: 'projects/kookaburra-api-test/messages/' + message.deliveryId,
+      messageId: 'projects/eshop-api-test/messages/' + message.deliveryId,
     }
   }
 }

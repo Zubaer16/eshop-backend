@@ -8,7 +8,7 @@
 ## Confirmed current state
 
 - Admin is Next.js 15 using browser-local Zustand persisted state (`lib/store.ts`), `lib/fixtures.ts`, and custom components for products, variants, categories, inventory, orders, customers, shipping, promotions, content, staff, and reports.
-- Storefront is Next.js 15, using browser-local cart/wishlist and sample catalog. `lib/api/client.ts` is a **dormant** transport with `NEXT_PUBLIC_KOOKABURRA_API_URL` and `/v1/...` path restriction; no live backend is connected.
+- Storefront is Next.js 15, using browser-local cart/wishlist and sample catalog. `lib/api/client.ts` is a **dormant** transport with `NEXT_PUBLIC_ESHOP_API_URL` (legacy `NEXT_PUBLIC_KOOKABURRA_API_URL` also works) and `/v1/...` path restriction; no live backend is connected.
 - Both contain **draft** contract projections (`storefront/lib/api/contracts.ts`; `admin/lib/compatibility-contract.ts`). They are not generated shared types and do not prove real data parity.
 - Storefront's `ApiMoney` uses `{ amountMinor, currency: 'USD' }`; category names, product titles and descriptions currently use `{ en: string }`; variants use `options: Record<string,string>`; nested categories use `parentId`.
 - Storefront expects `ApiCartItem` with optional `variantId`, `QuoteRequest` with ISO-address `destination` and `items`, and quote line/total money in minor units. The client must never supply authoritative price or payment state.

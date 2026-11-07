@@ -1,4 +1,4 @@
-# Kookaburra v2 — Storefront/Admin/Backend contract alignment (25 Oct 2026)
+# eShop v2 — Storefront/Admin/Backend contract alignment (25 Oct 2026)
 
 **Status: architecture/contract audit started; LIVE FRONTEND INTEGRATION NOT DONE.**
 This phase makes integration gaps explicit _before_ introducing future backend modules. It deliberately makes no schema changes, UI changes, auth changes, catalog endpoint changes, or migrations. Never treat this audit as proof of runtime compatibility.
@@ -27,7 +27,7 @@ Do **not** retrofit backend security, prices, stock or identifiers to browser-lo
 | Variants          | `options` JSON with size/color, per-variant SKU/price/stock         | `{size,color,stock}`                                                   | `{options:{size?,color?},stock}`                            | Map to correct variant ID; preserve color-only and size-only support                                                                  |
 | Inventory         | `InventoryBalance.id`, delta/reason/request UUID, per-SKU threshold | `adjustStock(productId, delta,note, variantId)`; low stock `<10`       | local display stock/availability                            | Resolve balance ID; generate idempotency UUID; update from authoritative balance; use threshold                                       |
 | Product lifecycle | `DRAFT / ACTIVE / ARCHIVED`                                         | `Active / Draft` only                                                  | only active public products                                 | Add explicit archived UI handling in integration adapter; NEVER silently treat archived as draft                                      |
-| Media             | No media asset model/API yet                                        | image `{id,url,alt}` field                                             | product gallery images and alt text                         | Define provider IDs, media references, ordering, alt text, safe deletion in Media                                                 |
+| Media             | No media asset model/API yet                                        | image `{id,url,alt}` field                                             | product gallery images and alt text                         | Define provider IDs, media references, ordering, alt text, safe deletion in Media                                                     |
 | Authentication    | Returns access/refresh tokens, protects with bearer JWT             | preview-only staff roles/permissions, no live sign-in                  | `apiRequest` sends `credentials: include`, no bearer header | **P0 design decision**: secure HttpOnly cookie/BFF flow, CSRF/origin controls, token rotation/storage; do not use localStorage tokens |
 | Staff roles       | `CUSTOMER/STAFF/ADMIN/OWNER` coarse permission                      | Owner, Manager, Catalog Editor, Support, Analyst and permission matrix | customer login preview                                      | **P0 design decision**: persistent backend role/permission mapping with migration plan                                                |
 | Cart/orders       | Not implemented                                                     | orders & refunds local only                                            | local cart + quote DTO draft                                | Commerce contract driven by both UIs; backend prices and order snapshots win                                                          |
@@ -56,7 +56,7 @@ Do **not** retrofit backend security, prices, stock or identifiers to browser-lo
 
 ## Running the audit (from backend folder)
 
-Ensure repos sit alongside each other as `kookaburra-backend`, `kookaburra-admin`, `kookaburra-storefront`, or set `KOOKABURRA_ADMIN_DIR` / `KOOKABURRA_STOREFRONT_DIR` to point to their real locations.
+Ensure repos sit alongside each other as `kookaburra-backend`, `kookaburra-admin`, `kookaburra-storefront`, or set `ESHOP_ADMIN_DIR` / `ESHOP_STOREFRONT_DIR` (legacy variable names also work) to point to their real locations.
 
 ```powershell
 npm run alignment:audit

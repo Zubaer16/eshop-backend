@@ -9,7 +9,7 @@ import { Environment } from '../src/config/environment'
 import {
   StripeTestGateway,
   VerifiedStripeIntentState,
-} from '../src/payments/stripe-gateway'
+} from '../src/payments/providers/stripe-gateway'
 
 const countryCode = 'CK'
 const currency = 'USD'

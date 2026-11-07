@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { DatabaseService } from '../database/database.service'
-import { Prisma } from '../generated/prisma/client'
+import { DatabaseService } from '../../database/database.service'
+import { Prisma } from '../../generated/prisma/client'
 
 export type TrackingKind = 'ORDER' | 'SHIPMENT' | 'RETURN' | 'REPLACEMENT'
 export type TrackingEvent = {
