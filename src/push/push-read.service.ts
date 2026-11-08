@@ -4,6 +4,7 @@ import { DatabaseService } from '../database/database.service'
 import { Environment } from '../config/environment'
 import type { SafeUser } from '../auth/auth.types'
 import { publicPushTarget } from './push-targets'
+import { webNavigation } from '../notifications/web-navigation'
 import { PushDeliveryQueryDto, PushPagingDto } from './push.dto'
 @Injectable()
 export class PushReadService {
@@ -63,6 +64,15 @@ export class PushReadService {
       skip: ((q.page ?? 1) - 1) * (q.limit ?? 20),
       take: q.limit ?? 20,
     })
+  }
+  async navigation(actor: SafeUser, id: string) {
+    const target = await this.target(actor, id)
+    return webNavigation(
+      this.db.client,
+      target.targetType,
+      target.targetId,
+      target.surface,
+    )
   }
   async target(actor: SafeUser, id: string) {
     const row = await this.db.client.pushDelivery.findFirst({

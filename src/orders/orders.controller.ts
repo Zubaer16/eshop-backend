@@ -27,6 +27,7 @@ import { AuthenticatedRequest } from '../auth/auth.types'
 import { CustomerCartGuard } from '../cart/cart.customer.guard'
 import { CreateOrderDto, OrderQueryDto, OrderResponseDto } from './orders.dto'
 import { OrdersService } from './orders.service'
+import { CustomerOrderPageDto } from './orders.response'
 
 @ApiTags('Orders / Customer')
 @ApiBearerAuth('access-token')
@@ -60,6 +61,7 @@ export class OrdersCustomerController {
   }
 
   @Get()
+  @ApiOkResponse({ type: CustomerOrderPageDto })
   @ApiOperation({
     summary: 'List own unpaid, cancelled and expired order snapshots',
   })

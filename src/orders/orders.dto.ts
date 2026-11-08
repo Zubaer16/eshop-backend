@@ -128,6 +128,7 @@ export class OrderLineResponseDto {
 }
 
 export class OrderResponseDto {
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date
   @ApiProperty({ format: 'uuid' }) id!: string
   @ApiProperty({ format: 'uuid' }) reservationId!: string
   @ApiProperty({ format: 'uuid' }) requestId!: string

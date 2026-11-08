@@ -35,6 +35,7 @@ import { NotificationOwnerGuard } from '../notifications/notifications.controlle
 import { PushDevicesService } from './push-devices.service'
 import { PushCampaignsService } from './push-campaigns.service'
 import { PushReadService } from './push-read.service'
+import { WebNotificationNavigationDto } from '../notifications/web-navigation'
 import {
   ApprovePushCampaignDto,
   PushCampaignDto,
@@ -111,6 +112,15 @@ export class PushDevicesController {
     @Query() q: PushRevisionDto,
   ) {
     return this.devices.revoke(req.authUser!.id, id, q.expectedRevision)
+  }
+  @Get('deliveries/:id/navigation')
+  @Header('Cache-Control', 'no-store')
+  @ApiOkResponse({ type: WebNotificationNavigationDto })
+  navigation(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.read.navigation(req.authUser!, id)
   }
   @Get('deliveries/:id/target')
   @Header('Cache-Control', 'no-store')

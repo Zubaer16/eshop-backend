@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "1.5.0",
+  "version": "1.7.0",
   "date": "2026-11-08",
   "purpose": "Source-grounded web integration contract and delivery status; focused live auth validation is separate from full product/provider acceptance",
   "apiPrefix": "/v1",
@@ -38,12 +38,12 @@
     {
       "step": 6,
       "title": "Order operations, fulfillment, tracking, returns, replacements and refunds",
-      "status": "NOT_STARTED"
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "step": 7,
       "title": "Content/settings, messaging, staff, reports and operations",
-      "status": "NOT_STARTED"
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "step": 8,
@@ -378,15 +378,23 @@
       "operationPrefixes": ["/v1/orders", "/v1/admin/orders"],
       "authorization": "Customer ownership; orders.manage for staff actions",
       "notes": [
-        "Current order list endpoints expose page/limit only; existing global UI search/status filters need an additive bounded server query or explicit UI capability reduction, not filtering one page and pretending it is the complete dataset.",
+        "Live order lists use existing server page/limit and exact UUID lookup; global text/status/date/customer filters are explicitly unavailable, with no fake single-page global filtering.",
         "Order payment status and shipment fulfillment status are independent; UI Pending/Processing/Shipped/Delivered is not a reversible map to Order.status.",
         "One shipment/all lines only in approved v1; no split shipping. Paid refunds are separate from unpaid cancellation.",
-        "Dedicated return/replacement/tracking actions are assigned to their own features."
+        "Dedicated return/replacement/tracking actions are assigned to their own features.",
+        "Step 6 source connects owned history/detail/unpaid cancellation and staff one-shipment fulfillment. Typed customer/Admin page/detail schemas mirror existing projections; financial and physical states remain distinct. Full tests deferred."
       ],
       "sourceFiles": [
         "src/orders/orders.controller.ts",
+        "src/orders/orders.response.ts",
         "src/orders/fulfillment/fulfillment.controller.ts",
-        "../eshop-admin-frontend/components/admin/order-details.tsx"
+        "../eshop-user-frontend/components/orders/orders.tsx",
+        "../eshop-user-frontend/components/orders/resource.tsx",
+        "../eshop-user-frontend/lib/api/orders.ts",
+        "../eshop-user-frontend/app/account/orders/[orderId]/page.tsx",
+        "../eshop-admin-frontend/components/orders/orders.tsx",
+        "web-integration-tests/orders.spec.ts",
+        "api-tests/web-orders.contract.smoke.spec.ts"
       ]
     },
     {
@@ -432,26 +440,37 @@
         "owned tracking",
         "refund request/history"
       ],
-      "operationPrefixes": ["/v1/orders", "/v1/admin/orders"],
+      "operationPrefixes": [
+        "/v1/orders",
+        "/v1/admin/orders",
+        "/v1/payments/orders",
+        "/v1/admin/payments/orders"
+      ],
       "authorization": "Customer return initiation/ownership; orders.manage inspection/fulfillment; OWNER refund requests",
       "notes": [
         "Admin preview requestReturn has no staff return-initiation API: move initiation to the customer flow instead of impersonating a customer.",
         "Return approval, inspection and restock are separate. Refunding never implies stock return. Replacement is same-SKU only; cross-SKU exchange is post-v1.",
         "Tracking is authenticated own UUID-based lookup; do not introduce public email/order-number tracking from the fixture UI.",
-        "No direct generic status setter, manual paid flag or local successful-refund record is allowed."
+        "No direct generic status setter, manual paid flag or local successful-refund record is allowed.",
+        "Step 6 source implements customer requests/withdrawal, staff approval/rejection/inspection/restock, inspected same-SKU replacement lifecycle, owned tracking and OWNER-only refund approval/history. Frozen UUID/body explicit retry/reconciliation; no provider execution, local success or stock-by-refund inference. Full validation deferred."
       ],
       "sourceFiles": [
         "src/orders/returns/returns.controller.ts",
         "src/orders/replacements/replacements.controller.ts",
         "src/orders/tracking/tracking.controller.ts",
-        "../eshop-admin-frontend/lib/order-workflow.ts"
+        "src/payments/refunds/refund-ledger.controller.ts",
+        "../eshop-user-frontend/components/orders/orders.tsx",
+        "../eshop-user-frontend/components/orders/resource.tsx",
+        "../eshop-admin-frontend/components/orders/orders.tsx",
+        "../eshop-admin-frontend/components/orders/resource.tsx",
+        "web-integration-tests/orders.spec.ts"
       ]
     },
     {
       "id": "merchandising",
       "step": 7,
       "title": "Homepage, collections and safe publication",
-      "userRoutes": ["/"],
+      "userRoutes": ["/", "/collections/[slug]"],
       "adminRoutes": ["/content"],
       "actions": [
         "banner/collection CRUD",
@@ -468,11 +487,17 @@
       "authorization": "marketing.manage or OWNER for edits; public effective publication only",
       "notes": [
         "Existing enabled/position/subtitle/imageUrl fields map to status/schedule/sort/verified media IDs; no silent publication.",
-        "Collection detail route is missing. Static homepage layout may remain presentation while data comes from the API."
+        "Collection detail route is missing. Static homepage layout may remain presentation while data comes from the API.",
+        "Published bounded homepage/collection cards and revision-aware staff publication/archive source is implemented. Real canonical ACTIVE products/images, no fixture fallback; full validation deferred."
       ],
       "sourceFiles": [
         "src/merchandising/merchandising.controller.ts",
-        "../eshop-admin-frontend/components/admin/store-content.tsx"
+        "../eshop-admin-frontend/components/admin/store-content.tsx",
+        "../eshop-user-frontend/components/store/live-store.tsx",
+        "../eshop-user-frontend/app/collections/[slug]/page.tsx",
+        "../eshop-admin-frontend/components/management/content.tsx",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
       ]
     },
     {
@@ -503,7 +528,7 @@
       "id": "settings",
       "step": 7,
       "title": "Store profile, SEO/content, verified branding and operations",
-      "userRoutes": ["/"],
+      "userRoutes": ["/", "/policies/[kind]"],
       "adminRoutes": ["/settings", "/content"],
       "actions": [
         "profile",
@@ -517,14 +542,23 @@
       "notes": [
         "Current one-form settings must split profile fields from revisioned operations/content/branding. orderPrefix is reserved and does not generate human-readable order IDs.",
         "Configured origins are presentation metadata; actual CORS comes from deployment. Backend currency is not a frontend FX conversion.",
-        "Missing policy views/branding editor may be pages or panels; use backend plain text and safe links, not raw HTML."
+        "Missing policy views/branding editor may be pages or panels; use backend plain text and safe links, not raw HTML.",
+        "OWNER profile/SEO/plain policies/verified branding/operations forms and public bootstrap/SEO/footer/theme/locale/navigation source is implemented. No FX, CORS grant or human order-number activation; full validation deferred."
       ],
       "sourceFiles": [
         "src/store-profile/store-profile.controller.ts",
         "src/store-content/store-content.controller.ts",
         "src/store-branding/store-branding.controller.ts",
         "src/store-operations/store-operations.controller.ts",
-        "src/store-bootstrap/store-bootstrap.controller.ts"
+        "src/store-bootstrap/store-bootstrap.controller.ts",
+        "../eshop-user-frontend/components/store/live-store.tsx",
+        "../eshop-user-frontend/app/layout.tsx",
+        "../eshop-user-frontend/app/policies/[kind]/page.tsx",
+        "../eshop-admin-frontend/components/management/settings.tsx",
+        "../eshop-admin-frontend/lib/api/management-contract.ts",
+        "scripts/audit-web-management.cjs",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
       ]
     },
     {
@@ -543,12 +577,18 @@
       "notes": [
         "UI display roles map explicitly to persistent uppercase role keys. Never authorize from browser seedRolePermissions.",
         "Staff create requires a password, absent from the current preview form. Keep it write-only and out of persisted state.",
-        "UI removeStaff maps to permitted disable/status update; backend has no physical staff-delete route."
+        "UI removeStaff maps to permitted disable/status update; backend has no physical staff-delete route.",
+        "OWNER roster/create/write-only initial password, persisted role/grants and disable/status forms implemented. OWNER immutable; no local deletion or browser permissions authority. Full validation deferred."
       ],
       "sourceFiles": [
         "src/auth/workspace/workspace.controller.ts",
         "src/auth/workspace/workspace.dto.ts",
-        "../eshop-admin-frontend/components/admin/staff.tsx"
+        "../eshop-admin-frontend/components/admin/staff.tsx",
+        "../eshop-admin-frontend/components/management/staff.tsx",
+        "../eshop-admin-frontend/components/management/shared.tsx",
+        "../eshop-admin-frontend/lib/api/management-payload.ts",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
       ]
     },
     {
@@ -574,20 +614,26 @@
         "Use verified TEST collection facts and independently confirmed refunds, not order fulfillment-derived revenue or local arithmetic.",
         "Report aggregate minor-unit strings remain exact; no Number conversion/FX/profit inference. Inventory is a current snapshot; financial windows are UTC [from,to).",
         "UI inclusive end date maps to next UTC day. CSV is server-generated, max 1000 rows/5 MiB; surface narrowing errors.",
-        "Payment attempt states and derived collection/refund states are separate; do not invent a provider-failed state for an unverified attempt."
+        "Payment attempt states and derived collection/refund states are separate; do not invent a provider-failed state for an unverified attempt.",
+        "Permission-aware server dashboard/reports/audit and bounded authenticated CSV source implemented. Exact integer strings, currency groups, UTC windows and current inventory basis retained; no browser finance totals. Full validation deferred."
       ],
       "sourceFiles": [
         "src/reporting/reporting.controller.ts",
         "src/reporting/reporting.policy.ts",
-        "../eshop-admin-frontend/lib/reporting.ts"
+        "../eshop-admin-frontend/lib/reporting.ts",
+        "../eshop-admin-frontend/components/management/reports.tsx",
+        "../eshop-admin-frontend/lib/api/runtime.ts",
+        "../eshop-admin-frontend/tests/csv-export.test.mjs",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
       ]
     },
     {
       "id": "notifications",
       "step": 7,
       "title": "Own inbox/preferences and guarded template/failure tools",
-      "userRoutes": [],
-      "adminRoutes": [],
+      "userRoutes": ["/account/notifications"],
+      "adminRoutes": ["/notifications", "/settings"],
       "actions": [
         "inbox/unread/read/read-all",
         "consent/preferences",
@@ -598,11 +644,17 @@
       "authorization": "Owned authenticated inbox; current staff grants/consent, OWNER administration",
       "notes": [
         "Header bells are missing/disabled UI, not missing notification APIs. Add User/Admin inbox surfaces and sign-out cache clearing.",
-        "Dispatch/provider deployment remains separate from rendering a real inbox."
+        "Dispatch/provider deployment remains separate from rendering a real inbox.",
+        "Owned inbox/read state/revisioned preferences and same-site authorized navigation source implemented. Mandatory security/transactional history retained; marketing consent separate. Legacy typed target responses unchanged; additive navigation routes. Full validation deferred."
       ],
       "sourceFiles": [
         "src/notifications/notifications.controller.ts",
-        "../eshop-admin-frontend/components/layout/admin-shell.tsx"
+        "../eshop-admin-frontend/components/layout/admin-shell.tsx",
+        "src/notifications/web-navigation.ts",
+        "../eshop-user-frontend/components/notifications/inbox.tsx",
+        "../eshop-admin-frontend/components/notifications/inbox.tsx",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
       ]
     },
     {
@@ -610,7 +662,7 @@
       "step": 7,
       "title": "Email readiness, templates and safe delivery history",
       "userRoutes": [],
-      "adminRoutes": [],
+      "adminRoutes": ["/settings", "/operations"],
       "actions": [
         "owner readiness",
         "template overrides",
@@ -621,16 +673,22 @@
       "authorization": "OWNER only",
       "notes": [
         "Missing Admin UI, existing backend. Keep SMTP credentials deployment-only, no public test-send or token-debug endpoint.",
-        "Accepted submission is not mailbox delivery; real verify/reset email acceptance still needs controlled external evidence."
+        "Accepted submission is not mailbox delivery; real verify/reset email acceptance still needs controlled external evidence.",
+        "OWNER readiness/templates/submission/planning history source implemented. No send/provider switch or SMTP credentials in UI; ACCEPTED is submission only. Real provider evidence remains separate."
       ],
-      "sourceFiles": ["src/email/email.controller.ts"]
+      "sourceFiles": [
+        "src/email/email.controller.ts",
+        "../eshop-admin-frontend/components/management/settings.tsx",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
+      ]
     },
     {
       "id": "push",
       "step": 7,
       "title": "Web device lifecycle and approved rich campaigns",
-      "userRoutes": [],
-      "adminRoutes": [],
+      "userRoutes": ["/account/notifications"],
+      "adminRoutes": ["/notifications", "/messaging", "/operations"],
       "actions": [
         "explicit permission",
         "register/refresh/revoke installation",
@@ -642,16 +700,28 @@
       "authorization": "Owned devices and current consent; marketing.manage composer, OWNER approval/operations per route",
       "notes": [
         "Both clients lack Firebase setup/service worker and device lifecycle integration. Provider/browser project configuration is required for actual display tests.",
-        "Registration tokens stay out of logs; rotate/revoke across account switch/sign-out. Provider acceptance does not prove display or click."
+        "Registration tokens stay out of logs; rotate/revoke across account switch/sign-out. Provider acceptance does not prove display or click.",
+        "Configured secure-browser permission/register/refresh/revoke and owner-bound generic-content worker source implemented; Firebase 13.2.0 pinned in both apps. Cross-account/queued cleanup fences and remote-revoke handling included. Marketing draft/preview/OWNER schedule/cancel/metrics connected. Public Firebase/VAPID and matching Backend provider configuration plus real browser/provider acceptance remain deployment-owned and unverified."
       ],
-      "sourceFiles": ["src/push/push.controller.ts"]
+      "sourceFiles": [
+        "src/push/push.controller.ts",
+        "../eshop-user-frontend/lib/api/browser-push.ts",
+        "../eshop-user-frontend/public/eshop-push-worker.js",
+        "../eshop-user-frontend/components/notifications/push-lifecycle.tsx",
+        "../eshop-admin-frontend/lib/api/browser-push.ts",
+        "../eshop-admin-frontend/components/management/push-campaigns.tsx",
+        "../eshop-user-frontend/tests/push-lifecycle.test.mjs",
+        "../eshop-user-frontend/tests/push-worker.test.mjs",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
+      ]
     },
     {
       "id": "jobs",
       "step": 7,
       "title": "Read-only operations and bounded in-app recovery",
       "userRoutes": [],
-      "adminRoutes": [],
+      "adminRoutes": ["/operations"],
       "actions": [
         "owner status/runs/failures",
         "approved in-app notification retry"
@@ -659,9 +729,15 @@
       "operationPrefixes": ["/v1/admin/jobs"],
       "authorization": "OWNER only",
       "notes": [
-        "Missing operational Admin surface, existing backend. Do not expose internal cron secrets or create generic payment/refund/SMTP/FCM retry buttons."
+        "Missing operational Admin surface, existing backend. Do not expose internal cron secrets or create generic payment/refund/SMTP/FCM retry buttons.",
+        "OWNER sanitized scheduler/run/failure snapshots and existing exhausted DB-only in-app receipt retry source implemented. No internal cron/provider replay exposed or invoked; full validation deferred."
       ],
-      "sourceFiles": ["src/jobs/jobs.controller.ts"]
+      "sourceFiles": [
+        "src/jobs/jobs.controller.ts",
+        "../eshop-admin-frontend/components/management/settings.tsx",
+        "web-integration-tests/management.spec.ts",
+        "api-tests/web-management.contract.smoke.spec.ts"
+      ]
     },
     {
       "id": "developer-alignment",
@@ -734,8 +810,8 @@
       "kind": "BACKEND_EXTENSION",
       "step": 6,
       "title": "Customer/staff order lists expose page/limit only",
-      "disposition": "Add documented filters required by the current UI, or explicitly reduce UI capabilities; test pagination/ownership/grants and never filter a single page as global results.",
-      "status": "OPEN"
+      "disposition": "Explicit v1 capability reduction: server pagination and exact UUID lookup only; no global text/status/date/customer filtering or single-page global illusion. New pagination/ownership/browser source tests await final execution.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "id": "GAP-ACCOUNT-UI",
@@ -752,8 +828,8 @@
       "kind": "ADAPTER",
       "step": 6,
       "title": "Local order state machine/return initiation/refund success conflicts with backend",
-      "disposition": "Use separate payment/fulfillment states, customer-initiated returns, explicit inspection/restock and request-versus-confirmed-refund status.",
-      "status": "OPEN"
+      "disposition": "Live source separates financial/physical states, customer return initiation/withdrawal, staff inspection/restock, same-SKU dispatch and OWNER refund request versus confirmed outcome. UUID/body retry and owned tracking tests are prepared; execution deferred.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "id": "GAP-MESSAGING-UI",
@@ -761,8 +837,8 @@
       "kind": "MISSING_FRONTEND",
       "step": 7,
       "title": "No working inbox, email operations, push composer/device UI",
-      "disposition": "Implement existing APIs; real SMTP/FCM/browser project configuration and external evidence remain separate.",
-      "status": "OPEN"
+      "disposition": "Step 7 live source now implements this area using current server ownership/grants/revisions/projections. New tests are prepared and deferred to step 8; real provider/deployment configuration and external acceptance remain separate. See WEB_WORKSPACE.md.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "id": "GAP-SETTINGS-UI",
@@ -770,8 +846,8 @@
       "kind": "MISSING_FRONTEND",
       "step": 7,
       "title": "No complete verified branding/policy/collection-detail surfaces",
-      "disposition": "Add pages/panels using existing safe projection/revision/media contracts.",
-      "status": "OPEN"
+      "disposition": "Step 7 live source now implements this area using current server ownership/grants/revisions/projections. New tests are prepared and deferred to step 8; real provider/deployment configuration and external acceptance remain separate. See WEB_WORKSPACE.md.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "id": "GAP-REPORTS",
@@ -779,8 +855,8 @@
       "kind": "ADAPTER",
       "step": 7,
       "title": "Browser-derived financial totals and statuses are incompatible",
-      "disposition": "Replace with server reports; preserve exact minor units, currencies, timestamps, lifetime-vs-period distinction and field privacy.",
-      "status": "OPEN"
+      "disposition": "Step 7 live source now implements this area using current server ownership/grants/revisions/projections. New tests are prepared and deferred to step 8; real provider/deployment configuration and external acceptance remain separate. See WEB_WORKSPACE.md.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "id": "GAP-STAFF-UI",
@@ -788,8 +864,8 @@
       "kind": "ADAPTER",
       "step": 7,
       "title": "Staff password input missing; removal is local deletion",
-      "disposition": "Write-only password on create; map removal to allowed disable/status change, preserve immutable OWNER and fresh grants.",
-      "status": "OPEN"
+      "disposition": "Step 7 live source now implements this area using current server ownership/grants/revisions/projections. New tests are prepared and deferred to step 8; real provider/deployment configuration and external acceptance remain separate. See WEB_WORKSPACE.md.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "id": "GAP-RELEASE-EVIDENCE",
@@ -826,12 +902,14 @@
     {
       "app": "user",
       "surface": "collection detail and policy views",
-      "step": 7
+      "step": 7,
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "app": "both",
       "surface": "inbox/preferences and push device lifecycle",
-      "step": 7
+      "step": 7,
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     },
     {
       "app": "admin",
@@ -842,7 +920,8 @@
     {
       "app": "admin",
       "surface": "email/push/jobs operational panels",
-      "step": 7
+      "step": 7,
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
     }
   ],
   "scopeRules": [

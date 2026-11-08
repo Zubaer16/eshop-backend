@@ -35,6 +35,7 @@ import { FulfillmentManageGuard } from './fulfillment.guard'
 import { FulfillmentService } from './fulfillment.service'
 import { OrdersService } from '../orders.service'
 import { OrderResponseDto } from '../orders.dto'
+import { AdminOrderPageDto, AdminOrderDetailDto } from '../orders.response'
 
 @ApiTags('Orders / Admin')
 @ApiBearerAuth('access-token')
@@ -49,6 +50,7 @@ export class FulfillmentAdminController {
   ) {}
 
   @Get()
+  @ApiOkResponse({ type: AdminOrderPageDto })
   @ApiOperation({
     summary:
       'Paginated order list for permitted staff; payment status and fulfillment are separate',
@@ -58,8 +60,10 @@ export class FulfillmentAdminController {
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: AdminOrderDetailDto })
   @ApiOperation({
-    summary: 'Read order and its shipment (one shipment per order in fulfillment)',
+    summary:
+      'Read order and its shipment (one shipment per order in fulfillment)',
   })
   @ApiNotFoundResponse({ description: 'Order not found' })
   get(@Param('id', ParseUUIDPipe) id: string) {

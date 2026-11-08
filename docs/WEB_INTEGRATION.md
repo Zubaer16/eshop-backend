@@ -1,8 +1,16 @@
 # eShop web integration
 
-Status on 2026-11-08: **steps 1-2 previously accepted; steps 3-5 implemented / full validation pending; steps 6-8 not started**. Current User/Admin catalog, account, cart, wishlist and customer-directory source is connected to the Backend. Checkout, shipping/tax policies, coupons/campaigns and TEST payment records are also connected; remaining business screens stay unavailable in live mode. Explicit preview remains separate. Automated test execution is deferred to the final integration window by owner instruction.
+Status on 2026-11-08: **steps 1-2 previously accepted; steps 3-7 implemented / full validation pending; step 8 not started**. Current User/Admin catalog, account, cart, wishlist and customer-directory source is connected to the Backend. Checkout, shipping/tax policies, coupons/campaigns and TEST payment records are also connected; Order history/operations, fulfillment, returns, replacements, owned tracking and refund requests are now connected; remaining business screens stay unavailable in live mode. Explicit preview remains separate. Automated test execution is deferred to the final integration window by owner instruction.
 
-Current source audit: **18 User + 18 Admin page entrypoints, 22 feature groups, 200 canonical API operations and 14 gap records**. There are **191 success schemas present / 9 absent**, across 156 API paths. The original step-1 snapshot was 15 + 16 pages and 198 operations; persistent auth later had 18 + 17 pages. Schema presence is not runtime proof.
+Current source audit: **21 User + 21 Admin page entrypoints, 22 feature groups, 202 canonical API operations and 14 gap records**. There are **196 success schemas present / 6 absent**, across 158 API paths. The original step-1 snapshot was 15 + 16 pages and 198 operations; persistent auth later had 18 + 17 pages. Schema presence is not runtime proof.
+
+## Content/workspace/messaging/reports source delivery - 2026-11-08
+
+Step 7 source is implemented; full validation is pending. Live published homepage/collection/identity/SEO/branding/policies/operations, OWNER staff/settings/templates, permission-aware reports/dashboard/audit/CSV, owned inbox/preferences/browser push and rich campaign/operational panels are connected. Two additive JWT-owned same-site navigation routes preserve legacy target responses. Firebase 13.2.0 is pinned; public Firebase/VAPID and matching Backend provider/deployment/browser evidence remain separate. SDK and worker source fences account/epoch/queued cleanup and displays generic lock-screen content. No suites, real provider actions or DB migrations were run. See [Web workspace](WEB_WORKSPACE.md). Next: step 8 all deferred tests, fixes, compatibility/cleanup and handoff.
+
+## Order operations/recovery source delivery - 2026-11-08
+
+Step 6 source is implemented; full runtime validation is pending. User owned history/detail, unpaid cancellation, return request/withdrawal and authenticated UUID tracking use real order/return/replacement/refund ledgers. Admin connects one-shipment fulfillment, physical inspection/restock, same-SKU replacement dispatch and OWNER-only refund approval/history. Keyed mutations preserve frozen UUID/body for explicit retry and ledger reconciliation. Only server SUCCEEDED confirms a refund; stock return remains separate. Existing order list capabilities are explicitly limited to server pagination and exact UUID lookup, with no global text/status/date/customer filters. Three missing order response schemas are now explicit. No suites, provider actions or DB migrations were run. See [Web orders](WEB_ORDERS.md). Next: step 7 content/settings, messaging, staff, reports and operations.
 
 ## Checkout/shipping/promotions source delivery - 2026-11-08
 
@@ -39,7 +47,7 @@ Step 5 source is implemented; full runtime validation is pending. User checkout 
 - Controller/guard/DTO implementations, existing API DB/security/OpenAPI tests and actual frontend source take precedence over historical planning documents.
 - `npm run integration:audit` verifies page coverage, API-to-controller route identity, feature API prefixes and source references. Use `npm run integration:audit -- --write` to save ignored `validation/web-integration/audit.json`; `--json` prints its complete route/schema/source inventory. Missing input repos or drift fail the audit; they are never reported as aligned.
 - Root overrides: `ESHOP_ADMIN_DIR` and `ESHOP_STOREFRONT_DIR`, with existing legacy overrides supported. The three sibling folders are `eshop-backend`, `eshop-admin-frontend`, `eshop-user-frontend`.
-- Compatibility source audit v1.21.0 reports 7 MATCH / 15 ADAPTER. It covers 22 historical compatibility findings, a different count from the new 22 integration feature groups and 14 gaps. Neither static audit proves a live browser flow.
+- Compatibility source audit v1.23.0 reports 7 MATCH / 15 ADAPTER. It covers 22 historical compatibility findings, a different count from the new 22 integration feature groups and 14 gaps. Neither static audit proves a live browser flow.
 
 The generated audit lists each operation's method/path, request/response/query schemas, security metadata, source controller line and guard annotations. Treat guard names as evidence pointers: inspect the guard/service for the actual rule. Hidden cron endpoints and signed provider webhooks are not browser UI actions.
 
@@ -52,8 +60,8 @@ The generated audit lists each operation's method/path, request/response/query s
 | 3    | Catalog, categories, variants, media and inventory                         | IMPLEMENTED_FULL_VALIDATION_PENDING |
 | 4    | Profile, addresses, carts, wishlist and customer directory                 | IMPLEMENTED_FULL_VALIDATION_PENDING |
 | 5    | Shipping, tax, coupons, checkout, payment and order creation               | IMPLEMENTED_FULL_VALIDATION_PENDING |
-| 6    | Order operations, fulfillment, tracking, returns, replacements and refunds | NOT_STARTED                         |
-| 7    | Content/settings, messaging, staff, reports and operations                 | NOT_STARTED                         |
+| 6    | Order operations, fulfillment, tracking, returns, replacements and refunds | IMPLEMENTED_FULL_VALIDATION_PENDING |
+| 7    | Content/settings, messaging, staff, reports and operations                 | IMPLEMENTED_FULL_VALIDATION_PENDING |
 | 8    | Cross-app E2E/security, fixture removal, cleanup and handoff               | NOT_STARTED                         |
 
 The first connected vertical slice is: OWNER/staff signs in -> creates category/product/verified gallery -> publishes ACTIVE -> User lists/opens the same canonical product -> inventory changes refresh the User availability hint. Implement this slice before extending checkout; execute its cross-app proof in the final test window under the current owner policy. Preserve the existing visual design; add genuine controls/states where the preview has no functionality.
@@ -240,7 +248,7 @@ Authorization: Customer ownership; orders.manage for staff actions.
 
 API families: `/v1/orders`, `/v1/admin/orders`.
 
-- Current order list endpoints expose page/limit only; existing global UI search/status filters need an additive bounded server query or explicit UI capability reduction, not filtering one page and pretending it is the complete dataset.
+- Live order lists use existing server pagination and exact UUID lookup. Global text/status/date/customer filters are explicitly unavailable; no single-page global filtering.
 - Order payment status and shipment fulfillment status are independent; UI Pending/Processing/Shipped/Delivered is not a reversible map to Order.status.
 - One shipment/all lines only in approved v1; no split shipping. Paid refunds are separate from unpaid cancellation.
 - Dedicated return/replacement/tracking actions are assigned to their own features.

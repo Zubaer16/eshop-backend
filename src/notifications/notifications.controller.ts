@@ -30,6 +30,7 @@ import { AccessGuard } from '../auth/access.guard'
 import { AdminGuard } from '../auth/admin.guard'
 import type { AuthenticatedRequest } from '../auth/auth.types'
 import { NotificationsService } from './notifications.service'
+import { WebNotificationNavigationDto } from './web-navigation'
 import {
   NotificationFailureDto,
   NotificationItemDto,
@@ -80,6 +81,15 @@ export class NotificationsController {
     @Query() query: NotificationQueryDto,
   ) {
     return this.service.inbox(req.authUser!, query)
+  }
+  @Get(':id/navigation')
+  @Header('Cache-Control', 'no-store')
+  @ApiOkResponse({ type: WebNotificationNavigationDto })
+  navigation(
+    @Req() req: AuthenticatedRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.service.navigation(req.authUser!, id)
   }
   @Get('preferences')
   @Header('Cache-Control', 'no-store')

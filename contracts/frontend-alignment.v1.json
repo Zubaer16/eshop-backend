@@ -1,5 +1,5 @@
 {
-  "version": "1.21.0",
+  "version": "1.23.0",
   "purpose": "Source-backed pre-integration contract baseline, NOT proof of runtime integration",
   "sourceBaselines": {
     "backend": "Current eShop Backend after implementation/cleanup/refactor; full local release suites passed 2026-11-07, receipt now historical after source edits. Web integration tracked separately in contracts/web-integration.v1.json.",
@@ -87,8 +87,8 @@
       "id": "staff-permissions",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Five Admin role keys and persistent permission grants implemented server-side; browser preview still requires API adapter",
-      "action": "Integrate Admin staff/role UI with /v1/admin/staff and /v1/admin/roles; treat backend policy as authoritative"
+      "summary": "Live OWNER-only staff/role source uses persisted grants, write-only creation password and DISABLED status; OWNER immutable. Runtime validation deferred.",
+      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
     },
     {
       "id": "product-media",
@@ -115,14 +115,14 @@
       "id": "commerce-future",
       "priority": "P2",
       "status": "ADAPTER",
-      "summary": "Live checkout/shipping/tax/coupon/campaign and TEST payment adapters are source-implemented; full runtime/provider validation remains pending. Owned recovery, request UUIDs, exact totals, revisions and OWNER-only financial policy are explicit.",
+      "summary": "Live checkout/shipping/promotions/TEST payment and order/history/fulfillment/return/replacement/tracking/refund-request adapters are source-implemented. Full runtime/provider validation remains deferred. Explicit v1 pagination/exact-UUID lookup replaces unsupported global order filters.",
       "action": "Execute prepared tests at the final integration window. Preserve distinct estimate/hold/unpaid/TEST-settlement states, owned address snapshots, null limits and server-authoritative money/stock/grants. Other store content/reporting remains step 7."
     },
     {
       "id": "status-shape",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live source explicitly represents DRAFT/ACTIVE/ARCHIVED and warns about archive gallery detachment; final tests are deferred.",
+      "summary": "Live source keeps catalog publication, order payment, original shipment, returns, replacements and refund-request outcomes distinct. No generic order status setter or local financial success. Final tests are deferred.",
       "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
     },
     {
@@ -143,36 +143,36 @@
       "id": "store-merchandising",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "merchandising banner/curated collection/homepage APIs are source-present; current UIs remain preview-based and local backend suites passed 2026-11-07; live client integration remains pending",
-      "action": "Map enabled to publication status/window, imageUrl to verified Media Library ID, CTA field names and canonical product IDs/order. Use hasVariants and availability hints safely; add collection route/editor controls during integration. Do not claim live publication or test acceptance from source audit."
+      "summary": "Live revisioned banner/collection editors, bounded public homepage/collection and verified canonical content source implemented; no preview fallback. Final publication/browser proof deferred.",
+      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
     },
     {
       "id": "notification-engine",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "notifications persisted inbox/read/preferences/templates and outbox subscriber are source-present; Admin bell remains a placeholder and Storefront has no operational inbox",
-      "action": "Implement authenticated own-inbox/preferences UI and typed target navigation. Staff alerts follow current permissions; security history remains mandatory; marketing channels default off. Activate the bounded dispatcher only with reviewed deployment/provider configuration. Email/push delivery remain separate email and push transports; no live browser acceptance from this audit."
+      "summary": "Live owned inbox/read/preferences and additive authorized web-navigation source implemented for both apps. Mandatory channels retained; final ownership/security/browser suites deferred.",
+      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
     },
     {
       "id": "email-delivery",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "email delivery independent email queue, SMTP adapter, safe submission history and owner template/status APIs are source-present; live provider and browser action flows remain unaccepted",
-      "action": "Build OWNER readiness/template/history UI without exposing credentials. Add Storefront /verify-email and /reset-password fragment-token pages calling existing one-time confirmation APIs. SMTP ACCEPTED means submission only. Keep customer identity email acceptance pending until controlled provider and token flows are validated; never publish SMTP secrets in either frontend."
+      "summary": "Live OWNER readiness/templates/sanitized submission/planning history source implemented. Actual SMTP submission/delivery and deployment verification remain separate.",
+      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
     },
     {
       "id": "push-campaigns",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "push messaging owned encrypted device lifecycle, FCM provider and approved rich campaign/inbox contracts are source-present; both web apps still need push/service-worker integration",
-      "action": "Implement explicit browser permission, per-installation registration/refresh/revoke on sign-out, client token rotation on account switch, and authenticated typed target resolution. Build marketing composer/preview/OWNER approval/schedule/metrics. Provider acceptance is not device display; actual Firebase/worker/frontend validation remains pending. Flutter comes after full web E2E."
+      "summary": "Live consent/device/worker and marketing draft/preview/OWNER schedule/cancel/metrics source implemented with pinned Firebase SDK and account/epoch/logout guards. Public Firebase/VAPID and matching Backend deployment/provider/browser acceptance remain unverified.",
+      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
     },
     {
       "id": "authoritative-reporting",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Live payments page reads server attempt/collection records and lifetime refund strings; other financial/dashboard/report/CSV adapters remain step 7. All new runtime validation is deferred.",
-      "action": "Replace booked/fulfillment-derived sample revenue with verified TEST collections and confirmed refunds on independent event dates. Preserve currency groups/exact minor-unit strings, UTC exclusive-to bounds and current inventory basis. Hide domain-restricted sections, require extra catalog/customer grants for performance data, and use bounded audited CSV. No live UI/runtime acceptance from source audit."
+      "summary": "Live dashboard/reports/payment/audit/CSV source uses server permissions, exact minor-unit strings, currency groups and UTC windows; all deferred runtime/financial checks remain pending.",
+      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
     }
   ],
   "currentSourceRoots": {

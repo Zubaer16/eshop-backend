@@ -1,4 +1,5 @@
 import { publicPushTarget, pushImage } from '../push/push-targets'
+import { webNavigation } from './web-navigation'
 import { ConfigService } from '@nestjs/config'
 import { Environment } from '../config/environment'
 import {
@@ -142,6 +143,15 @@ export class NotificationsService {
       data: { readAt: new Date() },
     })
     return { changed: result.count }
+  }
+  async navigation(actor: Actor, id: string) {
+    const target = await this.target(actor, id)
+    return webNavigation(
+      this.db.client,
+      target.targetType,
+      target.targetId,
+      actor.role === 'CUSTOMER' ? 'STOREFRONT' : 'ADMIN',
+    )
   }
   async target(actor: Actor, id: string) {
     const row = await this.db.client.notificationRecipient.findFirst({

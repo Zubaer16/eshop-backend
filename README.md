@@ -60,3 +60,11 @@ Historical milestone and patch notes have been removed from the active source tr
 ## Checkout source delivery (2026-11-08)
 
 Customer checkout uses owned saved-address snapshots, configured country/currency delivery and coupon estimates, expiring stock holds, idempotent unpaid order creation and explicit TEST payment actions. Reload/lost responses recover through owned server discovery. Admin policies follow OWNER-only checkout rate/zone guards, marketing revision/limit rules and payment-report permissions. No live card details or browser PAID flags. Test code is prepared; suites run together at final integration validation. Typecheck, lint and builds are the intermediate checks. See [Web checkout](docs/WEB_CHECKOUT.md).
+
+## Order operations source delivery (2026-11-08)
+
+Owned history/detail, unpaid cancellation, customer return requests/withdrawal and authenticated UUID tracking are connected. Admin uses server pagination/exact UUID lookup, one-shipment fulfillment, inspection/restock, same-SKU replacements and OWNER-only refund request/history. Refund approval is not provider success or stock return; uncertain keyed actions retain UUID/body for explicit retry/reconciliation. Typecheck/lint/build are intermediate checks; all automated suites remain deferred to final integration validation. See [Web orders](docs/WEB_ORDERS.md).
+
+## Store/workspace source delivery (2026-11-08)
+
+Step 7 source connects published homepage/collections/policies/branding and OWNER settings/staff/templates, current-grant dashboard/reports/audit/CSV, owned inbox/preferences/browser push and rich campaign/operations panels. Firebase 13.2.0 is pinned and lazily used only with public app/VAPID configuration and explicit prior browser consent. Auth credentials remain in the existing memory/HttpOnly session design. Actual Firebase/SMTP/FCM/provider/deployment acceptance remains separate. All automated suites are deferred to step 8; current type/lint/build/schema audits are intermediate checks. See [Web workspace](docs/WEB_WORKSPACE.md).
