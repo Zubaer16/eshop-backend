@@ -296,7 +296,7 @@ test('Admin uses real current grants, guards deep links and hides revoked sectio
     await expect(page).toHaveURL(/\/sign-in\?next=/)
     await login(page, adminOrigin, staff, '/orders')
     await expect(
-      page.getByRole('heading', { name: 'Workspace ready' }),
+      page.getByRole('heading', { name: 'Orders', exact: true }),
     ).toBeVisible()
     await expect(
       page

@@ -1,5 +1,8 @@
 # Web authentication
 
+Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
+
+
 User and Admin keep login across reload, new tabs and browser restart. The owner replaced the initial memory-only policy on 2026-11-07. Refresh sessions use a persistent HttpOnly cookie on each frontend's own origin. Access tokens stay in memory and domain requests still use direct Bearer JWT against `/v1`. The existing NestJS/mobile/API token contract is unchanged.
 
 Live mode is the default. Set `NEXT_PUBLIC_ESHOP_MODE=preview` explicitly for the separate sample UI. API failures never enable preview; unconnected business screens show an unavailable state.

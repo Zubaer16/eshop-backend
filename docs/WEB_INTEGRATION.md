@@ -1,10 +1,13 @@
 # eShop web integration
 
-Status on 2026-11-08: **steps 1-2 previously accepted; steps 3-7 implemented / full validation pending; step 8 not started**. Current User/Admin catalog, account, cart, wishlist and customer-directory source is connected to the Backend. Checkout, shipping/tax policies, coupons/campaigns and TEST payment records are also connected; Order history/operations, fulfillment, returns, replacements, owned tracking and refund requests are now connected; remaining business screens stay unavailable in live mode. Explicit preview remains separate. Automated test execution is deferred to the final integration window by owner instruction.
+Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
+
+
+Status on 2026-11-08: **all eight implementation/local-validation steps complete; external acceptance remains separate**. Current-source Backend release:local, 23 live cross-app flows, 47 Admin + 55 User unit tests and 39 Admin + 18 User preview tests passed. Each page renders its own feature and boundaries enforce only current authentication/permissions. Explicit preview stays separate. [Web validation](WEB_VALIDATION.md) records final source-bound evidence, accepted v1 limits and the missing external acceptance evidence.
 
 Current source audit: **21 User + 21 Admin page entrypoints, 22 feature groups, 202 canonical API operations and 14 gap records**. There are **196 success schemas present / 6 absent**, across 158 API paths. The original step-1 snapshot was 15 + 16 pages and 198 operations; persistent auth later had 18 + 17 pages. Schema presence is not runtime proof.
 
-## Content/workspace/messaging/reports source delivery - 2026-11-08
+## Content/workspace/messaging/reports source delivery - 2026-11-08 (historical source snapshot)
 
 Step 7 source is implemented; full validation is pending. Live published homepage/collection/identity/SEO/branding/policies/operations, OWNER staff/settings/templates, permission-aware reports/dashboard/audit/CSV, owned inbox/preferences/browser push and rich campaign/operational panels are connected. Two additive JWT-owned same-site navigation routes preserve legacy target responses. Firebase 13.2.0 is pinned; public Firebase/VAPID and matching Backend provider/deployment/browser evidence remain separate. SDK and worker source fences account/epoch/queued cleanup and displays generic lock-screen content. No suites, real provider actions or DB migrations were run. See [Web workspace](WEB_WORKSPACE.md). Next: step 8 all deferred tests, fixes, compatibility/cleanup and handoff.
 

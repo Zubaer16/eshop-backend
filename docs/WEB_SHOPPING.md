@@ -1,5 +1,8 @@
 # Web account, cart, wishlist and customer directory
 
+Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
+
+
 Status: **IMPLEMENTED / FULL VALIDATION PENDING**. Test code accompanies this delivery, but the owner requires all automated suites to run only after the remaining implementation work. Typecheck, lint, build and source/OpenAPI checks are not runtime acceptance.
 
 ## Account and addresses

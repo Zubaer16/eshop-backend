@@ -1,5 +1,7 @@
 # Web checkout, shipping and promotions
 
+Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
+
 Source delivery: **2026-11-08, IMPLEMENTED / FULL VALIDATION PENDING**. Test code is prepared; automated suites run only in the final integration window under the owner's instruction. Builds and source audits do not certify runtime behavior.
 
 The live User `/checkout` requires customer authentication. Guest items and uncertain cart changes must be resolved in `/cart` first. Saved addresses are fetched from the owned account; the selected address becomes an explicit allowlisted historical shipping snapshot in the existing order API. An address UUID is never treated as an order shipping payload. No delivery address or checkout credential is persisted in browser storage. Explicit preview remains separate.

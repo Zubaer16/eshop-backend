@@ -1,5 +1,9 @@
 # eShop Backend
 
+## Current API integration and routing
+
+Live API features are implemented with explicit preview mode kept separate. Each page renders its own feature; shared boundaries enforce authentication/current permissions. Current executed checks, accepted v1 limits and separate provider/deployment acceptance are tracked in [Integrated validation report](docs/WEB_VALIDATION.md). Earlier implementation-time deferral notes below are historical.
+
 Product name: **eShop**; package name: `eshop-backend`. Existing checkout folders and persisted technical identifiers remain compatible.
 
 Single-tenant, white-label e-commerce REST API built with NestJS, TypeScript, Prisma and PostgreSQL. The API uses the `/v1` prefix and server-side JWT/RBAC controls. Commerce, inventory, payments, fulfillment, media, store configuration, marketing, notifications, email, push and reporting share one modular backend.

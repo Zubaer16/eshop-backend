@@ -116,6 +116,7 @@ test('guest cart persists, lost absolute-quantity acknowledgement retries safely
     await page
       .getByRole('link', { name: 'Open full cart', exact: true })
       .click()
+    await expect(page).toHaveURL(userOrigin + '/cart')
     await page.reload()
     await expect(page.locator('main')).toContainText(product.title)
     let dropped = false
@@ -269,7 +270,9 @@ test('profile/address editing respects ownership and admin customer directory re
     await page
       .getByRole('button', { name: 'Save display name', exact: true })
       .click()
-    await expect(page.getByRole('status')).toContainText('Display name saved.')
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Display name saved.' }),
+    ).toHaveText('Display name saved.')
     await page
       .getByRole('link', { name: 'Saved addresses', exact: true })
       .click()

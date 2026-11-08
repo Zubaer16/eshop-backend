@@ -390,7 +390,7 @@ test('cross-app order fulfillment, customer withdrawal/return, inspection/restoc
     await page
       .getByRole('button', { name: 'Approve refund request', exact: true })
       .click()
-    await expect(page.getByRole('alert')).toBeVisible()
+    await expect(page.locator('main').getByRole('alert')).toBeVisible()
     expect(
       await s.f.db.refundRequest.count({ where: { orderId: s.order.id } }),
     ).toBe(0)

@@ -1,5 +1,7 @@
 # Web orders, fulfillment and recovery
 
+Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
+
 Source delivery: **2026-11-08, IMPLEMENTED / FULL VALIDATION PENDING**. New tests are written but unexecuted under the owner's policy. Intermediate TypeScript/lint/build and source checks do not establish runtime acceptance.
 
 ## Customer flows

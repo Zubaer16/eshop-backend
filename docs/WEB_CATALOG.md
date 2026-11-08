@@ -1,5 +1,7 @@
 # Web catalog, media and inventory
 
+Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
+
 Status: **IMPLEMENTED / FULL VALIDATION PENDING**. The owner requires test code alongside implementation and all automated test execution after the remaining implementation steps. No new unit, API, DB, security or browser suite was executed for this delivery. Builds, typechecks, lint and source/contract audits are separate evidence.
 
 ## Connected surfaces

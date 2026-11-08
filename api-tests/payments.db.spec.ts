@@ -93,6 +93,20 @@ test('Stripe TEST payment preparation real DB: one prepared test intent, safe re
     expect(orderResp.status()).toBe(200)
     const order = (await orderResp.json()) as { id: string; totalMinor: number }
 
+    const unprepared = await request.get('/v1/payments/orders/' + order.id, {
+      headers: bearer(customer.token),
+    })
+    expect(unprepared.status()).toBe(200)
+    expect(unprepared.headers()['content-type']).toContain('application/json')
+    expect(await unprepared.json()).toBeNull()
+    expect(
+      (
+        await request.get('/v1/payments/orders/' + order.id, {
+          headers: bearer(other.token),
+        })
+      ).status(),
+    ).toBe(404)
+
     const config = {
       get: (name: string) =>
         ({

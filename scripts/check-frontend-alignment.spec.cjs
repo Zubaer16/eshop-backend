@@ -70,15 +70,16 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
   )
   const commerce = result.results.find((item) => item.id === 'commerce-future')
   assert.equal(commerce?.detected, true)
-  assert.equal(commerce?.status, 'ADAPTER') // promotions coupon APIs now exist; browser integration is still pending.
+  assert.equal(commerce?.status, 'ADAPTER') // Adapters remain distinct from source compatibility and runtime acceptance.
   assert.doesNotMatch(
     commerce.summary,
     /orders, payments and coupons remain planned/,
   )
-  assert.match(
-    commerce.summary,
-    /promotions coupon\/campaign APIs are source-present/,
-  )
+  const declared =
+    require('../contracts/frontend-alignment.v1.json').findings.find(
+      (item) => item.id === 'commerce-future',
+    )
+  assert.equal(commerce.summary, declared.summary)
 })
 
 test('missing projects are never treated as aligned', () => {
@@ -112,4 +113,47 @@ test('eShop directory settings override compatible legacy settings', () => {
   assert.equal(legacy.backend, path.resolve('/legacy/backend'))
   assert.equal(legacy.admin, path.resolve('/legacy/admin'))
   assert.equal(legacy.storefront, path.resolve('/legacy/storefront'))
+})
+
+test('removing the coupon creation operation cannot remain source-aligned', (t) => {
+  const roots = resolveRoots()
+  if (
+    !fs.existsSync(path.join(roots.admin, 'lib/types.ts')) ||
+    !fs.existsSync(path.join(roots.storefront, 'lib/api/contracts.ts'))
+  ) {
+    t.skip('Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks')
+    return
+  }
+  const dir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'eshop-alignment-commerce-'),
+  )
+  try {
+    fs.cpSync(path.join(roots.backend, 'src'), path.join(dir, 'src'), {
+      recursive: true,
+      filter: (entry) => !entry.split(path.sep).includes('generated'),
+    })
+    fs.mkdirSync(path.join(dir, 'prisma'))
+    fs.copyFileSync(
+      path.join(roots.backend, 'prisma/schema.prisma'),
+      path.join(dir, 'prisma/schema.prisma'),
+    )
+    const finding = () =>
+      evaluate({ ...roots, backend: dir }).results.find(
+        (item) => item.id === 'commerce-future',
+      )
+    assert.equal(finding().detected, true)
+    const controller = path.join(dir, 'src/promotions/promotions.controller.ts')
+    const source = fs.readFileSync(controller, 'utf8')
+    assert.ok(source.includes("@Post('coupons')"))
+    fs.writeFileSync(
+      controller,
+      source.replace("@Post('coupons')", "@Post('removed-coupons')"),
+    )
+    assert.equal(finding().detected, false)
+    assert.equal(finding().status, 'REVIEW_REQUIRED')
+  } finally {
+    assert.equal(path.dirname(dir), path.resolve(os.tmpdir()))
+    assert.match(path.basename(dir), /^eshop-alignment-commerce-/)
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
 })

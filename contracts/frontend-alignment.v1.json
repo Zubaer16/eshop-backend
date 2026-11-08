@@ -1,10 +1,10 @@
 {
-  "version": "1.23.0",
-  "purpose": "Source-backed pre-integration contract baseline, NOT proof of runtime integration",
+  "version": "1.24.0",
+  "purpose": "Source compatibility and explicit adapter mapping; runtime acceptance is recorded separately in the validation report",
   "sourceBaselines": {
-    "backend": "Current eShop Backend after implementation/cleanup/refactor; full local release suites passed 2026-11-07, receipt now historical after source edits. Web integration tracked separately in contracts/web-integration.v1.json.",
-    "admin": "kookaburra-admin-full-20261025-181323.zip",
-    "storefront": "kookaburra-storefront-full-20261020-101939.zip"
+    "backend": "Current eshop-backend source; source-bound local release receipt and external acceptance remain distinct.",
+    "admin": "Current ../eshop-admin-frontend source; explicit preview remains separate.",
+    "storefront": "Current ../eshop-user-frontend source; canonical live API adapters and explicit preview remain separate."
   },
   "apiPrefix": "/v1",
   "canonicalRules": {
@@ -38,15 +38,15 @@
       "id": "catalog-pricing",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live source uses integer minor-unit API values with exact decimal parsing and real currency precision; execution of new adapter tests is deferred.",
-      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
+      "summary": "Live adapters preserve integer minor units, exact decimal parsing and real currency precision; browser formatting never owns price.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "catalog-identity",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live source uses canonical product/category/variant UUIDs and slugs; explicit preview retains separate demo identities. Final cross-app proof is deferred.",
-      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
+      "summary": "Live adapters preserve canonical product/category/variant UUIDs and slugs; preview identities remain separate.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "variant-shape",
@@ -60,14 +60,14 @@
       "priority": "P1",
       "status": "ADAPTER",
       "summary": "Live source preserves category hierarchy, active/color/order fields, scalar English names and all product categoryIds; final runtime validation is pending.",
-      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "inventory-identity",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live source reads and writes by canonical balance UUID, distinguishes reserved/available stock and keeps retry payload UUIDs; final runtime validation is deferred.",
-      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
+      "summary": "Live inventory uses canonical balance UUIDs, distinct held/available stock and frozen retry request IDs.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "catalog-stock-guard",
@@ -87,43 +87,43 @@
       "id": "staff-permissions",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live OWNER-only staff/role source uses persisted grants, write-only creation password and DISABLED status; OWNER immutable. Runtime validation deferred.",
-      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
+      "summary": "Live OWNER staff/roles use persisted current grants, write-only creation passwords and DISABLED status; OWNER stays immutable.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "product-media",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Live source implements signed POST/PUT transfer, completion, current-namespace library and ordered verified-ID galleries; external provider and final browser acceptance remain pending.",
-      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
+      "summary": "Live media uses verified canonical IDs, provider-specific signed uploads and reference-aware galleries/deletion; actual external provider acceptance is separate.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "customer-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live web source now connects owned cart quotes, absolute quantity/removal/clear, header/drawer and canonical product actions; frozen retry/reconciliation code awaits final runtime validation.",
-      "action": "Use canonical productId/variantId and Bearer JWT; never send client-side totals or expect inventory to be reserved"
+      "summary": "Live customer cart/profile/addresses/wishlist use owned canonical API data and session/account fences; no fixture import or local price authority.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "guest-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live web source now uses a separate HttpOnly guest capability cookie and explicit current-customer merge with conflict preservation; no fixture import. New guest-cookie/ownership/browser tests are deferred.",
-      "action": "Guest browser holds X-Guest-Cart-Token securely, calls PUT /v1/guest-cart/items with canonical IDs and POST /v1/cart/merge after customer JWT login; never reuse token after merge or trust client subtotal"
+      "summary": "Live guest cart uses a separate HttpOnly capability cookie and explicit current-customer merge; conflicts preserve guest items.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "commerce-future",
       "priority": "P2",
       "status": "ADAPTER",
-      "summary": "Live checkout/shipping/promotions/TEST payment and order/history/fulfillment/return/replacement/tracking/refund-request adapters are source-implemented. Full runtime/provider validation remains deferred. Explicit v1 pagination/exact-UUID lookup replaces unsupported global order filters.",
-      "action": "Execute prepared tests at the final integration window. Preserve distinct estimate/hold/unpaid/TEST-settlement states, owned address snapshots, null limits and server-authoritative money/stock/grants. Other store content/reporting remains step 7."
+      "summary": "Live checkout/shipping/promotions/TEST payment and order/fulfillment/return/replacement/tracking/refund-request adapters preserve server money, stock and ownership. Unprepared owned payment status is explicit JSON null. Pagination/exact UUID lookup replaces unsupported global order filters.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "status-shape",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live source keeps catalog publication, order payment, original shipment, returns, replacements and refund-request outcomes distinct. No generic order status setter or local financial success. Final tests are deferred.",
-      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
+      "summary": "Catalog publication, order payment, original shipment, returns, replacements and refund-request outcomes remain distinct; no local financial success setter.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "page-shape",
@@ -143,41 +143,42 @@
       "id": "store-merchandising",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Live revisioned banner/collection editors, bounded public homepage/collection and verified canonical content source implemented; no preview fallback. Final publication/browser proof deferred.",
-      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
+      "summary": "Live revisioned banner/collection editors and public bounded homepage/collection use canonical published content and verified media, with no preview fallback.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "notification-engine",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Live owned inbox/read/preferences and additive authorized web-navigation source implemented for both apps. Mandatory channels retained; final ownership/security/browser suites deferred.",
-      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
+      "summary": "Live owned inbox/read/preferences and authorized same-site navigation retain mandatory channels and current ownership.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "email-delivery",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Live OWNER readiness/templates/sanitized submission/planning history source implemented. Actual SMTP submission/delivery and deployment verification remain separate.",
-      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
+      "summary": "Live OWNER readiness/template/history views keep SMTP credentials deployment-owned; provider submission and mailbox delivery remain distinct.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "push-campaigns",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Live consent/device/worker and marketing draft/preview/OWNER schedule/cancel/metrics source implemented with pinned Firebase SDK and account/epoch/logout guards. Public Firebase/VAPID and matching Backend deployment/provider/browser acceptance remain unverified.",
-      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
+      "summary": "Live browser opt-in/device lifecycle and revisioned campaign approval/cancellation preserve owner/epoch fences and generic worker content. Actual FCM/HTTPS/browser delivery acceptance is separate.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "authoritative-reporting",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Live dashboard/reports/payment/audit/CSV source uses server permissions, exact minor-unit strings, currency groups and UTC windows; all deferred runtime/financial checks remain pending.",
-      "action": "Run all prepared/existing suites at step 8, repair failures and preserve server authority. Source presence is not runtime acceptance; actual external provider/deployment evidence remains separate."
+      "summary": "Live reports/dashboard/payment/audit/CSV preserve server permissions, exact integer strings, currency groups and UTC windows; no browser financial math.",
+      "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     }
   ],
   "currentSourceRoots": {
     "backend": "eshop-backend",
     "admin": "eshop-admin-frontend",
     "storefront": "eshop-user-frontend"
-  }
+  },
+  "validationReport": "docs/WEB_VALIDATION.md"
 }

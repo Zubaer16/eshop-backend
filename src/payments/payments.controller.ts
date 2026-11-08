@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common'
 import {
@@ -17,8 +18,9 @@ import {
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger'
-import type { Request } from 'express'
+import type { Request, Response } from 'express'
 import { AccessGuard } from '../auth/access.guard'
 import { AuthenticatedRequest } from '../auth/auth.types'
 import { CustomerCartGuard } from '../cart/cart.customer.guard'
@@ -78,12 +80,20 @@ export class PaymentCustomerController {
     summary:
       'Read owned test payment preparation status, or null if not prepared',
   })
-  @ApiOkResponse({ type: PaymentPreparationResponseDto })
-  get(
+  @ApiOkResponse({
+    schema: {
+      nullable: true,
+      allOf: [{ $ref: getSchemaPath(PaymentPreparationResponseDto) }],
+    },
+  })
+  async get(
     @Req() req: AuthenticatedRequest,
     @Param('orderId', ParseUUIDPipe) id: string,
+    @Res() response: Response,
   ) {
-    return this.payments.get(req.authUser!.id, id)
+    const preparation = await this.payments.get(req.authUser!.id, id)
+    // Nest omits a null return body; this endpoint promises a JSON nullable value.
+    return response.json(preparation)
   }
 }
 

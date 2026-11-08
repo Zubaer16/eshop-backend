@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "version": "1.7.0",
+  "version": "1.8.0",
   "date": "2026-11-08",
-  "purpose": "Source-grounded web integration contract and delivery status; focused live auth validation is separate from full product/provider acceptance",
+  "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "apiPrefix": "/v1",
   "roots": {
     "backend": ".",
@@ -23,32 +23,32 @@
     {
       "step": 3,
       "title": "Catalog, categories, variants, media and inventory",
-      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+      "status": "IMPLEMENTED"
     },
     {
       "step": 4,
       "title": "Profile, addresses, carts, wishlist and customer directory",
-      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+      "status": "IMPLEMENTED"
     },
     {
       "step": 5,
       "title": "Shipping, tax, coupons, checkout, payment and order creation",
-      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+      "status": "IMPLEMENTED"
     },
     {
       "step": 6,
       "title": "Order operations, fulfillment, tracking, returns, replacements and refunds",
-      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+      "status": "IMPLEMENTED"
     },
     {
       "step": 7,
       "title": "Content/settings, messaging, staff, reports and operations",
-      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+      "status": "IMPLEMENTED"
     },
     {
       "step": 8,
       "title": "Cross-app E2E/security, fixture removal, cleanup and handoff",
-      "status": "NOT_STARTED"
+      "status": "IMPLEMENTED"
     }
   ],
   "features": [
@@ -742,19 +742,26 @@
     {
       "id": "developer-alignment",
       "step": 8,
-      "title": "Preview-only compatibility diagnostics",
+      "title": "Integration compatibility and validation guidance",
       "userRoutes": [],
       "adminRoutes": ["/alignment"],
       "actions": [
-        "review integration contracts",
-        "remove stale preview notices after tested activation"
+        "review canonical identifiers, currency and preview boundaries",
+        "read validation scope and evidence guidance"
       ],
       "operationPrefixes": [],
-      "authorization": "Development diagnostic, not an authorization source",
+      "authorization": "OWNER in live mode; development diagnostic, never an authorization source",
       "notes": [
-        "Existing route is a static compatibility preview. Keep it clearly diagnostic and avoid claiming source audit is live end-to-end acceptance."
+        "Live /alignment explains shared server authority and separate test/provider acceptance; explicit preview retains its local diagnostics. Page files own feature rendering, boundaries enforce only current authentication/permissions."
       ],
-      "sourceFiles": ["../eshop-admin-frontend/components/admin/alignment.tsx"]
+      "sourceFiles": [
+        "../eshop-admin-frontend/app/(admin)/alignment/page.tsx",
+        "../eshop-admin-frontend/components/management/alignment.tsx",
+        "../eshop-admin-frontend/components/admin/alignment.tsx",
+        "../eshop-admin-frontend/components/auth/workspace-boundary.tsx",
+        "../eshop-user-frontend/components/auth/user-boundary.tsx",
+        "docs/WEB_VALIDATION.md"
+      ]
     }
   ],
   "gaps": [
@@ -930,7 +937,8 @@
     "Each converted live feature uses real API data with loading/empty/error/permission states, no silent fixture fallback.",
     "The read-only source audit performs no provider calls, production writes, dependency installation, database resets or fixture-ID imports.",
     "Update all three external master docs with evidence after each integration delivery.",
-    "Step 1 inventories gaps; implementation is tracked in steps 2-8."
+    "Step 1 inventories gaps; implementation is tracked in steps 2-8.",
+    "Each page renders its own live/preview feature; shared boundaries enforce only authentication/current permissions."
   ],
   "validationPolicy": {
     "ownerInstructionDate": "2026-11-07",
@@ -945,5 +953,7 @@
     "intermediateStatus": "IMPLEMENTED / FULL VALIDATION PENDING",
     "executeAllDeferredTestsAtStep": 8,
     "acceptance": "Resolve failures and rerun affected suites before final acceptance; do not weaken tests or infer runtime PASS from builds."
-  }
+  },
+  "validationReport": "docs/WEB_VALIDATION.md",
+  "implementationHistory": "Implementation-time deferral and next-step notes are historical for their delivery. Current results and remaining external acceptance are recorded in the validation report."
 }

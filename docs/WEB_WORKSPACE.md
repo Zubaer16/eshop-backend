@@ -1,5 +1,7 @@
 # Web store content, workspace, reports and messaging
 
+Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
+
 Source delivery **2026-11-08: IMPLEMENTED / FULL VALIDATION PENDING**. This closes implementation step 7. All unit/API/DB/browser suites remain deferred to step 8 by owner instruction; source, schema, type/lint/build checks are not runtime acceptance.
 
 ## Published storefront

@@ -4,6 +4,8 @@ import { defineConfig } from '@playwright/test'
 // All browser test modes use port 4101; the development DB is never a test target.
 const port = Number(process.env.API_TEST_PORT)
 const mode = process.env.API_TEST_MODE
+// Optional unattended execution changes presentation only, never DB guards or assertions.
+const automated = process.env.API_TEST_VISUAL_AUTOMATED === '1'
 if (!(port === 4101 && ['smoke', 'db'].includes(mode))) {
   throw new Error('Use the guarded npm run test:api:visual:* scripts')
 }
@@ -22,8 +24,8 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${port}`,
     browserName: 'chromium',
-    headless: false,
-    launchOptions: { slowMo: 900 },
+    headless: automated,
+    launchOptions: { slowMo: automated ? 0 : 900 },
     viewport: { width: 1280, height: 820 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

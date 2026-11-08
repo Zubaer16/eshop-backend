@@ -118,7 +118,9 @@ test('owner configures a real shipping lane and coupon; stale coupon edits fail 
     await page
       .getByRole('button', { name: 'Save configuration', exact: true })
       .click()
-    await expect(page.getByRole('alert')).toBeVisible()
+    await expect(page.locator('main').getByRole('alert')).toHaveText(
+      'Coupon changed. Reload and retry.',
+    )
     await page
       .getByRole('button', {
         name: 'Close and refresh server records',

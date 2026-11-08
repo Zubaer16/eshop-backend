@@ -47,7 +47,9 @@ test('Admin publishes verified media and variants; User sees the same UUID, exac
     await page
       .getByRole('button', { name: 'Save category', exact: true })
       .click()
-    await expect(page.getByRole('status')).toContainText('Category saved.')
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Category saved.' }),
+    ).toHaveText('Category saved.')
     await page.getByRole('link', { name: 'Products', exact: true }).click()
     await page.getByRole('button', { name: 'Add product', exact: true }).click()
     await page.getByLabel('Product title', { exact: true }).fill(title)
@@ -225,7 +227,9 @@ test('Admin publishes verified media and variants; User sees the same UUID, exac
         .filter({ hasText: title })
         .getByRole('button', { name: 'Archive', exact: true })
         .click()
-      await expect(page.getByRole('status')).toContainText('Product archived.')
+      await expect(
+        page.getByRole('status').filter({ hasText: 'Product archived.' }),
+      ).toHaveText('Product archived.')
       const missing = await user.goto(
         'http://127.0.0.1:3300/product/' + f.slug('published'),
       )

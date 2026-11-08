@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 
-test('Stripe TEST payment preparation Swagger: test-only preparation, signed public receipt and no payability', async ({ request }) => {
+test('Stripe TEST payment preparation Swagger: test-only preparation, signed public receipt and no payability', async ({
+  request,
+}) => {
   const response = await request.get('/docs-json')
   expect(response.status()).toBe(200)
   const doc = await response.json()
@@ -11,15 +13,45 @@ test('Stripe TEST payment preparation Swagger: test-only preparation, signed pub
     const op = doc.paths[path]?.[method]
     expect(op).toBeDefined()
     expect(op.tags).toContain('Payments / Customer')
-    expect(op.security).toEqual(expect.arrayContaining([{ 'access-token': [] }]))
+    expect(op.security).toEqual(
+      expect.arrayContaining([{ 'access-token': [] }]),
+    )
   }
   const webhook = doc.paths['/v1/payments/stripe/webhook']?.post
   expect(webhook?.tags).toContain('Payments / Webhooks')
   expect(webhook?.security ?? []).toEqual([])
   const props = doc.components.schemas.PaymentPreparationResponseDto.properties
-  for (const item of ['orderId', 'providerIntentId', 'preparationStatus', 'amountMinor', 'currency', 'canConfirm', 'payable'])
+  for (const item of [
+    'orderId',
+    'providerIntentId',
+    'preparationStatus',
+    'amountMinor',
+    'currency',
+    'canConfirm',
+    'payable',
+  ])
     expect(props).toHaveProperty(item)
   expect(props).not.toHaveProperty('clientSecret')
   expect(props).not.toHaveProperty('client_secret')
-  expect((await request.post('/v1/payments/orders/00000000-0000-4000-8000-000000000000/prepare')).status()).toBe(401)
+  expect(
+    (
+      await request.post(
+        '/v1/payments/orders/00000000-0000-4000-8000-000000000000/prepare',
+      )
+    ).status(),
+  ).toBe(401)
+})
+
+test('unprepared owned payment status documents an explicit nullable JSON response', async ({
+  request,
+}) => {
+  const doc = await (await request.get('/docs-json')).json()
+  const schema =
+    doc.paths['/v1/payments/orders/{orderId}'].get.responses['200'].content[
+      'application/json'
+    ].schema
+  expect(schema.nullable).toBe(true)
+  expect(schema.allOf).toEqual([
+    { $ref: '#/components/schemas/PaymentPreparationResponseDto' },
+  ])
 })
