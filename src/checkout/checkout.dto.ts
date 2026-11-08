@@ -88,6 +88,12 @@ export class PutCheckoutRateDto {
   enabled!: boolean
 }
 
+export class CheckoutRateResponseDto extends PutCheckoutRateDto {
+  @ApiProperty({ format: 'uuid' }) id!: string
+  @ApiProperty({ format: 'date-time' }) createdAt!: Date
+  @ApiProperty({ format: 'date-time' }) updatedAt!: Date
+}
+
 export class CheckoutEstimateResponseDto {
   @ApiProperty({ format: 'uuid' }) cartId!: string
   @ApiProperty({ example: 'US' }) countryCode!: string

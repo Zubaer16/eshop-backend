@@ -13,9 +13,7 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
     !fs.existsSync(path.join(roots.admin, 'lib/types.ts')) ||
     !fs.existsSync(path.join(roots.storefront, 'lib/api/contracts.ts'))
   ) {
-    t.skip(
-      'Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks',
-    )
+    t.skip('Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks')
     return
   }
   const result = evaluate(roots)
@@ -31,7 +29,7 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
   )
   assert.equal(
     result.results.find((item) => item.id === 'session-transport')?.status,
-    'ADAPTER',
+    'MATCH',
   )
   assert.equal(
     result.results.find((item) => item.id === 'staff-permissions')?.status,
@@ -77,7 +75,10 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
     commerce.summary,
     /orders, payments and coupons remain planned/,
   )
-  assert.match(commerce.summary, /promotions coupon\/campaign APIs are source-present/)
+  assert.match(
+    commerce.summary,
+    /promotions coupon\/campaign APIs are source-present/,
+  )
 })
 
 test('missing projects are never treated as aligned', () => {

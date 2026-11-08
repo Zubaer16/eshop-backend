@@ -1,8 +1,8 @@
 {
-  "version": "1.15.0",
+  "version": "1.21.0",
   "purpose": "Source-backed pre-integration contract baseline, NOT proof of runtime integration",
   "sourceBaselines": {
-    "backend": "Local working tree through reporting authoritative reporting/activity; merchandising-reporting static/build/migration evidence only, runtime tests deferred to release acceptance",
+    "backend": "Current eShop Backend after implementation/cleanup/refactor; full local release suites passed 2026-11-07, receipt now historical after source edits. Web integration tracked separately in contracts/web-integration.v1.json.",
     "admin": "kookaburra-admin-full-20261025-181323.zip",
     "storefront": "kookaburra-storefront-full-20261020-101939.zip"
   },
@@ -12,12 +12,12 @@
     "money": "Integer minor units and ISO 4217 currency; UI USD decimal display is a presentation adapter only",
     "inventory": "Stock changed only through Inventory API after item creation; product/variant stockOnHand are mirrors",
     "availability": "Display hint only, authoritative stock validated by checkout backend",
-    "auth": "Bearer JWT-only; frontend must send Authorization header and manage token lifecycle; no cookie session/BFF is mandated.",
+    "auth": "Domain API remains Bearer JWT-only. Owner-approved persistent web sessions use a limited same-origin Next auth bridge with HttpOnly cookies for refresh credentials, access tokens in memory and fresh backend identity/grants; mobile/API contracts unchanged.",
     "status": "Explicit map ACTIVE/DRAFT/ARCHIVED; never silently map ARCHIVED to Draft",
-    "media": "Provider-tracked media IDs and ordered gallery; Cloudinary/S3/R2 and VPS disk signer/verify/delete adapters supported; responsive renditions and external CDN purge pending",
+    "media": "Canonical verified media IDs, signed provider-specific upload/complete and reference-aware gallery/deletion APIs. Existing rendition/reconcile tooling; actual external provider/CDN/deployment validation remains separate.",
     "pagination": "Existing {items,total,page,limit,pages} needs a frontend adapter to ApiPage.pageSize or additive backend alias",
     "apiStability": "Keep /v1 and legacy endpoints stable; add new documented DTOs without breaking already-tested clients",
-    "cart": "guest cart cart and merge implemented; checkout estimate country/currency live estimated shipping/tax implemented; reservation customer stock holds now implemented (10-minute TTL); address-specific tax and payable checkout/payment remain deferred."
+    "cart": "Canonical guest/customer cart and login merge; customer JWT for configured country/currency checkout estimates, bounded reservations and unpaid order creation. Existing STRIPE_TEST-only payment capability; no guest checkout, automatic FX or address-specific tax inference."
   },
   "findings": [
     {
@@ -38,15 +38,15 @@
       "id": "catalog-pricing",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Read projection exposes integer minor-unit money and variant effective price; UI decimal conversion remains adapter responsibility",
-      "action": "Use lossless minor-unit mapping; variant override must be represented; server is authoritative"
+      "summary": "Live source uses integer minor-unit API values with exact decimal parsing and real currency precision; execution of new adapter tests is deferred.",
+      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
     },
     {
       "id": "catalog-identity",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Canonical backend UUID differs from demo product/variant IDs",
-      "action": "Resolve explicit mappings; never guess or silently migrate fixtures"
+      "summary": "Live source uses canonical product/category/variant UUIDs and slugs; explicit preview retains separate demo identities. Final cross-app proof is deferred.",
+      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
     },
     {
       "id": "variant-shape",
@@ -59,15 +59,15 @@
       "id": "category-shape",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Category metadata active, color and sortOrder now persisted; frontend still needs English name adapter and primary-category view",
-      "action": "Use explicit primary category for existing Admin view while retaining backend multiple categories"
+      "summary": "Live source preserves category hierarchy, active/color/order fields, scalar English names and all product categoryIds; final runtime validation is pending.",
+      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
     },
     {
       "id": "inventory-identity",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Balance ID remains write identity; GET inventory supports productId and variantId lookup for Admin adapter",
-      "action": "Create stock-adjustment adapter with lookup and UUID idempotency; use server lowStockThreshold"
+      "summary": "Live source reads and writes by canonical balance UUID, distinguishes reserved/available stock and keeps retry payload UUIDs; final runtime validation is deferred.",
+      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
     },
     {
       "id": "catalog-stock-guard",
@@ -79,9 +79,9 @@
     {
       "id": "session-transport",
       "priority": "P0",
-      "status": "ADAPTER",
-      "summary": "JWT-only decided: Storefront transport currently sends credentials:include without Authorization bearer",
-      "action": "Adapt frontend API transport to send Bearer JWT and handle refresh securely; no backend cookie session or BFF"
+      "status": "MATCH",
+      "summary": "Both live frontends restore login after reload through same-origin HttpOnly refresh cookies; domain calls use Bearer JWT with cookies omitted and access tokens in memory.",
+      "action": "Preserve customer/staff cookie and audience separation, exact-origin CSRF checks, fresh identity, serialized rotation across tabs and no automatic write replay."
     },
     {
       "id": "staff-permissions",
@@ -94,36 +94,36 @@
       "id": "product-media",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "Backend media assets, verified URLs and ordered gallery APIs now implemented; Admin still needs signed-upload UI workflow and adapter",
-      "action": "Use canonical media IDs/URLs and signed upload method/headers; Cloudinary POST, S3/R2 presigned PUT and VPS signed raw PUT supported. Responsive renditions and external CDN purge are later increments."
+      "summary": "Live source implements signed POST/PUT transfer, completion, current-namespace library and ordered verified-ID galleries; external provider and final browser acceptance remain pending.",
+      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
     },
     {
       "id": "customer-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Customer JWT cart and live authoritative price/stock quote implemented; storefront cart adapter is not yet connected",
+      "summary": "Live web source now connects owned cart quotes, absolute quantity/removal/clear, header/drawer and canonical product actions; frozen retry/reconciliation code awaits final runtime validation.",
       "action": "Use canonical productId/variantId and Bearer JWT; never send client-side totals or expect inventory to be reserved"
     },
     {
       "id": "guest-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Anonymous guest cart capability and transactional JWT customer merge implemented; Storefront local cart still needs API transport adapter",
+      "summary": "Live web source now uses a separate HttpOnly guest capability cookie and explicit current-customer merge with conflict preservation; no fixture import. New guest-cookie/ownership/browser tests are deferred.",
       "action": "Guest browser holds X-Guest-Cart-Token securely, calls PUT /v1/guest-cart/items with canonical IDs and POST /v1/cart/merge after customer JWT login; never reuse token after merge or trust client subtotal"
     },
     {
       "id": "commerce-future",
       "priority": "P2",
       "status": "ADAPTER",
-      "summary": "Checkout, holds, orders, payments, store configuration delivery zones and promotions coupon/campaign APIs are source-present; browser commerce adapters and acceptance remain pending",
-      "action": "Use one normalized couponCode on estimate/reservation/delivery-options; map percent to basis points and money to minor units. Preserve server discount snapshots and null/unlimited semantics. release security external provider acceptance remains separate; merchandising content is a separate integration area."
+      "summary": "Live checkout/shipping/tax/coupon/campaign and TEST payment adapters are source-implemented; full runtime/provider validation remains pending. Owned recovery, request UUIDs, exact totals, revisions and OWNER-only financial policy are explicit.",
+      "action": "Execute prepared tests at the final integration window. Preserve distinct estimate/hold/unpaid/TEST-settlement states, owned address snapshots, null limits and server-authoritative money/stock/grants. Other store content/reporting remains step 7."
     },
     {
       "id": "status-shape",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Admin Active/Draft cannot represent backend ARCHIVED status",
-      "action": "Define archive visibility and prevent lossy conversion in Admin mapping"
+      "summary": "Live source explicitly represents DRAFT/ACTIVE/ARCHIVED and warns about archive gallery detachment; final tests are deferred.",
+      "action": "Run the prepared adapter/API/security/cross-app tests in the final integration window; preserve server rules and separate preview fixtures. Source presence alone is not runtime acceptance."
     },
     {
       "id": "page-shape",
@@ -143,7 +143,7 @@
       "id": "store-merchandising",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "merchandising banner/curated collection/homepage APIs are source-present; current UIs remain preview-based and runtime validation is deferred to release acceptance",
+      "summary": "merchandising banner/curated collection/homepage APIs are source-present; current UIs remain preview-based and local backend suites passed 2026-11-07; live client integration remains pending",
       "action": "Map enabled to publication status/window, imageUrl to verified Media Library ID, CTA field names and canonical product IDs/order. Use hasVariants and availability hints safely; add collection route/editor controls during integration. Do not claim live publication or test acceptance from source audit."
     },
     {
@@ -151,7 +151,7 @@
       "priority": "P1",
       "status": "ADAPTER",
       "summary": "notifications persisted inbox/read/preferences/templates and outbox subscriber are source-present; Admin bell remains a placeholder and Storefront has no operational inbox",
-      "action": "Implement authenticated own-inbox/preferences UI and typed target navigation. Staff alerts follow current permissions; security history remains mandatory; marketing channels default off. Activate bounded dispatcher after runtime validation. Email/push delivery remain separate email and push transports; no live browser acceptance from this audit."
+      "action": "Implement authenticated own-inbox/preferences UI and typed target navigation. Staff alerts follow current permissions; security history remains mandatory; marketing channels default off. Activate the bounded dispatcher only with reviewed deployment/provider configuration. Email/push delivery remain separate email and push transports; no live browser acceptance from this audit."
     },
     {
       "id": "email-delivery",
@@ -171,8 +171,13 @@
       "id": "authoritative-reporting",
       "priority": "P1",
       "status": "ADAPTER",
-      "summary": "reporting ledger-aware financial/daily/order/payment/SKU/customer/inventory/audit/CSV and permission-aware dashboard APIs are source-present; Admin reports remain browser preview math",
+      "summary": "Live payments page reads server attempt/collection records and lifetime refund strings; other financial/dashboard/report/CSV adapters remain step 7. All new runtime validation is deferred.",
       "action": "Replace booked/fulfillment-derived sample revenue with verified TEST collections and confirmed refunds on independent event dates. Preserve currency groups/exact minor-unit strings, UTC exclusive-to bounds and current inventory basis. Hide domain-restricted sections, require extra catalog/customer grants for performance data, and use bounded audited CSV. No live UI/runtime acceptance from source audit."
     }
-  ]
+  ],
+  "currentSourceRoots": {
+    "backend": "eshop-backend",
+    "admin": "eshop-admin-frontend",
+    "storefront": "eshop-user-frontend"
+  }
 }

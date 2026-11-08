@@ -6,6 +6,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Put,
   Req,
   UseGuards,
@@ -27,7 +28,11 @@ import {
   MediaUploadInstructionDto,
   ReplaceProductGalleryDto,
   StartMediaUploadDto,
+  MediaLibraryQueryDto,
+  MediaLibraryPageDto,
+  MediaDeletionScheduledDto,
 } from './media.dto'
+import { CatalogGalleryImageResponseDto } from '../catalog/catalog.response'
 
 @ApiTags('Media / Admin')
 @ApiBearerAuth('access-token')
@@ -35,6 +40,15 @@ import {
 @UseGuards(AccessGuard, AdminGuard, CatalogWriteGuard)
 export class MediaController {
   constructor(private readonly media: MediaService) {}
+  @Get('media')
+  @ApiOperation({
+    summary:
+      'Bounded current-namespace media library; ACTIVE by default, exact UUID search; catalog.manage required',
+  })
+  @ApiOkResponse({ type: MediaLibraryPageDto })
+  list(@Query() query: MediaLibraryQueryDto) {
+    return this.media.listAssets(query)
+  }
   @Post('media/uploads')
   @ApiOperation({
     summary:
@@ -65,6 +79,7 @@ export class MediaController {
     return this.media.getAsset(id)
   }
   @Delete('media/:id')
+  @ApiOkResponse({ type: MediaDeletionScheduledDto })
   @ApiOperation({
     summary:
       'Schedule deletion of unreferenced media after retention; never delete shared images',
@@ -94,6 +109,7 @@ export class MediaController {
     return this.media.retryDeletion(id, request.authUser!.id)
   }
   @Put('products/:id/media')
+  @ApiOkResponse({ type: [CatalogGalleryImageResponseDto] })
   @ApiOperation({
     summary:
       'Atomically replace up to six verified images, ordered from cover; queue orphan cleanup',

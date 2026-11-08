@@ -85,3 +85,6 @@ export class GuestCartCreatedDto {
   @ApiProperty({ format: 'uuid' }) guestCartId!: string
   @ApiProperty({ type: String, format: 'date-time' }) expiresAt!: string
 }
+export class GuestCartRevokedDto {
+  @ApiProperty() revoked!: boolean
+}

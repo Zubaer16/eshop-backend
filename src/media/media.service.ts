@@ -14,7 +14,11 @@ import { Prisma } from '../generated/prisma/client'
 import { MediaStorageRegistry } from './storage.registry'
 import { DiskMediaProvider } from './disk.storage'
 import { MediaCdnPurgeService } from './cdn-purge.service'
-import { ReplaceProductGalleryDto, StartMediaUploadDto } from './media.dto'
+import {
+  MediaLibraryQueryDto,
+  ReplaceProductGalleryDto,
+  StartMediaUploadDto,
+} from './media.dto'
 import { readyWidths, renditionKey, widthsFor } from './renditions'
 import { S3MediaProvider } from './s3.storage'
 
@@ -47,6 +51,32 @@ export class MediaService {
     private readonly cdn: MediaCdnPurgeService,
     private readonly s3: S3MediaProvider,
   ) {}
+
+  async listAssets(query: MediaLibraryQueryDto) {
+    const page = query.page ?? 1,
+      limit = query.limit ?? 20
+    const where: Prisma.MediaAssetWhereInput = {
+      namespace: this.config.get('MEDIA_NAMESPACE', { infer: true }),
+      status: query.status ?? 'ACTIVE',
+      ...(query.id ? { id: query.id } : {}),
+    }
+    const [items, total] = await this.db.client.$transaction([
+      this.db.client.mediaAsset.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.db.client.mediaAsset.count({ where }),
+    ])
+    return {
+      items: items.map(serialize),
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
+    }
+  }
 
   async createUpload(input: StartMediaUploadDto, actorId: string) {
     const id = randomUUID()

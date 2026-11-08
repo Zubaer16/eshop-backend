@@ -48,6 +48,13 @@ export class CatalogTestFixture {
     return `QA-${this.key}-${label}`.toUpperCase()
   }
 
+  browserCredentials() {
+    const email = `catalog-${this.key}-browser-${randomUUID()}@example.test`
+    const password = `Browser-${randomUUID()}-Aa1!`
+    this.emails.push(email)
+    return { email, password }
+  }
+
   async account(role: CatalogRole) {
     const email = `catalog-${this.key}-${role.toLowerCase()}-${randomUUID()}@example.test`
     const password = `Catalog-${randomUUID()}-Aa1!`

@@ -13,6 +13,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOkResponse,
+  ApiCreatedResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger'
@@ -27,6 +28,12 @@ import {
   SetLowStockThresholdDto,
 } from './inventory.dto'
 import { InventoryService } from './inventory.service'
+import {
+  InventoryBalancePageDto,
+  InventoryBalanceResponseDto,
+  InventoryMovementPageDto,
+  InventoryAdjustmentResponseDto,
+} from './inventory.response'
 
 @ApiTags('Inventory / Admin')
 @ApiBearerAuth('access-token')
@@ -37,6 +44,7 @@ export class InventoryController {
 
   @Get()
   @ApiOkResponse({
+    type: InventoryBalancePageDto,
     description:
       'Returns canonical balance IDs, productId/variantId and pageSize alias for Admin inventory adapters',
   })
@@ -49,12 +57,14 @@ export class InventoryController {
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: InventoryBalanceResponseDto })
   @ApiOperation({ summary: 'Read one SKU stock balance' })
   get(@Param('id', ParseUUIDPipe) id: string) {
     return this.inventory.get(id)
   }
 
   @Get(':id/movements')
+  @ApiOkResponse({ type: InventoryMovementPageDto })
   @ApiOperation({ summary: 'Paginated append-only movements for one SKU' })
   movements(
     @Param('id', ParseUUIDPipe) id: string,
@@ -64,6 +74,7 @@ export class InventoryController {
   }
 
   @Patch(':id/threshold')
+  @ApiOkResponse({ type: InventoryBalanceResponseDto })
   @UseGuards(InventoryWriteGuard)
   @ApiOperation({
     summary: 'Set low-stock threshold; inventory.adjust permission',
@@ -77,6 +88,7 @@ export class InventoryController {
   }
 
   @Post(':id/adjustments')
+  @ApiCreatedResponse({ type: InventoryAdjustmentResponseDto })
   @UseGuards(InventoryWriteGuard)
   @ApiOperation({
     summary: 'Atomic, idempotent stock adjustment; inventory.adjust permission',

@@ -215,6 +215,15 @@ export class UpdateProductDto extends PartialType(
   OmitType(CreateProductDto, ['stockOnHand', 'variants'] as const),
 ) {}
 export class ProductQueryDto {
+  @ApiPropertyOptional({
+    example: 'USD',
+    description:
+      'Exact currency; price filters use minor units of this currency, without conversion',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Z]{3}$/)
+  currency?: string
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)

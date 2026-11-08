@@ -14,6 +14,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOkResponse,
+  ApiCreatedResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger'
@@ -26,6 +27,8 @@ import {
   CatalogCategoryResponseDto,
   CatalogProductResponseDto,
   CatalogProductPageResponseDto,
+  CatalogVariantResponseDto,
+  CatalogDeletedResponseDto,
 } from './catalog.response'
 import {
   CreateCategoryDto,
@@ -86,6 +89,7 @@ export class AdminCatalogController {
   }
 
   @Post('categories')
+  @ApiCreatedResponse({ type: CatalogCategoryResponseDto })
   @UseGuards(CatalogWriteGuard)
   createCategory(
     @Body() input: CreateCategoryDto,
@@ -95,6 +99,7 @@ export class AdminCatalogController {
   }
 
   @Patch('categories/:id')
+  @ApiOkResponse({ type: CatalogCategoryResponseDto })
   @UseGuards(CatalogWriteGuard)
   updateCategory(
     @Param('id', ParseUUIDPipe) id: string,
@@ -105,6 +110,7 @@ export class AdminCatalogController {
   }
 
   @Delete('categories/:id')
+  @ApiOkResponse({ type: CatalogDeletedResponseDto })
   @UseGuards(CatalogWriteGuard)
   deleteCategory(
     @Param('id', ParseUUIDPipe) id: string,
@@ -126,6 +132,7 @@ export class AdminCatalogController {
   }
 
   @Post('products')
+  @ApiCreatedResponse({ type: CatalogProductResponseDto })
   @UseGuards(CatalogWriteGuard)
   createProduct(
     @Body() input: CreateProductDto,
@@ -135,6 +142,7 @@ export class AdminCatalogController {
   }
 
   @Patch('products/:id')
+  @ApiOkResponse({ type: CatalogProductResponseDto })
   @UseGuards(CatalogWriteGuard)
   updateProduct(
     @Param('id', ParseUUIDPipe) id: string,
@@ -145,6 +153,7 @@ export class AdminCatalogController {
   }
 
   @Delete('products/:id')
+  @ApiOkResponse({ type: CatalogProductResponseDto })
   @UseGuards(CatalogWriteGuard)
   archiveProduct(
     @Param('id', ParseUUIDPipe) id: string,
@@ -154,6 +163,7 @@ export class AdminCatalogController {
   }
 
   @Post('products/:id/variants')
+  @ApiCreatedResponse({ type: CatalogVariantResponseDto })
   @UseGuards(CatalogWriteGuard)
   addVariant(
     @Param('id', ParseUUIDPipe) id: string,
@@ -164,6 +174,7 @@ export class AdminCatalogController {
   }
 
   @Patch('products/:id/variants/:variantId')
+  @ApiOkResponse({ type: CatalogVariantResponseDto })
   @UseGuards(CatalogWriteGuard)
   updateVariant(
     @Param('id', ParseUUIDPipe) id: string,
@@ -180,6 +191,7 @@ export class AdminCatalogController {
   }
 
   @Delete('products/:id/variants/:variantId')
+  @ApiOkResponse({ type: CatalogDeletedResponseDto })
   @UseGuards(CatalogWriteGuard)
   deleteVariant(
     @Param('id', ParseUUIDPipe) id: string,

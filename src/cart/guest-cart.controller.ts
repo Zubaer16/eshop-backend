@@ -26,6 +26,7 @@ import type { Request } from 'express'
 import {
   CartQuoteResponseDto,
   GuestCartCreatedDto,
+  GuestCartRevokedDto,
   SetCartItemDto,
 } from './cart.dto'
 import { GuestCartService } from './guest-cart.service'
@@ -105,7 +106,10 @@ export class GuestCartController {
   @ApiOperation({
     summary: 'Revoke anonymous cart capability and delete its items',
   })
-  @ApiOkResponse({ description: 'Guest capability revoked' })
+  @ApiOkResponse({
+    type: GuestCartRevokedDto,
+    description: 'Guest capability revoked',
+  })
   revoke(@Req() request: Request) {
     return this.guest.revoke(guestCapability(request))
   }

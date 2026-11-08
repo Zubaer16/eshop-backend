@@ -4,7 +4,7 @@ The product display name is **eShop**. Package names are `eshop-backend`, `eshop
 
 Storefront API configuration uses `NEXT_PUBLIC_ESHOP_API_URL`, with `NEXT_PUBLIC_KOOKABURRA_API_URL` retained as a fallback for existing builds. Set the new variable before rebuilding deployed frontend bundles. Cross-repository auditing accepts `ESHOP_ADMIN_DIR` / `ESHOP_STOREFRONT_DIR`, then the legacy variables. Without overrides it detects sibling `eshop-admin-frontend` / `eshop-user-frontend` folders and falls back to the current `kookaburra-*` folders.
 
-Local checkout directory names and Git remotes have not been changed. Package identity and product branding do not require changing these paths. GitHub repository, hosting project, DNS and external provider names require separate account-side changes; none were performed here.
+Local checkout folders have been renamed to the agreed eShop names; the earlier separate backend is preserved as `eshop-backend-old`. Git remotes are owner-managed and were not changed by these local operations. Package identity and product branding do not require changing these paths. GitHub repository, hosting project, DNS and external provider names require separate account-side changes; none were performed here.
 
 Compatibility identifiers retained intentionally:
 
@@ -16,4 +16,4 @@ Compatibility identifiers retained intentionally:
 
 No credential files, external Firebase projects, media objects or databases were renamed. New Firebase test fixture labels use eshop; actual deployment project IDs remain deployment-owned. No dependency reinstall is required solely for package renaming.
 
-Agreed Git repository names: `eshop-backend`, `eshop-admin-frontend`, `eshop-user-frontend`. The owner will rename the Git repositories separately. Current local folders remain unchanged; after moving local checkouts to the agreed sibling names, the alignment audit detects them automatically.
+Agreed Git repository names: `eshop-backend`, `eshop-admin-frontend`, `eshop-user-frontend`. The owner will rename the Git repositories separately. All three local folders now use these agreed sibling names, and the alignment audit detects them automatically.

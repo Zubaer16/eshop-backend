@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Header,
   Param,
   ParseUUIDPipe,
   Post,
@@ -33,6 +34,7 @@ import { CustomerCartGuard } from '../cart/cart.customer.guard'
 import {
   CheckoutEstimateDto,
   CheckoutEstimateResponseDto,
+  CheckoutRateResponseDto,
   PutCheckoutRateDto,
 } from './checkout.dto'
 import { AvailableDeliveryOptionsDto } from './delivery-zones.dto'
@@ -44,6 +46,7 @@ import { ReservationService } from './reservation.service'
 import {
   CreateReservationDto,
   CheckoutReservationResponseDto,
+  CheckoutRecoveryResponseDto,
 } from './reservation.dto'
 
 class DeliveryCountryQueryDto extends CouponSelectionDto {
@@ -67,6 +70,17 @@ export class CheckoutCustomerController {
     private readonly checkout: CheckoutService,
     private readonly reservations: ReservationService,
   ) {}
+
+  @Get('recovery')
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({
+    summary:
+      'Recover own hold/latest unpaid order; no address or provider secrets',
+  })
+  @ApiOkResponse({ type: CheckoutRecoveryResponseDto })
+  recovery(@Req() req: AuthenticatedRequest) {
+    return this.reservations.recovery(req.authUser!.id)
+  }
 
   @Post('estimate')
   @HttpCode(HttpStatus.OK)
@@ -178,7 +192,7 @@ export class CheckoutAdminController {
     summary:
       'List explicitly configured country/currency shipping and tax estimate policies (OWNER)',
   })
-  @ApiOkResponse({ description: 'Configured rate policies; no secret values' })
+  @ApiOkResponse({ type: [CheckoutRateResponseDto] })
   list() {
     return this.checkout.listRates()
   }
@@ -188,7 +202,7 @@ export class CheckoutAdminController {
     summary:
       'Idempotently configure one country/currency shipping/tax estimate lane (OWNER)',
   })
-  @ApiOkResponse({ description: 'Persisted rate policy' })
+  @ApiOkResponse({ type: CheckoutRateResponseDto })
   @ApiBadRequestResponse({
     description:
       'Invalid rates, money bounds, tax basis points or unsupported fields',

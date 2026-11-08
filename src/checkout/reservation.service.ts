@@ -301,6 +301,22 @@ export class ReservationService {
     }
   }
 
+  /** Owned discovery after a lost response. No address or provider credentials. */
+  async recovery(customerId: string) {
+    const active = await this.database.client.checkoutReservation.findFirst({
+      where: { customerId, status: 'ACTIVE' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { id: true },
+    })
+    const reservation = active ? await this.get(customerId, active.id) : null
+    const order = await this.database.client.order.findFirst({
+      where: { customerId, status: 'PENDING_PAYMENT' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { id: true },
+    })
+    return { reservation, orderId: order?.id ?? null }
+  }
+
   async get(customerId: string, id: string) {
     return this.database.client.$transaction(async (tx) => {
       const found = await tx.checkoutReservation.findFirst({

@@ -15,6 +15,8 @@ export default tseslint.config(
       'test-results-swagger/**',
       'playwright-report/**',
       'test-results/**',
+      'test-results-web-auth/**',
+      'validation/web-integration/**',
       'node_modules/**',
       'jest.config.cjs',
       'jest.e2e.config.cjs',
@@ -29,6 +31,7 @@ export default tseslint.config(
       'playwright.api.config.mjs',
       'playwright.swagger.config.mjs',
       'scripts/**/*.cjs',
+      'playwright.web.config.mjs',
     ],
     languageOptions: {
       globals: {
@@ -56,6 +59,7 @@ export default tseslint.config(
       'test/**/*.ts',
       'api-tests/**/*.ts',
       'swagger-ui-tests/**/*.ts',
+      'web-integration-tests/**/*.ts',
     ],
     rules: {
       'no-undef': 'off', // TypeScript performs identifier checking.

@@ -1,0 +1,870 @@
+{
+  "schema": 1,
+  "version": "1.5.0",
+  "date": "2026-11-08",
+  "purpose": "Source-grounded web integration contract and delivery status; focused live auth validation is separate from full product/provider acceptance",
+  "apiPrefix": "/v1",
+  "roots": {
+    "backend": ".",
+    "admin": "../eshop-admin-frontend",
+    "user": "../eshop-user-frontend"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "title": "Contract and screen/action audit",
+      "status": "AUDIT_COMPLETE"
+    },
+    {
+      "step": 2,
+      "title": "API transport, authentication, session and permissions",
+      "status": "COMPLETE"
+    },
+    {
+      "step": 3,
+      "title": "Catalog, categories, variants, media and inventory",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "step": 4,
+      "title": "Profile, addresses, carts, wishlist and customer directory",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "step": 5,
+      "title": "Shipping, tax, coupons, checkout, payment and order creation",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "step": 6,
+      "title": "Order operations, fulfillment, tracking, returns, replacements and refunds",
+      "status": "NOT_STARTED"
+    },
+    {
+      "step": 7,
+      "title": "Content/settings, messaging, staff, reports and operations",
+      "status": "NOT_STARTED"
+    },
+    {
+      "step": 8,
+      "title": "Cross-app E2E/security, fixture removal, cleanup and handoff",
+      "status": "NOT_STARTED"
+    }
+  ],
+  "features": [
+    {
+      "id": "auth",
+      "step": 2,
+      "title": "User and staff authentication",
+      "userRoutes": [
+        "/forgot-password",
+        "/reset-password",
+        "/sign-in",
+        "/sign-up",
+        "/verify-email"
+      ],
+      "adminRoutes": ["/", "/sign-in"],
+      "actions": [
+        "register",
+        "sign in",
+        "refresh",
+        "logout",
+        "read current identity",
+        "guard private routes"
+      ],
+      "operationPrefixes": ["/v1/auth", "/v1/admin/auth"],
+      "authorization": "Customer credentials vs staff login; no public Admin registration",
+      "notes": [
+        "Owner superseded memory-only reload behavior on 2026-11-07: persistent HttpOnly same-origin refresh cookies restore web login across reload, tabs and browser restart. Access tokens stay in memory; domain/mobile/API contracts remain Bearer JWT. Exact-origin CSRF and separate customer/staff cookies are required.",
+        "Single-flight refresh, at most one replay of a safe request, no refresh loop; logout and account/role changes clear private data.",
+        "Signup CredentialsDto has email/password only; optional display name uses authenticated account/profile PATCH after registration.",
+        "Forgot/reset/verify flows passed isolated real-backend browser tests, including fragment clearing, replay rejection and password/session revocation. External SMTP delivery is not certified.",
+        "Persistent-session browser acceptance: 13 real-backend tests include reload, concurrent tabs, new contexts, cross-tab logout/account switching, CSRF and backend expiry. Cookie max age matches existing 30-day rotating refresh lifetime."
+      ],
+      "sourceFiles": [
+        "src/auth/customer-auth.controller.ts",
+        "src/auth/admin-auth.controller.ts",
+        "../eshop-user-frontend/lib/api/runtime.ts",
+        "../eshop-user-frontend/components/auth/auth-provider.tsx",
+        "../eshop-user-frontend/components/auth/sign-in-form.tsx",
+        "../eshop-user-frontend/components/auth/recovery-form.tsx",
+        "../eshop-admin-frontend/lib/api/runtime.ts",
+        "../eshop-admin-frontend/lib/admin-access.ts",
+        "../eshop-admin-frontend/components/auth/workspace-boundary.tsx",
+        "web-integration-tests/auth.spec.ts",
+        "../eshop-user-frontend/lib/api/session-server.ts",
+        "../eshop-user-frontend/lib/api/browser-session.ts",
+        "../eshop-user-frontend/app/api/auth/session/route.ts",
+        "../eshop-admin-frontend/lib/api/session-server.ts",
+        "../eshop-admin-frontend/lib/api/browser-session.ts",
+        "../eshop-admin-frontend/app/api/auth/session/route.ts"
+      ]
+    },
+    {
+      "id": "catalog",
+      "step": 3,
+      "title": "Catalog navigation, search and product pages",
+      "userRoutes": ["/categories", "/shop", "/product/[slug]"],
+      "adminRoutes": ["/categories", "/products"],
+      "actions": [
+        "list/search/filter/page",
+        "product detail",
+        "create/update/archive",
+        "variant CRUD",
+        "publish and see in storefront"
+      ],
+      "operationPrefixes": [
+        "/v1/categories",
+        "/v1/products",
+        "/v1/admin/categories",
+        "/v1/admin/products"
+      ],
+      "authorization": "Public ACTIVE-only reads; staff reads, catalog.manage mutations",
+      "notes": [
+        "Live views use canonical UUIDs, scalar English fields, all categoryIds and explicit DRAFT/ACTIVE/ARCHIVED status; fixtures stay in explicit preview mode.",
+        "Backend adds optional currency filter. User price filters target USD with exact minor units; variant prices inherit only when override is null.",
+        "Search is server title search; no pretend global SKU/description search. Legacy price presets map to USD caps 25/60/120, stock=1 maps to true, featured maps to visibly labeled newest.",
+        "Live product metadata/detail requests are no-store and use actual slugs. Static fixture slugs are generated only in preview mode.",
+        "Source implemented; unit/API/browser test code prepared but execution deferred to step 8 under owner policy."
+      ],
+      "sourceFiles": [
+        "src/catalog/catalog.controller.ts",
+        "src/catalog/catalog.dto.ts",
+        "src/catalog/catalog.response.ts",
+        "../eshop-user-frontend/lib/api/catalog.ts",
+        "../eshop-user-frontend/lib/api/public-catalog.ts",
+        "../eshop-user-frontend/components/catalog/catalog.tsx",
+        "../eshop-user-frontend/components/catalog/catalog-provider.tsx",
+        "../eshop-admin-frontend/components/catalog/products.tsx",
+        "../eshop-admin-frontend/components/catalog/categories.tsx",
+        "web-integration-tests/catalog.spec.ts"
+      ],
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "media",
+      "step": 3,
+      "title": "Verified uploads, product galleries and reusable assets",
+      "userRoutes": [],
+      "adminRoutes": ["/products", "/content", "/settings", "/media"],
+      "actions": [
+        "sign upload",
+        "provider-specific direct upload",
+        "complete verification",
+        "replace gallery",
+        "reuse asset",
+        "reference-safe delete"
+      ],
+      "operationPrefixes": [
+        "/v1/admin/media",
+        "/v1/media",
+        "/v1/admin/media-deletion-jobs"
+      ],
+      "authorization": "Current catalog.manage media guard; deletion/reference rules remain server-side",
+      "notes": [
+        "Bounded GET /v1/admin/media is current-namespace scoped, ACTIVE by default, exact UUID search with page/limit/status. No original filenames exist to search.",
+        "Library and product gallery use verified canonical asset IDs. Signed POST/PUT transfers never carry API bearer/cookies; completion remains server verification.",
+        "Gallery supports ordered cover, alt text, reuse and reference-safe deletion scheduling. Deletion jobs/provider workers and content/settings integration remain with their owning operations steps.",
+        "Media rights remain catalog.manage. Read-only staff cannot upload or use the protected library.",
+        "Source and regression tests prepared; no new HTTP/provider/browser execution under deferred-validation policy."
+      ],
+      "sourceFiles": [
+        "src/media/media.controller.ts",
+        "src/media/media.dto.ts",
+        "src/media/media.service.ts",
+        "../eshop-admin-frontend/components/catalog/media.tsx",
+        "../eshop-admin-frontend/lib/api/media-upload.ts",
+        "../eshop-admin-frontend/app/(admin)/media/page.tsx",
+        "api-tests/media-library.db.spec.ts"
+      ],
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "inventory",
+      "step": 3,
+      "title": "Physical stock, reservations and adjustments",
+      "userRoutes": [],
+      "adminRoutes": ["/inventory"],
+      "actions": [
+        "list/page",
+        "read SKU balance",
+        "threshold update",
+        "idempotent adjustment",
+        "movement history"
+      ],
+      "operationPrefixes": ["/v1/admin/inventory"],
+      "authorization": "All existing staff may read balances/movements; inventory.adjust is required for threshold/adjustment writes.",
+      "notes": [
+        "Use InventoryBalance ID, not product ID, as adjustment identity. Physical, reserved and available quantities are separate.",
+        "No stock writes through product edits; product/variant stock fields are initial-creation values or read mirrors.",
+        "A mutation request keeps the same idempotency UUID across a retry, then refetches authoritative state.",
+        "Unconfirmed adjustments keep a locked payload and request UUID for explicit retry/reconciliation; dialog close is blocked until confirmed or locally discarded. No global inventory totals are fabricated from one page."
+      ],
+      "sourceFiles": [
+        "src/inventory/inventory.controller.ts",
+        "src/inventory/inventory.response.ts",
+        "../eshop-admin-frontend/components/catalog/inventory.tsx"
+      ],
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "profile",
+      "step": 4,
+      "title": "Customer profile and addresses",
+      "userRoutes": ["/account", "/account/addresses", "/account/settings"],
+      "adminRoutes": [],
+      "actions": [
+        "read/update own profile",
+        "address list/create/edit/delete/default",
+        "password change",
+        "notification preferences"
+      ],
+      "operationPrefixes": ["/v1/account"],
+      "authorization": "Customer-owned identity; current email/role are not editable profile fields",
+      "notes": [
+        "Live account overview reads the owned profile and edits displayName only. Email/role are not editable; existing verification/password security flows remain separate.",
+        "Owned saved-address CRUD/default selection follows Backend max10, ISO country and E.164 rules. Existing default cannot be silently unset; deletion/default replacement is server-confirmed.",
+        "Notification preferences remain with the messaging delivery in step 7. No addresses are copied to staff customer views.",
+        "New UI tests are prepared; execution is deferred to the final integration window."
+      ],
+      "sourceFiles": [
+        "src/account/account.controller.ts",
+        "src/account/account.dto.ts",
+        "../eshop-user-frontend/components/shopping/account.tsx",
+        "../eshop-user-frontend/lib/api/shopping.ts",
+        "web-integration-tests/shopping.spec.ts"
+      ],
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "cart",
+      "step": 4,
+      "title": "Guest/customer cart and login merge",
+      "userRoutes": ["/cart"],
+      "adminRoutes": [],
+      "actions": [
+        "guest cart creation/token",
+        "add/update/remove/clear",
+        "quote",
+        "login merge and replay"
+      ],
+      "operationPrefixes": ["/v1/cart", "/v1/guest-cart"],
+      "authorization": "Guest capability in X-Guest-Cart-Token; customer Bearer JWT for owned cart/merge",
+      "notes": [
+        "Live product actions, header counts, drawer and cart page use server quotes and canonical item/variant IDs; no preview store import.",
+        "Guest capability persists only in a separate host-only HttpOnly SameSite=Lax cookie (Secure/__Host- in production) through a narrow same-origin guest bridge. Fixed expiry matches Backend 14 days; no guest token in JSON/URLs/browser storage.",
+        "After login, guest items stay separate until explicit merge into the current customer. Conflicts preserve items and allow guest quantity/removal while signed in. Successful merge consumes the guest capability.",
+        "Merge restores the current customer through the existing session handler under the same auth Web Lock, verifies expected customer UUID, and sends only server-owned Bearer/capability to Backend. Cookie rotation/expiry rules are preserved.",
+        "Same-browser write serialization reads a fresh quote before converting Add into an absolute quantity. Unconfirmed writes retain the same frozen desired change for explicit retry; no automatic write replay or subtotal-as-payment claim.",
+        "Checkout remains step 5. Guest checkout is not enabled. No tests/DB writes executed for this source delivery."
+      ],
+      "sourceFiles": [
+        "src/cart/cart.controller.ts",
+        "src/cart/guest-cart.controller.ts",
+        "src/cart/cart.dto.ts",
+        "../eshop-user-frontend/lib/api/guest-cart-server.ts",
+        "../eshop-user-frontend/lib/api/guest-cart-client.ts",
+        "../eshop-user-frontend/app/api/cart/guest/route.ts",
+        "../eshop-user-frontend/components/shopping/commerce-provider.tsx",
+        "../eshop-user-frontend/components/shopping/cart.tsx",
+        "../eshop-user-frontend/components/layout/header.tsx",
+        "web-integration-tests/shopping.spec.ts"
+      ],
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "wishlist",
+      "step": 4,
+      "title": "Owned wishlist",
+      "userRoutes": ["/wishlist"],
+      "adminRoutes": [],
+      "actions": [
+        "read owned saved items",
+        "save/remove canonical products",
+        "restore account list after reload",
+        "sign in with safe return to product"
+      ],
+      "operationPrefixes": ["/v1/wishlist"],
+      "authorization": "Customer-owned Bearer JWT",
+      "notes": [
+        "Web saved items require customer login. Anonymous Save links return to the product after sign-in/signup; no unauthenticated local wishlist or implicit import is introduced.",
+        "Saved state changes only after a confirmed PUT/DELETE, then server-owned data is refreshed. Unpublished products stay hidden according to existing Backend rules.",
+        "The bounded canonical merge API remains available to other clients/explicit reviewed imports; this web flow has no local guest wishlist to import and never imports legacy fixture IDs.",
+        "Private list/counters reset across logout/account changes. Source test execution remains deferred."
+      ],
+      "sourceFiles": [
+        "src/wishlist/wishlist.controller.ts",
+        "src/wishlist/wishlist.dto.ts",
+        "../eshop-user-frontend/lib/api/shopping.ts",
+        "../eshop-user-frontend/components/shopping/commerce-provider.tsx",
+        "../eshop-user-frontend/components/shopping/cart.tsx"
+      ],
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "customers",
+      "step": 4,
+      "title": "Staff customer directory and detail",
+      "userRoutes": [],
+      "adminRoutes": ["/customers"],
+      "actions": [
+        "search/page/status filter",
+        "detail",
+        "recent orders",
+        "separate financial performance"
+      ],
+      "operationPrefixes": ["/v1/admin/customers"],
+      "authorization": "customers.view; financial customer reports additionally require payments.view",
+      "notes": [
+        "Live read-only directory uses Backend email/display-name search, ACTIVE/DISABLED filters and pagination.",
+        "Details show server order count, up to five recent UUID order statuses and saved-address count. No address contents, location, browser-derived spend or customer mutation controls.",
+        "Current customers.view is enforced in navigation and Backend. Financial reporting remains its own permission-gated reporting step.",
+        "Browser privacy/ownership and directory tests are prepared, not executed."
+      ],
+      "sourceFiles": [
+        "src/customers/customers.controller.ts",
+        "src/customers/customers.dto.ts",
+        "../eshop-admin-frontend/components/customers/customers.tsx",
+        "web-integration-tests/shopping.spec.ts"
+      ],
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "checkout",
+      "step": 5,
+      "title": "Delivery quote, stock holds and unpaid order creation",
+      "userRoutes": ["/checkout"],
+      "adminRoutes": ["/shipping"],
+      "actions": [
+        "configured country/currency estimate",
+        "delivery options",
+        "coupon",
+        "reserve/release",
+        "create/replay order"
+      ],
+      "operationPrefixes": ["/v1/checkout", "/v1/admin/checkout"],
+      "authorization": "Customer JWT; checkout rate and delivery-zone policies OWNER only",
+      "notes": [
+        "Guest cart is supported, guest checkout is not. Require login before checkout and merge safely.",
+        "UI standard/express delivery identifiers map to configured options. Other country is not an ISO country; unsupported/unconfigured destinations show a real error.",
+        "UI tax is percent; backend basis points. Fee/cap/minimum values convert losslessly to minor units. Nullable unlimited caps/threshold semantics need explicit mapping.",
+        "Estimate -> reservation -> order must preserve chosen address/country/service/coupon and request IDs; expire/requote on conflicts.",
+        "Order creation is mapped separately by orders feature; do not send client totals or set PAID from a redirect.",
+        "Step 5 source implemented; full runtime validation deferred. Owned no-store recovery discovers a live hold/latest unpaid order after reload or lost acknowledgement. Separate frozen request UUIDs, exact server totals and address snapshot allowlist; no browser-storage PII. See WEB_CHECKOUT.md."
+      ],
+      "sourceFiles": [
+        "src/checkout/checkout.controller.ts",
+        "src/checkout/reservation.service.ts",
+        "src/checkout/delivery-zones.controller.ts",
+        "../eshop-user-frontend/lib/api/checkout.ts",
+        "../eshop-user-frontend/components/shopping/checkout.tsx",
+        "../eshop-admin-frontend/components/commerce/shipping.tsx",
+        "web-integration-tests/checkout.spec.ts",
+        "api-tests/web-checkout.contract.smoke.spec.ts"
+      ]
+    },
+    {
+      "id": "orders",
+      "step": 6,
+      "title": "Customer history and staff fulfillment",
+      "userRoutes": ["/account/orders", "/account/orders/[orderId]"],
+      "adminRoutes": ["/orders"],
+      "actions": [
+        "create unpaid order",
+        "own history/detail/cancel",
+        "staff order list/detail",
+        "fulfillment start/ship/deliver"
+      ],
+      "operationPrefixes": ["/v1/orders", "/v1/admin/orders"],
+      "authorization": "Customer ownership; orders.manage for staff actions",
+      "notes": [
+        "Current order list endpoints expose page/limit only; existing global UI search/status filters need an additive bounded server query or explicit UI capability reduction, not filtering one page and pretending it is the complete dataset.",
+        "Order payment status and shipment fulfillment status are independent; UI Pending/Processing/Shipped/Delivered is not a reversible map to Order.status.",
+        "One shipment/all lines only in approved v1; no split shipping. Paid refunds are separate from unpaid cancellation.",
+        "Dedicated return/replacement/tracking actions are assigned to their own features."
+      ],
+      "sourceFiles": [
+        "src/orders/orders.controller.ts",
+        "src/orders/fulfillment/fulfillment.controller.ts",
+        "../eshop-admin-frontend/components/admin/order-details.tsx"
+      ]
+    },
+    {
+      "id": "payments",
+      "step": 5,
+      "title": "Owned TEST payment preparation and safe payment state",
+      "userRoutes": ["/checkout"],
+      "adminRoutes": ["/payments"],
+      "actions": [
+        "prepare",
+        "read verified state",
+        "controlled fixed-card TEST completion",
+        "staff ledger reporting"
+      ],
+      "operationPrefixes": ["/v1/payments", "/v1/admin/payments"],
+      "authorization": "Customer-owned payment APIs; refunds OWNER; reporting payments.view",
+      "notes": [
+        "Current provider is STRIPE_TEST only; prepare never returns client_secret. Do not wire a real card/Stripe Elements form or claim production charging from current endpoints.",
+        "Existing test-complete is fixed TEST capability and must be clearly gated. Actual provider verification remains separate.",
+        "Webhook is backend-only signed input, never a browser action. Refund POST creates a request, not proof of a successful refund.",
+        "Admin simulated payment statuses/country search and finance totals must be replaced by the real attempt/collection/refund projections.",
+        "Step 5 source connects explicit TEST preparation/completion and owned status refresh, plus paginated permission-gated attempt/collection records. Only server order PAID confirms payment. Real provider/webhook evidence and full reports remain separate."
+      ],
+      "sourceFiles": [
+        "src/payments/payments.controller.ts",
+        "src/payments/refunds/refund-ledger.controller.ts",
+        "../eshop-admin-frontend/lib/payment-report.ts",
+        "../eshop-user-frontend/components/shopping/checkout.tsx",
+        "../eshop-admin-frontend/components/commerce/payments.tsx",
+        "src/reporting/reporting.controller.ts"
+      ]
+    },
+    {
+      "id": "recovery",
+      "step": 6,
+      "title": "Returns, same-SKU replacements and owned tracking",
+      "userRoutes": ["/account/orders/[orderId]", "/track"],
+      "adminRoutes": ["/orders"],
+      "actions": [
+        "customer return request/withdraw",
+        "staff approve/reject/receive/restock",
+        "same-SKU replacement lifecycle",
+        "owned tracking",
+        "refund request/history"
+      ],
+      "operationPrefixes": ["/v1/orders", "/v1/admin/orders"],
+      "authorization": "Customer return initiation/ownership; orders.manage inspection/fulfillment; OWNER refund requests",
+      "notes": [
+        "Admin preview requestReturn has no staff return-initiation API: move initiation to the customer flow instead of impersonating a customer.",
+        "Return approval, inspection and restock are separate. Refunding never implies stock return. Replacement is same-SKU only; cross-SKU exchange is post-v1.",
+        "Tracking is authenticated own UUID-based lookup; do not introduce public email/order-number tracking from the fixture UI.",
+        "No direct generic status setter, manual paid flag or local successful-refund record is allowed."
+      ],
+      "sourceFiles": [
+        "src/orders/returns/returns.controller.ts",
+        "src/orders/replacements/replacements.controller.ts",
+        "src/orders/tracking/tracking.controller.ts",
+        "../eshop-admin-frontend/lib/order-workflow.ts"
+      ]
+    },
+    {
+      "id": "merchandising",
+      "step": 7,
+      "title": "Homepage, collections and safe publication",
+      "userRoutes": ["/"],
+      "adminRoutes": ["/content"],
+      "actions": [
+        "banner/collection CRUD",
+        "revision-aware publish/archive",
+        "schedule",
+        "public homepage and collection detail"
+      ],
+      "operationPrefixes": [
+        "/v1/admin/store/banners",
+        "/v1/admin/store/collections",
+        "/v1/store/homepage",
+        "/v1/store/collections"
+      ],
+      "authorization": "marketing.manage or OWNER for edits; public effective publication only",
+      "notes": [
+        "Existing enabled/position/subtitle/imageUrl fields map to status/schedule/sort/verified media IDs; no silent publication.",
+        "Collection detail route is missing. Static homepage layout may remain presentation while data comes from the API."
+      ],
+      "sourceFiles": [
+        "src/merchandising/merchandising.controller.ts",
+        "../eshop-admin-frontend/components/admin/store-content.tsx"
+      ]
+    },
+    {
+      "id": "promotions",
+      "step": 5,
+      "title": "Financial coupons and editorial campaigns",
+      "userRoutes": [],
+      "adminRoutes": ["/promotions"],
+      "actions": [
+        "coupon rules/limits/windows/categories",
+        "campaign linkage",
+        "usage",
+        "disable/archive"
+      ],
+      "operationPrefixes": ["/v1/admin/promotions", "/v1/promotions"],
+      "authorization": "marketing.manage or OWNER",
+      "notes": [
+        "Financial campaigns and approved rich push campaigns are separate APIs; do not merge their states/approvals.",
+        "Integer discounts/currency/date windows/null unlimited limits remain authoritative on the backend. Zero-total coupon checkout remains outside approved v1.",
+        "Step 5 source connects coupon/campaign search/pagination/detail, revision-checked forms, disable/pause and quota counts. Nullable limits and timezone windows remain Backend rules; no blind retry of creates. Full test execution deferred."
+      ],
+      "sourceFiles": [
+        "src/promotions/promotions.controller.ts",
+        "../eshop-admin-frontend/components/commerce/promotions.tsx"
+      ]
+    },
+    {
+      "id": "settings",
+      "step": 7,
+      "title": "Store profile, SEO/content, verified branding and operations",
+      "userRoutes": ["/"],
+      "adminRoutes": ["/settings", "/content"],
+      "actions": [
+        "profile",
+        "content/policies",
+        "branding",
+        "bootstrap",
+        "operations"
+      ],
+      "operationPrefixes": ["/v1/store", "/v1/admin/store"],
+      "authorization": "OWNER for configuration; public safe projections only",
+      "notes": [
+        "Current one-form settings must split profile fields from revisioned operations/content/branding. orderPrefix is reserved and does not generate human-readable order IDs.",
+        "Configured origins are presentation metadata; actual CORS comes from deployment. Backend currency is not a frontend FX conversion.",
+        "Missing policy views/branding editor may be pages or panels; use backend plain text and safe links, not raw HTML."
+      ],
+      "sourceFiles": [
+        "src/store-profile/store-profile.controller.ts",
+        "src/store-content/store-content.controller.ts",
+        "src/store-branding/store-branding.controller.ts",
+        "src/store-operations/store-operations.controller.ts",
+        "src/store-bootstrap/store-bootstrap.controller.ts"
+      ]
+    },
+    {
+      "id": "staff",
+      "step": 7,
+      "title": "Staff lifecycle, fresh grants and immutable OWNER",
+      "userRoutes": [],
+      "adminRoutes": ["/staff"],
+      "actions": [
+        "list/create",
+        "role/status update",
+        "role permission update"
+      ],
+      "operationPrefixes": ["/v1/admin/staff", "/v1/admin/roles"],
+      "authorization": "Current backend OWNER/staff.manage rules; OWNER cannot be created/delegated by the browser",
+      "notes": [
+        "UI display roles map explicitly to persistent uppercase role keys. Never authorize from browser seedRolePermissions.",
+        "Staff create requires a password, absent from the current preview form. Keep it write-only and out of persisted state.",
+        "UI removeStaff maps to permitted disable/status update; backend has no physical staff-delete route."
+      ],
+      "sourceFiles": [
+        "src/auth/workspace/workspace.controller.ts",
+        "src/auth/workspace/workspace.dto.ts",
+        "../eshop-admin-frontend/components/admin/staff.tsx"
+      ]
+    },
+    {
+      "id": "reports",
+      "step": 7,
+      "title": "Permission-aware financial reports, dashboard and audit",
+      "userRoutes": [],
+      "adminRoutes": ["/dashboard", "/payments", "/reports", "/activity"],
+      "actions": [
+        "server aggregates",
+        "bounded filters/page",
+        "exact-currency charts",
+        "safe CSV export",
+        "safe audit read"
+      ],
+      "operationPrefixes": [
+        "/v1/admin/reports",
+        "/v1/admin/dashboard",
+        "/v1/admin/activity"
+      ],
+      "authorization": "Fresh per-report grants; dashboard.view alone does not grant finance/customer/inventory access",
+      "notes": [
+        "Use verified TEST collection facts and independently confirmed refunds, not order fulfillment-derived revenue or local arithmetic.",
+        "Report aggregate minor-unit strings remain exact; no Number conversion/FX/profit inference. Inventory is a current snapshot; financial windows are UTC [from,to).",
+        "UI inclusive end date maps to next UTC day. CSV is server-generated, max 1000 rows/5 MiB; surface narrowing errors.",
+        "Payment attempt states and derived collection/refund states are separate; do not invent a provider-failed state for an unverified attempt."
+      ],
+      "sourceFiles": [
+        "src/reporting/reporting.controller.ts",
+        "src/reporting/reporting.policy.ts",
+        "../eshop-admin-frontend/lib/reporting.ts"
+      ]
+    },
+    {
+      "id": "notifications",
+      "step": 7,
+      "title": "Own inbox/preferences and guarded template/failure tools",
+      "userRoutes": [],
+      "adminRoutes": [],
+      "actions": [
+        "inbox/unread/read/read-all",
+        "consent/preferences",
+        "typed target navigation",
+        "owner templates/failures"
+      ],
+      "operationPrefixes": ["/v1/notifications", "/v1/admin/notifications"],
+      "authorization": "Owned authenticated inbox; current staff grants/consent, OWNER administration",
+      "notes": [
+        "Header bells are missing/disabled UI, not missing notification APIs. Add User/Admin inbox surfaces and sign-out cache clearing.",
+        "Dispatch/provider deployment remains separate from rendering a real inbox."
+      ],
+      "sourceFiles": [
+        "src/notifications/notifications.controller.ts",
+        "../eshop-admin-frontend/components/layout/admin-shell.tsx"
+      ]
+    },
+    {
+      "id": "email",
+      "step": 7,
+      "title": "Email readiness, templates and safe delivery history",
+      "userRoutes": [],
+      "adminRoutes": [],
+      "actions": [
+        "owner readiness",
+        "template overrides",
+        "submission history",
+        "planning failures"
+      ],
+      "operationPrefixes": ["/v1/admin/email"],
+      "authorization": "OWNER only",
+      "notes": [
+        "Missing Admin UI, existing backend. Keep SMTP credentials deployment-only, no public test-send or token-debug endpoint.",
+        "Accepted submission is not mailbox delivery; real verify/reset email acceptance still needs controlled external evidence."
+      ],
+      "sourceFiles": ["src/email/email.controller.ts"]
+    },
+    {
+      "id": "push",
+      "step": 7,
+      "title": "Web device lifecycle and approved rich campaigns",
+      "userRoutes": [],
+      "adminRoutes": [],
+      "actions": [
+        "explicit permission",
+        "register/refresh/revoke installation",
+        "campaign compose/preview/approve/cancel",
+        "metrics",
+        "authenticated tap routing"
+      ],
+      "operationPrefixes": ["/v1/notifications/push", "/v1/admin/push"],
+      "authorization": "Owned devices and current consent; marketing.manage composer, OWNER approval/operations per route",
+      "notes": [
+        "Both clients lack Firebase setup/service worker and device lifecycle integration. Provider/browser project configuration is required for actual display tests.",
+        "Registration tokens stay out of logs; rotate/revoke across account switch/sign-out. Provider acceptance does not prove display or click."
+      ],
+      "sourceFiles": ["src/push/push.controller.ts"]
+    },
+    {
+      "id": "jobs",
+      "step": 7,
+      "title": "Read-only operations and bounded in-app recovery",
+      "userRoutes": [],
+      "adminRoutes": [],
+      "actions": [
+        "owner status/runs/failures",
+        "approved in-app notification retry"
+      ],
+      "operationPrefixes": ["/v1/admin/jobs"],
+      "authorization": "OWNER only",
+      "notes": [
+        "Missing operational Admin surface, existing backend. Do not expose internal cron secrets or create generic payment/refund/SMTP/FCM retry buttons."
+      ],
+      "sourceFiles": ["src/jobs/jobs.controller.ts"]
+    },
+    {
+      "id": "developer-alignment",
+      "step": 8,
+      "title": "Preview-only compatibility diagnostics",
+      "userRoutes": [],
+      "adminRoutes": ["/alignment"],
+      "actions": [
+        "review integration contracts",
+        "remove stale preview notices after tested activation"
+      ],
+      "operationPrefixes": [],
+      "authorization": "Development diagnostic, not an authorization source",
+      "notes": [
+        "Existing route is a static compatibility preview. Keep it clearly diagnostic and avoid claiming source audit is live end-to-end acceptance."
+      ],
+      "sourceFiles": ["../eshop-admin-frontend/components/admin/alignment.tsx"]
+    }
+  ],
+  "gaps": [
+    {
+      "id": "GAP-AUTH-UI",
+      "priority": "P0",
+      "kind": "MISSING_FRONTEND",
+      "step": 2,
+      "title": "Admin login/guards and functional User sign-in/up",
+      "disposition": "Implemented and tested in step 2; see docs/WEB_AUTH.md for session, audience, permissions and replay rules.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "GAP-TRANSPORT",
+      "priority": "P0",
+      "kind": "ADAPTER",
+      "step": 2,
+      "title": "Dormant transport conflicts with approved JWT contract",
+      "disposition": "Implemented and tested in step 2; see docs/WEB_AUTH.md for session, audience, permissions and replay rules.",
+      "status": "RESOLVED"
+    },
+    {
+      "id": "GAP-RESPONSE-CONTRACT",
+      "priority": "P0",
+      "kind": "BACKEND_CONTRACT",
+      "step": 2,
+      "title": "Success schemas missing on part of OpenAPI",
+      "disposition": "Guest revoke acknowledgement now has an explicit DTO; account/cart/wishlist/customer read contracts already typed. Current canonical capture has 188 success schemas and 11 remaining absent responses owned by later features/triage.",
+      "status": "PARTIALLY_RESOLVED",
+      "steps": [2, 3, 4, 5, 6, 7]
+    },
+    {
+      "id": "GAP-IDENTITY",
+      "priority": "P0",
+      "kind": "ADAPTER",
+      "step": 3,
+      "title": "Fixture identifiers are incompatible with real API identities",
+      "disposition": "Source implemented in step 3; see docs/WEB_CATALOG.md. New test code is deferred to final step 8.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "GAP-MEDIA-LIST",
+      "priority": "P1",
+      "kind": "BACKEND_EXTENSION",
+      "step": 3,
+      "title": "No reusable media library asset list/search",
+      "disposition": "Source implemented in step 3; see docs/WEB_CATALOG.md. New test code is deferred to final step 8.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "GAP-ORDER-FILTERS",
+      "priority": "P1",
+      "kind": "BACKEND_EXTENSION",
+      "step": 6,
+      "title": "Customer/staff order lists expose page/limit only",
+      "disposition": "Add documented filters required by the current UI, or explicitly reduce UI capabilities; test pagination/ownership/grants and never filter a single page as global results.",
+      "status": "OPEN"
+    },
+    {
+      "id": "GAP-ACCOUNT-UI",
+      "priority": "P1",
+      "kind": "MISSING_FRONTEND",
+      "step": 4,
+      "title": "Profile/address/security are placeholders; reset/verify pages missing",
+      "disposition": "Account display-name and owned address CRUD/default UI are implemented; existing security flows retained. New runtime tests deferred; notification preferences remain with step 7.",
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "id": "GAP-FULFILLMENT-UI",
+      "priority": "P0",
+      "kind": "ADAPTER",
+      "step": 6,
+      "title": "Local order state machine/return initiation/refund success conflicts with backend",
+      "disposition": "Use separate payment/fulfillment states, customer-initiated returns, explicit inspection/restock and request-versus-confirmed-refund status.",
+      "status": "OPEN"
+    },
+    {
+      "id": "GAP-MESSAGING-UI",
+      "priority": "P1",
+      "kind": "MISSING_FRONTEND",
+      "step": 7,
+      "title": "No working inbox, email operations, push composer/device UI",
+      "disposition": "Implement existing APIs; real SMTP/FCM/browser project configuration and external evidence remain separate.",
+      "status": "OPEN"
+    },
+    {
+      "id": "GAP-SETTINGS-UI",
+      "priority": "P1",
+      "kind": "MISSING_FRONTEND",
+      "step": 7,
+      "title": "No complete verified branding/policy/collection-detail surfaces",
+      "disposition": "Add pages/panels using existing safe projection/revision/media contracts.",
+      "status": "OPEN"
+    },
+    {
+      "id": "GAP-REPORTS",
+      "priority": "P0",
+      "kind": "ADAPTER",
+      "step": 7,
+      "title": "Browser-derived financial totals and statuses are incompatible",
+      "disposition": "Replace with server reports; preserve exact minor units, currencies, timestamps, lifetime-vs-period distinction and field privacy.",
+      "status": "OPEN"
+    },
+    {
+      "id": "GAP-STAFF-UI",
+      "priority": "P0",
+      "kind": "ADAPTER",
+      "step": 7,
+      "title": "Staff password input missing; removal is local deletion",
+      "disposition": "Write-only password on create; map removal to allowed disable/status change, preserve immutable OWNER and fresh grants.",
+      "status": "OPEN"
+    },
+    {
+      "id": "GAP-RELEASE-EVIDENCE",
+      "priority": "P1",
+      "kind": "EXTERNAL_VALIDATION",
+      "step": 8,
+      "title": "Current receipt is historical and external manifest absent",
+      "disposition": "Preserve existing release:* scripts; fresh local receipt when current-source release acceptance is requested. Provider/restore/deployment evidence cannot be fabricated.",
+      "status": "OPEN"
+    },
+    {
+      "id": "GAP-OPTIONAL-SCOPE",
+      "priority": "P2",
+      "kind": "OWNER_SCOPE",
+      "step": 8,
+      "title": "Production card payments, public tracking, newsletter, cross-SKU/partial shipments",
+      "disposition": "Do not infer optional features from decorative preview UI. Current v1 remains TEST payments, owned tracking, same-SKU replacement and one shipment; new business scope needs explicit decision.",
+      "status": "OPEN"
+    }
+  ],
+  "plannedSurfaces": [
+    {
+      "app": "admin",
+      "surface": "sign-in/session-expiry",
+      "step": 2,
+      "status": "COMPLETE"
+    },
+    {
+      "app": "user",
+      "surface": "forgot-password, reset-password, verify-email",
+      "step": 2,
+      "status": "COMPLETE"
+    },
+    {
+      "app": "user",
+      "surface": "collection detail and policy views",
+      "step": 7
+    },
+    {
+      "app": "both",
+      "surface": "inbox/preferences and push device lifecycle",
+      "step": 7
+    },
+    {
+      "app": "admin",
+      "surface": "verified media picker and upload workflow",
+      "step": 3,
+      "status": "IMPLEMENTED_FULL_VALIDATION_PENDING"
+    },
+    {
+      "app": "admin",
+      "surface": "email/push/jobs operational panels",
+      "step": 7
+    }
+  ],
+  "scopeRules": [
+    "Preserve existing dirty work and current UI design unless real functionality requires controls.",
+    "Do not change financial, authorization, stock or approved v1 scope to fit preview data.",
+    "Each converted live feature uses real API data with loading/empty/error/permission states, no silent fixture fallback.",
+    "The read-only source audit performs no provider calls, production writes, dependency installation, database resets or fixture-ID imports.",
+    "Update all three external master docs with evidence after each integration delivery.",
+    "Step 1 inventories gaps; implementation is tracked in steps 2-8."
+  ],
+  "validationPolicy": {
+    "ownerInstructionDate": "2026-11-07",
+    "writeTestsWithImplementation": true,
+    "executeTestsDuringRemainingImplementation": false,
+    "intermediateChecks": [
+      "typecheck including test sources",
+      "lint",
+      "build",
+      "read-only contract/source audits"
+    ],
+    "intermediateStatus": "IMPLEMENTED / FULL VALIDATION PENDING",
+    "executeAllDeferredTestsAtStep": 8,
+    "acceptance": "Resolve failures and rerun affected suites before final acceptance; do not weaken tests or infer runtime PASS from builds."
+  }
+}

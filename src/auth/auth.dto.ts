@@ -142,3 +142,7 @@ export class PasswordResetCompleteDto {
   @ApiProperty({ example: true }) changed!: boolean
   @ApiProperty({ example: true }) sessionsRevoked!: boolean
 }
+
+export class LogoutResultDto {
+  @ApiProperty({ example: true }) loggedOut!: boolean
+}

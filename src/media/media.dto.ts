@@ -6,6 +6,7 @@ import {
   IsArray,
   IsOptional,
   IsInt,
+  IsIn,
   IsString,
   IsUUID,
   Matches,
@@ -73,6 +74,64 @@ export class MediaAssetPublicDto {
   @ApiProperty() bytes!: number
   @ApiProperty() width!: number
   @ApiProperty() height!: number
+}
+export class MediaLibraryQueryDto {
+  @ApiPropertyOptional({ default: 1, minimum: 1, maximum: 10000 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(10000)
+  page?: number
+  @ApiPropertyOptional({ default: 20, minimum: 1, maximum: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number
+  @ApiPropertyOptional({
+    enum: [
+      'ACTIVE',
+      'PENDING_UPLOAD',
+      'PENDING_DELETE',
+      'DELETE_FAILED',
+      'DELETED',
+    ],
+    default: 'ACTIVE',
+  })
+  @IsOptional()
+  @IsIn([
+    'ACTIVE',
+    'PENDING_UPLOAD',
+    'PENDING_DELETE',
+    'DELETE_FAILED',
+    'DELETED',
+  ])
+  status?:
+    | 'ACTIVE'
+    | 'PENDING_UPLOAD'
+    | 'PENDING_DELETE'
+    | 'DELETE_FAILED'
+    | 'DELETED'
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Exact canonical asset ID search; filenames are not stored',
+  })
+  @IsOptional()
+  @IsUUID()
+  id?: string
+}
+export class MediaLibraryPageDto {
+  @ApiProperty({ type: [MediaAssetPublicDto] }) items!: MediaAssetPublicDto[]
+  @ApiProperty() total!: number
+  @ApiProperty() page!: number
+  @ApiProperty() limit!: number
+  @ApiProperty() pages!: number
+}
+export class MediaDeletionScheduledDto {
+  @ApiProperty({ format: 'uuid' }) id!: string
+  @ApiProperty() scheduled!: boolean
 }
 export class MediaUploadInstructionDto {
   @ApiProperty({ format: 'uuid' }) mediaId!: string

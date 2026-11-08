@@ -1,5 +1,7 @@
 # eShop v2 — Storefront/Admin/Backend contract alignment (25 Oct 2026)
 
+> Historical source audit. Current integration work follows [Web integration](WEB_INTEGRATION.md) and `contracts/web-integration.v1.json`, checked against current controllers/OpenAPI. Old planned endpoints, cookie/BFF recommendations and pending-implementation claims below are not current requirements; approved authentication is direct Bearer JWT.
+
 **Status: architecture/contract audit started; LIVE FRONTEND INTEGRATION NOT DONE.**
 This phase makes integration gaps explicit _before_ introducing future backend modules. It deliberately makes no schema changes, UI changes, auth changes, catalog endpoint changes, or migrations. Never treat this audit as proof of runtime compatibility.
 

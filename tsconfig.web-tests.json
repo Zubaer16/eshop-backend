@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": [
+    "web-integration-tests/**/*.ts",
+    "api-tests/web-catalog.contract.smoke.spec.ts",
+    "api-tests/media-library.db.spec.ts",
+    "api-tests/web-catalog.db.spec.ts",
+    "api-tests/web-shopping.contract.smoke.spec.ts",
+    "api-tests/web-checkout.contract.smoke.spec.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

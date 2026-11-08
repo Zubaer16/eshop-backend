@@ -4,7 +4,7 @@
 // API_TEST_DATABASE_URL must point to a separate, LOCAL database with a fixed name.
 const { spawnSync } = require('node:child_process')
 const { randomBytes } = require('node:crypto')
-const { existsSync } = require('node:fs')
+const { existsSync, rmSync } = require('node:fs')
 const path = require('node:path')
 const os = require('node:os')
 const { config } = require('dotenv')
@@ -47,6 +47,8 @@ const allowed = [
   'visual-reporting',
   'visual-report',
   'security',
+  'web-auth',
+  'web-integration',
 ]
 if (!allowed.includes(mode)) {
   process.stderr.write(
@@ -212,6 +214,36 @@ try {
     )
   }
   const safe = databaseEnv() // fails closed before any DB request
+  if (mode === 'web-auth' || mode === 'web-integration') {
+    safe.API_TEST_MODE = 'db'
+    safe.CORS_ORIGINS = 'http://127.0.0.1:3300,http://127.0.0.1:3301'
+    safe.MEDIA_PROVIDER = 'disk'
+    const diskRoot = path.resolve(
+      os.tmpdir(),
+      `eshop-web-media-test-${randomBytes(10).toString('hex')}`,
+    )
+    safe.MEDIA_DISK_ROOT = diskRoot
+    safe.MEDIA_DISK_API_BASE_URL = 'http://127.0.0.1:4101'
+    safe.MEDIA_DISK_PUBLIC_BASE_URL = 'http://127.0.0.1:4101'
+    safe.MEDIA_DISK_UPLOAD_SECRET = randomBytes(48).toString('hex')
+    process.once('exit', () => {
+      // Delete only this generated disposable directory, after Playwright stops its servers.
+      if (
+        path.dirname(diskRoot) === path.resolve(os.tmpdir()) &&
+        /^eshop-web-media-test-[a-f0-9]{20}$/.test(path.basename(diskRoot))
+      )
+        rmSync(diskRoot, { recursive: true, force: true })
+    })
+    run(
+      path.join(root, 'node_modules', '@playwright', 'test', 'cli.js'),
+      [
+        'test',
+        '--config=playwright.web.config.mjs',
+        ...(mode === 'web-auth' ? ['auth.spec.ts'] : []),
+      ],
+      safe,
+    )
+  }
   if (mode === 'db-deploy') {
     const prisma = path.join(
       root,
@@ -304,7 +336,10 @@ try {
             ? ['--grep', 'guest cart Swagger Chromium: guest capability']
             : []),
           ...(mode === 'visual-checkout'
-            ? ['--grep', 'checkout estimate Swagger Chromium: owner policy configuration']
+            ? [
+                '--grep',
+                'checkout estimate Swagger Chromium: owner policy configuration',
+              ]
             : []),
           ...(mode === 'visual-reservation'
             ? ['--grep', 'reservation Swagger Chromium: reservation']
@@ -313,7 +348,10 @@ try {
             ? ['--grep', 'orders Swagger Chromium: unpaid order']
             : []),
           ...(mode === 'visual-payments'
-            ? ['--grep', 'Stripe TEST payment preparation Swagger Chromium: test payment']
+            ? [
+                '--grep',
+                'Stripe TEST payment preparation Swagger Chromium: test payment',
+              ]
             : []),
           ...(mode === 'visual-fulfillment'
             ? ['--grep', 'fulfillment Swagger Chromium: orders admin']
@@ -328,7 +366,10 @@ try {
             ? ['--grep', 'tracking Swagger Chromium: tracking']
             : []),
           ...(mode === 'visual-admin-cancel'
-            ? ['--grep', 'Admin unpaid cancellation Swagger Chromium: Admin unpaid cancellation']
+            ? [
+                '--grep',
+                'Admin unpaid cancellation Swagger Chromium: Admin unpaid cancellation',
+              ]
             : []),
           ...(mode === 'visual-wishlist'
             ? ['--grep', 'wishlist Swagger Chromium: JWT wishlist']
@@ -337,16 +378,28 @@ try {
             ? ['--grep', 'customer account Swagger Chromium: customer account']
             : []),
           ...(mode === 'visual-customers'
-            ? ['--grep', 'customer administration Swagger Chromium: admin customer directory']
+            ? [
+                '--grep',
+                'customer administration Swagger Chromium: admin customer directory',
+              ]
             : []),
           ...(mode === 'visual-password-change'
-            ? ['--grep', 'password change Swagger Chromium: customer password change']
+            ? [
+                '--grep',
+                'password change Swagger Chromium: customer password change',
+              ]
             : []),
           ...(mode === 'visual-email-verification'
-            ? ['--grep', 'email verification Swagger Chromium: email verification']
+            ? [
+                '--grep',
+                'email verification Swagger Chromium: email verification',
+              ]
             : []),
           ...(mode === 'visual-password-reset'
-            ? ['--grep', 'password recovery Swagger Chromium: password recovery']
+            ? [
+                '--grep',
+                'password recovery Swagger Chromium: password recovery',
+              ]
             : []),
           ...(mode === 'visual-store-profile'
             ? ['--grep', 'store profile Swagger Chromium: OWNER store identity']
@@ -355,10 +408,16 @@ try {
             ? ['--grep', 'store content Swagger Chromium: OWNER store content']
             : []),
           ...(mode === 'visual-store-branding'
-            ? ['--grep', 'store branding Swagger Chromium: media-backed store branding']
+            ? [
+                '--grep',
+                'store branding Swagger Chromium: media-backed store branding',
+              ]
             : []),
           ...(mode === 'visual-store-bootstrap'
-            ? ['--grep', 'store bootstrap Swagger Chromium: public store bootstrap']
+            ? [
+                '--grep',
+                'store bootstrap Swagger Chromium: public store bootstrap',
+              ]
             : []),
           ...(mode === 'visual-store-gate'
             ? ['--grep', 'store operations Swagger Chromium: OWNER store ops']
@@ -369,7 +428,9 @@ try {
           ...(mode === 'visual-reporting'
             ? ['--grep', 'reporting Swagger Chromium:']
             : []),
-          ...(mode === 'visual-push' ? ['--grep', 'push messaging Swagger Chromium:'] : []),
+          ...(mode === 'visual-push'
+            ? ['--grep', 'push messaging Swagger Chromium:']
+            : []),
           ...(mode === 'visual-email-delivery'
             ? ['--grep', 'email delivery Swagger Chromium:']
             : []),

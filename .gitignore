@@ -25,3 +25,9 @@ artifacts/release/
 # Historic local receipts (if present) must also remain untracked.
 validation/g12-*/
 artifacts/g12/
+
+# Generated cross-repository web integration source inventory
+validation/web-integration/
+
+# Cross-app authentication browser artifacts
+test-results-web-auth/

@@ -66,3 +66,10 @@ export class CheckoutReservationResponseDto {
   })
   payable!: false
 }
+
+export class CheckoutRecoveryResponseDto {
+  @ApiProperty({ type: CheckoutReservationResponseDto, nullable: true })
+  reservation!: CheckoutReservationResponseDto | null
+  @ApiProperty({ type: String, format: 'uuid', nullable: true })
+  orderId!: string | null
+}

@@ -32,6 +32,9 @@
     "media:cleanup": "npm run build && node -r dotenv/config dist/tools/media-cleanup.js",
     "cleanup:visual-dev:preview": "node scripts/cleanup-visual-dev-fixtures.cjs",
     "cleanup:visual-dev:apply": "node scripts/cleanup-visual-dev-fixtures.cjs --apply",
+    "test:web:auth:types": "tsc --noEmit -p tsconfig.web-tests.json",
+    "test:web:auth": "npm run build && npm run test:web:auth:types && node scripts/run-api-tests.cjs web-auth",
+    "integration:audit": "node scripts/audit-web-integration.cjs",
     "alignment:audit": "node scripts/check-frontend-alignment.cjs",
     "alignment:gate": "node scripts/check-frontend-alignment.cjs --strict",
     "alignment:test": "node --test scripts/check-frontend-alignment.spec.cjs",
@@ -81,7 +84,8 @@
     "release:openapi:check": "node scripts/release-openapi-check.cjs",
     "release:local": "node scripts/release-run-local.cjs",
     "release:gate": "node scripts/release-acceptance-gate.cjs",
-    "release:tooling:test": "node --test scripts/release-*.spec.cjs"
+    "release:tooling:test": "node --test scripts/release-*.spec.cjs",
+    "test:web:integration": "npm run build && npm run test:web:auth:types && node scripts/run-api-tests.cjs web-integration"
   },
   "engines": {
     "node": ">=24.11.0 <25"

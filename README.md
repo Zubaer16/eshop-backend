@@ -42,11 +42,21 @@ Never apply database changes without confirming the exact dev/test database iden
 
 **Current local release verification passed on 2026-11-07:** all 12 runner steps exited zero, before removal of a temporary convenience command alias. The suite implementations are unchanged; this package-script change invalidates the prior source-bound receipt. See ignored `validation/release-local/receipt.json`; future source changes require fresh evidence. **External release verification remains pending:** the reviewed provider, database restore, deployment and security evidence manifest is not present. Local PASS does not replace the separate `npm run release:gate` decision.
 
+## Web integration
+
+Steps 1–2 are complete: live User/Admin authentication, persistent sessions and route permissions. Catalog/media/inventory source is implemented with full runtime validation deferred; account/cart/wishlist/customer-directory source is also implemented with final runtime validation deferred; checkout/shipping/tax/promotions/TEST payment source is now implemented with full validation deferred. Run `npm run integration:audit`, follow [the integration flow/gap map](docs/WEB_INTEGRATION.md) and see [web authentication](docs/WEB_AUTH.md) for configuration and focused test commands. Unconnected business screens remain unavailable in live mode; explicit preview is separate.
+
 ## Documentation
 
 - [Release operations and acceptance](docs/RELEASE_OPERATIONS.md)
 - [API automated testing](docs/API_AUTOMATED_TESTING.md)
+- [Web catalog/media/inventory](docs/WEB_CATALOG.md)
+- [Web account/cart/wishlist/customers](docs/WEB_SHOPPING.md)
 - [Frontend/backend handoff](docs/FRONTEND_HANDOFF.md)
 - [Deployment decisions](docs/DEPLOYMENT_DECISIONS.md)
 
 Historical milestone and patch notes have been removed from the active source tree during documentation hygiene. They are preserved in a **separate history archive outside this repository**. The three owner-held master documents also remain outside all repositories.
+
+## Checkout source delivery (2026-11-08)
+
+Customer checkout uses owned saved-address snapshots, configured country/currency delivery and coupon estimates, expiring stock holds, idempotent unpaid order creation and explicit TEST payment actions. Reload/lost responses recover through owned server discovery. Admin policies follow OWNER-only checkout rate/zone guards, marketing revision/limit rules and payment-report permissions. No live card details or browser PAID flags. Test code is prepared; suites run together at final integration validation. Typecheck, lint and builds are the intermediate checks. See [Web checkout](docs/WEB_CHECKOUT.md).

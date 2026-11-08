@@ -116,6 +116,10 @@ function evaluate(roots) {
     adminPermissions: read(roots.admin, 'lib/workspace-policy.ts'),
     adminCompatibilityDraft: read(roots.admin, 'lib/compatibility-contract.ts'),
     storefrontTransport: read(roots.storefront, 'lib/api/client.ts'),
+    storefrontRuntime: read(roots.storefront, 'lib/api/runtime.ts'),
+    adminRuntime: read(roots.admin, 'lib/api/runtime.ts'),
+    storefrontSession: read(roots.storefront, 'lib/api/session-server.ts'),
+    adminSession: read(roots.admin, 'lib/api/session-server.ts'),
     storefrontContracts: read(roots.storefront, 'lib/api/contracts.ts'),
     storefrontAdapters: read(
       roots.storefront,
@@ -143,7 +147,9 @@ function evaluate(roots) {
     prefix:
       /app\.setGlobalPrefix\(['"]v1['"]\)/.test(
         read(roots.backend, 'src/bootstrap.ts'),
-      ) && /path:\s*`\/v1\/\$\{string\}`/.test(source.storefrontTransport),
+      ) &&
+      /\/v1\//.test(source.storefrontRuntime) &&
+      /createApiClient/.test(source.storefrontTransport),
     'public-catalog':
       /@Get\('categories'\)/.test(source.backendCatalogController) &&
       /@Get\('products'\)/.test(source.backendCatalogController) &&
@@ -179,7 +185,18 @@ function evaluate(roots) {
         source.backendCatalogDto,
       ),
     'session-transport':
-      /credentials:\s*'include'/.test(source.storefrontTransport) &&
+      [source.storefrontRuntime, source.adminRuntime].every(
+        (runtime) =>
+          /Authorization: 'Bearer '/.test(runtime) &&
+          /credentials:\s*'omit'/.test(runtime) &&
+          /async function signOut/.test(runtime),
+      ) &&
+      [source.storefrontSession, source.adminSession].every(
+        (session) =>
+          /HttpOnly; SameSite=Lax/.test(session) &&
+          /request.headers.get\('origin'\)/.test(session) &&
+          /Max-Age/.test(session),
+      ) &&
       /accessToken!: string/.test(source.backendAuthDto) &&
       /authorization/i.test(source.backendAuthGuard),
     'staff-permissions':

@@ -1,5 +1,7 @@
 # Frontend-to-backend audit — 2026-10-19
 
+> Historical source audit. Current integration work follows [Web integration](WEB_INTEGRATION.md) and `contracts/web-integration.v1.json`, checked against current controllers/OpenAPI. Old planned endpoints, cookie/BFF recommendations and pending-implementation claims below are not current requirements; approved authentication is direct Bearer JWT.
+
 **Exact inputs reviewed**
 
 - `kookaburra-admin-full-20261019-170806.zip`

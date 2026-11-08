@@ -11,6 +11,7 @@ export class CatalogCategoryResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string
   @ApiProperty() slug!: string
   @ApiProperty() name!: string
+  @ApiProperty() description!: string
   @ApiProperty({ nullable: true, type: String }) parentId!: string | null
   @ApiProperty({ example: '#EAF0FF' }) color!: string
   @ApiProperty({ minimum: 0 }) sortOrder!: number
@@ -47,6 +48,12 @@ export class CatalogProductResponseDto {
     description: 'English-only title; frontend wraps in {en: title}',
   })
   title!: string
+  @ApiProperty() sku!: string
+  @ApiProperty() currency!: string
+  @ApiProperty({ type: 'integer' }) priceMinor!: number
+  @ApiProperty({ type: Number, nullable: true }) compareAtMinor!: number | null
+  @ApiProperty({ type: 'integer' }) stockOnHand!: number
+  @ApiProperty() hasVariants!: boolean
   @ApiProperty() description!: string
   @ApiProperty({ enum: ['DRAFT', 'ACTIVE', 'ARCHIVED'] }) status!: string
   @ApiProperty({
@@ -66,7 +73,7 @@ export class CatalogProductResponseDto {
   @ApiProperty({
     description:
       'Size/color variant records include `available` and effective `price`',
-    type: [Object],
+    type: () => [CatalogVariantResponseDto],
   })
   variants!: object[]
   @ApiProperty({
@@ -90,6 +97,26 @@ export class CatalogProductResponseDto {
   @ApiProperty({ example: 'Just in' }) badge!: string
   @ApiPropertyOptional({ enum: ['new', 'popular', 'sale'], nullable: true })
   tag?: string | null
+}
+
+export class CatalogVariantResponseDto {
+  @ApiProperty({ format: 'uuid' }) id!: string
+  @ApiProperty({ format: 'uuid' }) productId!: string
+  @ApiProperty() sku!: string
+  @ApiProperty({
+    type: Object,
+    description: 'Size and/or color string options',
+  })
+  options!: object
+  @ApiProperty({ type: Number, nullable: true }) priceMinor!: number | null
+  @ApiProperty({ type: 'integer' }) stockOnHand!: number
+  @ApiPropertyOptional() available?: boolean
+  @ApiPropertyOptional({ type: CatalogMoneyResponseDto })
+  price?: CatalogMoneyResponseDto
+}
+export class CatalogDeletedResponseDto {
+  @ApiProperty() deleted!: boolean
+  @ApiProperty({ format: 'uuid' }) id!: string
 }
 
 export class CatalogProductPageResponseDto {

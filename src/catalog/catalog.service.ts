@@ -212,6 +212,7 @@ export class CatalogService {
         ? { categories: { some: { category: { slug: query.category } } } }
         : {}),
       ...(query.tag ? { tag: query.tag } : {}),
+      ...(query.currency ? { currency: query.currency } : {}),
       ...(query.minPriceMinor !== undefined || query.maxPriceMinor !== undefined
         ? {
             priceMinor: {

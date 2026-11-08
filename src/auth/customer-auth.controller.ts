@@ -32,6 +32,7 @@ import {
   PasswordChangedDto,
   CredentialsDto,
   RefreshDto,
+  LogoutResultDto,
   SafeUserDto,
   TokenPairDto,
 } from './auth.dto'
@@ -73,6 +74,7 @@ export class CustomerAuthController {
 
   @Post('logout')
   @HttpCode(200)
+  @ApiOkResponse({ type: LogoutResultDto })
   @ApiOperation({ summary: 'Revoke a presented refresh token' })
   logout(@Body() dto: RefreshDto): Promise<{ loggedOut: boolean }> {
     return this.auth.logout(dto)
