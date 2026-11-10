@@ -2,6 +2,9 @@ import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { createHttpApp } from './bootstrap'
 import { Environment } from './config/environment'
+import { NestFactory } from '@nestjs/core'
+
+void NestFactory
 
 async function bootstrap(): Promise<void> {
   const app = await createHttpApp()
