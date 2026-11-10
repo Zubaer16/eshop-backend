@@ -1,3 +1,4 @@
+import { MEDIA_MODULES, type MediaModule } from './media-path'
 import { Type } from 'class-transformer'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import {
@@ -17,6 +18,16 @@ import {
 } from 'class-validator'
 
 export class StartMediaUploadDto {
+  @ApiPropertyOptional({
+    enum: [...MEDIA_MODULES],
+    default: 'products',
+    description:
+      'Storage folder only; does not grant access or attach the asset.',
+  })
+  @IsOptional()
+  @IsIn([...MEDIA_MODULES])
+  module?: MediaModule
+
   @ApiProperty({
     enum: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
   })

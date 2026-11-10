@@ -20,6 +20,7 @@ export type Environment = JobsConfig &
     DATABASE_URL: string
     JWT_ACCESS_SECRET: string
     AUTH_ACTION_TOKEN_ENCRYPTION_KEY: string
+    MEDIA_CLOUDINARY_FOLDER_MODE: 'dynamic' | 'fixed'
     MEDIA_CLOUD_NAME: string
     MEDIA_API_KEY: string
     MEDIA_API_SECRET: string
@@ -155,6 +156,9 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
       'AUTH_ACTION_TOKEN_ENCRYPTION_KEY must be 32 random bytes as 64 hex characters',
     )
   }
+  const folderMode = raw.MEDIA_CLOUDINARY_FOLDER_MODE ?? 'dynamic'
+  if (folderMode !== 'dynamic' && folderMode !== 'fixed')
+    throw new Error('MEDIA_CLOUDINARY_FOLDER_MODE must be dynamic or fixed')
   const cloudName = String(raw.MEDIA_CLOUD_NAME ?? '').trim()
   const apiKey = String(raw.MEDIA_API_KEY ?? '').trim()
   const apiSecret = String(raw.MEDIA_API_SECRET ?? '').trim()
@@ -332,6 +336,7 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
     MEDIA_S3_ACCESS_KEY_ID: s3AccessKey,
     MEDIA_S3_SECRET_ACCESS_KEY: s3Secret,
     MEDIA_S3_PUBLIC_BASE_URL: s3PublicBase,
+    MEDIA_CLOUDINARY_FOLDER_MODE: folderMode,
     MEDIA_CLOUD_NAME: cloudName,
     MEDIA_API_KEY: apiKey,
     MEDIA_API_SECRET: apiSecret,

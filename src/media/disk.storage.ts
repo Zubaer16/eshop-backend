@@ -33,12 +33,11 @@ import type {
   UploadInstruction,
   VerifiedMedia,
 } from './storage'
+import { mediaKeyParts } from './media-path'
 import { inspectImage } from './s3.storage'
 
 const MAX_BYTES = 10 * 1024 * 1024
 const TOKEN_TTL = 15 * 60
-const uuid =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const allowedMime = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const hash = (value: Buffer) => createHash('sha256').update(value).digest('hex')
 
@@ -73,12 +72,8 @@ export class DiskMediaProvider implements MediaStorageProvider {
   private objectPath(objectKey: string) {
     const { root } = this.settings()
     const namespace = this.config.get('MEDIA_NAMESPACE', { infer: true })
-    if (!objectKey.startsWith(`${namespace}/`))
-      throw new ConflictException('Wrong media namespace')
-    const mediaId = objectKey.slice(namespace.length + 1)
-    if (!uuid.test(mediaId))
-      throw new ConflictException('Invalid storage asset key')
-    const full = resolve(root, ...namespace.split('/'), mediaId)
+    const { parts, mediaId } = mediaKeyParts(namespace, objectKey)
+    const full = resolve(root, ...namespace.split('/'), ...parts)
     const rel = relative(resolve(root), full)
     if (
       !rel ||

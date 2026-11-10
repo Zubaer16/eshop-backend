@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import type { Environment } from '../config/environment'
+import { mediaKeyParts } from './media-path'
 import { renditionUrl } from './renditions'
 
 /** Optional Cloudflare zone purge. Cloudinary already requests invalidation at destroy.
@@ -35,7 +36,7 @@ export class MediaCdnPurgeService {
     const expected =
       provider === 's3'
         ? `${this.config.get('MEDIA_S3_PUBLIC_BASE_URL', { infer: true })}/${objectKey.split('/').map(encodeURIComponent).join('/')}`
-        : `${this.config.get('MEDIA_DISK_PUBLIC_BASE_URL', { infer: true })}/v1/media/files/${objectKey.slice(namespace.length + 1)}`
+        : `${this.config.get('MEDIA_DISK_PUBLIC_BASE_URL', { infer: true })}/v1/media/files/${mediaKeyParts(namespace, objectKey).mediaId}`
     if (publicUrl !== expected)
       throw new ConflictException(
         'CDN deletion URL differs from verified provider URL',

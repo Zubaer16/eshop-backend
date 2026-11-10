@@ -13,6 +13,13 @@ const factory = () =>
       )[key],
   } as ConfigService<Environment, true>)
 describe('media Cloudinary provider adapter', () => {
+  it('signs the dynamic Console folder together with the immutable public ID', () => {
+    const fields = factory().signedUpload('projects/eshop/banners/uuid').fields
+    expect(fields.public_id).toBe('projects/eshop/banners/uuid')
+    expect(fields.asset_folder).toBe('projects/eshop/banners')
+    expect(fields.signature).toMatch(/^[a-f0-9]{40}$/)
+  })
+
   it('signs upload without exposing provider secret', () => {
     const result = factory().signedUpload('projects/sample/products/test-id')
     expect(result.uploadUrl).toBe(

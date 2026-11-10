@@ -1,5 +1,9 @@
 # Integrated web validation
 
+## Media folder change - 2026-11-09
+
+Media upload source changed after the full local receipt below. See [MEDIA_STORAGE.md](MEDIA_STORAGE.md) for current focused validation: Backend build/lint, 41 media/config tests, Admin check and source alignment passed. Cloudinary authenticated ping/settings passed; actual upload lifecycle, full release and cross-app browser suites have not been rerun for this change. Earlier full local receipts are historical for this source revision.
+
 Status: LOCAL VALIDATION COMPLETE / EXTERNAL ACCEPTANCE PENDING, 2026-11-08. All eight implementation/local-validation steps are complete. Current-source Backend release:local and all frontend/live cross-app checks passed. The release gate is blocked only by missing external evidence; production/provider acceptance is not claimed.
 
 ## Resulting structure and fixes

@@ -24,6 +24,21 @@ describe('responsive media/CDN CDN purge with durable-job-friendly failure seman
     global.fetch = original
   })
 
+  it('purges nested disk modules through the UUID public route', async () => {
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValue({ ok: true, json: async () => ({ success: true }) })
+    global.fetch = fetchMock as typeof fetch
+    await new MediaCdnPurgeService(cfg()).purge(
+      'disk',
+      'projects/kookaburra/products/banners/' + id,
+      'https://images.example.com/v1/media/files/' + id,
+    )
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).files).toEqual([
+      'https://images.example.com/v1/media/files/' + id,
+    ])
+  })
+
   it('purges only the exact provider-derived URL after S3 deletion', async () => {
     const calls: Array<{ input: string; init: RequestInit | undefined }> = []
     global.fetch = jest
@@ -47,12 +62,10 @@ describe('responsive media/CDN CDN purge with durable-job-friendly failure seman
   })
 
   it('purges original and all deterministic derived URLs in a single request', async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({ success: true }),
-      }) as typeof fetch
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true }),
+    }) as typeof fetch
     await new MediaCdnPurgeService(cfg()).purge('s3', key, url, [320, 480])
     expect(
       JSON.parse(String((global.fetch as jest.Mock).mock.calls[0][1].body)),

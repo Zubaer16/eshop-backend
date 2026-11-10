@@ -36,10 +36,13 @@ export interface MediaStorageProvider {
 @Injectable()
 export class CloudinaryMediaProvider implements MediaStorageProvider {
   readonly key = 'cloudinary'
+  private readonly folderMode: 'dynamic' | 'fixed'
   private readonly cloud: string
   private readonly apiKey: string
   private readonly apiSecret: string
   constructor(config: ConfigService<Environment, true>) {
+    this.folderMode =
+      config.get('MEDIA_CLOUDINARY_FOLDER_MODE', { infer: true }) ?? 'dynamic'
     this.cloud = config.get('MEDIA_CLOUD_NAME', { infer: true })
     this.apiKey = config.get('MEDIA_API_KEY', { infer: true })
     this.apiSecret = config.get('MEDIA_API_SECRET', { infer: true })
@@ -65,6 +68,9 @@ export class CloudinaryMediaProvider implements MediaStorageProvider {
     this.configured()
     const values = {
       public_id: objectKey,
+      ...(this.folderMode === 'dynamic'
+        ? { asset_folder: objectKey.slice(0, objectKey.lastIndexOf('/')) }
+        : {}),
       timestamp: Math.floor(Date.now() / 1000),
       overwrite: false,
       unique_filename: false,

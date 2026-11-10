@@ -1,8 +1,16 @@
 {
   "schema": 1,
-  "version": "1.8.0",
-  "date": "2026-11-08",
+  "version": "1.9.0",
+  "date": "2026-11-09",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
+  "mediaStorage": {
+    "uploadModule": "Optional: products (default), categories, brands, banners, branding, notifications",
+    "objectKey": "<MEDIA_NAMESPACE>/<module>/<UUID>",
+    "cloudinaryFolderMode": "dynamic (default) signs asset_folder; fixed mode retains public_id-derived folders",
+    "legacy": "Flat UUID keys remain supported under the same configured namespace. Changing namespace is not a migration.",
+    "authorization": "Existing catalog.manage and reference-aware deletion rules remain unchanged; folder is storage classification only.",
+    "verification": "Cloudinary authenticated read-only ping and settings passed on 2026-11-09. Actual provider upload/complete/delete and browser acceptance remain pending."
+  },
   "apiPrefix": "/v1",
   "roots": {
     "backend": ".",

@@ -33,6 +33,32 @@ describe('media upload and gallery validation', () => {
     ).toBeGreaterThan(0)
   })
 
+  it('accepts approved modules and rejects paths or unknown modules', async () => {
+    for (const module of [
+      'products',
+      'categories',
+      'brands',
+      'banners',
+      'branding',
+      'notifications',
+    ])
+      expect(
+        await errors(
+          { module, mimeType: 'image/png', bytes: 32 },
+          StartMediaUploadDto,
+        ),
+      ).toHaveLength(0)
+    for (const module of ['../products', 'products/other', 'unknown', ''])
+      expect(
+        (
+          await errors(
+            { module, mimeType: 'image/png', bytes: 32 },
+            StartMediaUploadDto,
+          )
+        ).length,
+      ).toBeGreaterThan(0)
+  })
+
   it('rejects repeated media IDs, invalid UUIDs and oversized galleries', async () => {
     const id = '11111111-1111-4111-8111-111111111111'
     expect(

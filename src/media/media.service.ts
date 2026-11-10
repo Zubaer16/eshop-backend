@@ -81,7 +81,7 @@ export class MediaService {
   async createUpload(input: StartMediaUploadDto, actorId: string) {
     const id = randomUUID()
     const namespace = this.config.get('MEDIA_NAMESPACE', { infer: true })
-    const objectKey = `${namespace}/${id}`
+    const objectKey = `${namespace}/${input.module ?? 'products'}/${id}`
     // Check provider is configured before creating a pending row.
     const provider = this.storage.current
     const instruction = provider.signedUpload(objectKey, input.mimeType)

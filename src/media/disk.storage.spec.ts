@@ -38,6 +38,39 @@ describe('VPS disk media persistent VPS media (no provider account required)', (
     await rm(directory, { recursive: true, force: true })
   })
 
+  it('stores nested module assets while keeping UUID HTTP routes and rejecting arbitrary paths', async () => {
+    const nested = 'projects/kookaburra/products/banners/' + id
+    const bytes = image()
+    const instruction = disk.signedUpload(nested, 'image/png')
+    expect(instruction.uploadUrl).toBe(
+      'http://localhost:4000/v1/media/disk-uploads/' + id,
+    )
+    await disk.receive(
+      nested,
+      'image/png',
+      bytes.length,
+      instruction.headers!['X-Media-Upload-Token']!,
+      Readable.from([bytes]),
+      bytes.length,
+    )
+    expect((await disk.verify(nested)).url).toBe(
+      'https://media.example.test/v1/media/files/' + id,
+    )
+    expect(await readFile(join(directory, ...nested.split('/')))).toEqual(bytes)
+    await disk.delete(nested)
+    for (const suffix of [
+      '../' + id,
+      'unknown/' + id,
+      'products/banners/' + id,
+    ])
+      expect(() =>
+        disk.signedUpload(
+          'projects/kookaburra/products/' + suffix,
+          'image/png',
+        ),
+      ).toThrow(ConflictException)
+  })
+
   it('signs 15-minute one-use raw PUT URL without exposing server secret', () => {
     const instruction = disk.signedUpload(key, 'image/png')
     expect(instruction.method).toBe('PUT')

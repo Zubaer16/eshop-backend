@@ -1,5 +1,5 @@
 {
-  "version": "1.24.0",
+  "version": "1.25.0",
   "purpose": "Source compatibility and explicit adapter mapping; runtime acceptance is recorded separately in the validation report",
   "sourceBaselines": {
     "backend": "Current eshop-backend source; source-bound local release receipt and external acceptance remain distinct.",
@@ -14,7 +14,7 @@
     "availability": "Display hint only, authoritative stock validated by checkout backend",
     "auth": "Domain API remains Bearer JWT-only. Owner-approved persistent web sessions use a limited same-origin Next auth bridge with HttpOnly cookies for refresh credentials, access tokens in memory and fresh backend identity/grants; mobile/API contracts unchanged.",
     "status": "Explicit map ACTIVE/DRAFT/ARCHIVED; never silently map ARCHIVED to Draft",
-    "media": "Canonical verified media IDs, signed provider-specific upload/complete and reference-aware gallery/deletion APIs. Existing rendition/reconcile tooling; actual external provider/CDN/deployment validation remains separate.",
+    "media": "Canonical verified media IDs, signed provider-specific upload/complete and reference-aware gallery/deletion APIs. Existing rendition/reconcile tooling; actual external provider/CDN/deployment validation remains separate. Upload module is an optional allowlisted storage classification (products default); new keys are <namespace>/<module>/<UUID>. Dynamic Cloudinary signed asset_folder matches the path; folders grant no permissions and do not restrict cross-module media reuse.",
     "pagination": "Existing {items,total,page,limit,pages} needs a frontend adapter to ApiPage.pageSize or additive backend alias",
     "apiStability": "Keep /v1 and legacy endpoints stable; add new documented DTOs without breaking already-tested clients",
     "cart": "Canonical guest/customer cart and login merge; customer JWT for configured country/currency checkout estimates, bounded reservations and unpaid order creation. Existing STRIPE_TEST-only payment capability; no guest checkout, automatic FX or address-specific tax inference."
