@@ -45,7 +45,7 @@ export class PaymentCustomerController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'Explicitly enabled non-production Stripe TEST card simulation; no raw card data; signed webhook settlement still required',
+      'Explicitly enabled Stripe TEST card simulation (nonproduction or operator-opted production showcase); no raw card data; signed webhook settlement still required',
   })
   @ApiOkResponse({ type: TestCardCompletionResponseDto })
   @ApiUnauthorizedResponse({ description: 'Customer JWT required' })

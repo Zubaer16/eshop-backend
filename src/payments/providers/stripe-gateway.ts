@@ -1,6 +1,7 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Environment } from '../../config/environment'
+import { stripeTestCapabilityEnabled } from '../stripe-demo-policy'
 
 export type PreparedStripeIntent = { id: string; status: string }
 
@@ -156,9 +157,7 @@ export class StripeTestGateway {
   private refundKey(): string {
     const key = this.config.get('STRIPE_TEST_SECRET_KEY', { infer: true })
     if (
-      this.config.get('NODE_ENV', { infer: true }) === 'production' ||
-      !this.config.get('STRIPE_TEST_ENABLED', { infer: true }) ||
-      !this.config.get('STRIPE_TEST_REFUNDS_ENABLED', { infer: true }) ||
+      !stripeTestCapabilityEnabled(this.config, 'refunds') ||
       !/^sk_test_[A-Za-z0-9]{8,}$/.test(key)
     )
       throw new ServiceUnavailableException('Stripe TEST refunds are disabled')

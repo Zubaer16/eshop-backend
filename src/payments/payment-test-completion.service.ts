@@ -8,7 +8,11 @@ import { ConfigService } from '@nestjs/config'
 import { Prisma } from '../generated/prisma/client'
 import { DatabaseService } from '../database/database.service'
 import { Environment } from '../config/environment'
-import { StripeTestGateway, VerifiedStripeIntentState } from './providers/stripe-gateway'
+import { stripeTestCapabilityEnabled } from './stripe-demo-policy'
+import {
+  StripeTestGateway,
+  VerifiedStripeIntentState,
+} from './providers/stripe-gateway'
 
 const LEASE_MS = 90_000
 const MAX_ATTEMPTS = 7
@@ -26,11 +30,7 @@ export class PaymentTestCompletionService {
   ) {}
 
   private enabled() {
-    if (
-      !this.config.get('STRIPE_TEST_ENABLED', { infer: true }) ||
-      !this.config.get('STRIPE_TEST_CHECKOUT_ENABLED', { infer: true }) ||
-      this.config.get('NODE_ENV', { infer: true }) === 'production'
-    )
+    if (!stripeTestCapabilityEnabled(this.config, 'checkout'))
       throw new ServiceUnavailableException(
         'Test-only card completion is disabled',
       )

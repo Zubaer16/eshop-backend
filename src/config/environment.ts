@@ -7,6 +7,7 @@ export type Environment = JobsConfig &
   PushConfig &
   EmailConfig & {
     STRIPE_TEST_ENABLED: boolean
+    STRIPE_DEMO_MODE: boolean
     STRIPE_TEST_CHECKOUT_ENABLED: boolean
     STRIPE_TEST_REFUNDS_ENABLED: boolean
     STRIPE_TEST_SECRET_KEY: string
@@ -278,27 +279,41 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
     (cdnToken.length < 20 || cdnToken.length > 512 || /\s/.test(cdnToken))
   )
     throw new Error('Invalid Cloudflare CDN API token')
+  // Production remains protected unless the operator explicitly enables a
+  // test-only showcase. No live Stripe credentials are permitted in either mode.
+  const demoFlag = raw.STRIPE_DEMO_MODE ?? 'false'
+  if (![true, false, 'true', 'false'].includes(demoFlag as string | boolean))
+    throw new Error('STRIPE_DEMO_MODE must be true or false')
+  const demoMode = demoFlag === true || demoFlag === 'true'
   const stripeFlag = raw.STRIPE_TEST_ENABLED ?? 'false'
   if (![true, false, 'true', 'false'].includes(stripeFlag as string | boolean))
     throw new Error('STRIPE_TEST_ENABLED must be true or false')
   const stripeEnabled = stripeFlag === true || stripeFlag === 'true'
+  if (demoMode && !stripeEnabled)
+    throw new Error('Stripe showcase mode requires enabled Stripe TEST')
   const checkoutFlag = raw.STRIPE_TEST_CHECKOUT_ENABLED ?? 'false'
   if (
     ![true, false, 'true', 'false'].includes(checkoutFlag as string | boolean)
   )
     throw new Error('STRIPE_TEST_CHECKOUT_ENABLED must be true or false')
   const checkoutEnabled = checkoutFlag === true || checkoutFlag === 'true'
-  if (checkoutEnabled && (!stripeEnabled || mode === 'production'))
+  if (
+    checkoutEnabled &&
+    (!stripeEnabled || (mode === 'production' && !demoMode))
+  )
     throw new Error(
-      'TEST checkout requires enabled Stripe TEST and non-production environment',
+      'TEST checkout requires enabled Stripe TEST and non-production or explicit showcase mode',
     )
   const refundFlag = raw.STRIPE_TEST_REFUNDS_ENABLED ?? 'false'
   if (![true, false, 'true', 'false'].includes(refundFlag as string | boolean))
     throw new Error('STRIPE_TEST_REFUNDS_ENABLED must be true or false')
   const refundsEnabled = refundFlag === true || refundFlag === 'true'
-  if (refundsEnabled && (!stripeEnabled || mode === 'production'))
+  if (
+    refundsEnabled &&
+    (!stripeEnabled || (mode === 'production' && !demoMode))
+  )
     throw new Error(
-      'TEST refunds require enabled Stripe TEST and non-production environment',
+      'TEST refunds require enabled Stripe TEST and non-production or explicit showcase mode',
     )
   const stripeKey =
     typeof raw.STRIPE_TEST_SECRET_KEY === 'string'
@@ -319,6 +334,7 @@ export function validateEnvironment(raw: Record<string, unknown>): Environment {
     ...emailConfiguration(raw, mode),
     ...pushConfiguration(raw, mode),
     STRIPE_TEST_ENABLED: stripeEnabled,
+    STRIPE_DEMO_MODE: demoMode,
     STRIPE_TEST_CHECKOUT_ENABLED: checkoutEnabled,
     STRIPE_TEST_REFUNDS_ENABLED: refundsEnabled,
     STRIPE_TEST_SECRET_KEY: stripeKey,

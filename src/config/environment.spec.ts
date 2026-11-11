@@ -57,6 +57,58 @@ describe('environment configuration', () => {
       }).STRIPE_TEST_ENABLED,
     ).toBe(true)
   })
+  it('requires explicit TEST-only showcase opt-in in production', () => {
+    const prod = {
+      NODE_ENV: 'production',
+      CORS_ORIGINS: 'https://shop.example',
+      DATABASE_URL: 'postgresql://example/db',
+      JWT_ACCESS_SECRET: 'a'.repeat(40),
+      STRIPE_TEST_ENABLED: 'true',
+      STRIPE_TEST_CHECKOUT_ENABLED: 'true',
+      STRIPE_TEST_REFUNDS_ENABLED: 'true',
+      STRIPE_TEST_SECRET_KEY: 'sk_test_TESTONLY123456789012345',
+      STRIPE_TEST_WEBHOOK_SECRET: 'whsec_TESTONLY123456789012345',
+    }
+    expect(() => validateEnvironment(prod)).toThrow('TEST checkout')
+    expect(() =>
+      validateEnvironment({ ...prod, STRIPE_DEMO_MODE: 'true' }),
+    ).not.toThrow()
+    expect(
+      validateEnvironment({ ...prod, STRIPE_DEMO_MODE: 'true' }),
+    ).toMatchObject({
+      NODE_ENV: 'production',
+      STRIPE_DEMO_MODE: true,
+      STRIPE_TEST_CHECKOUT_ENABLED: true,
+      STRIPE_TEST_REFUNDS_ENABLED: true,
+    })
+    expect(validateEnvironment({}).STRIPE_DEMO_MODE).toBe(false)
+    for (const flag of ['yes', 1, '', 'TRUE']) {
+      expect(() =>
+        validateEnvironment({ ...prod, STRIPE_DEMO_MODE: flag }),
+      ).toThrow('STRIPE_DEMO_MODE')
+    }
+    expect(() =>
+      validateEnvironment({
+        ...prod,
+        STRIPE_DEMO_MODE: 'true',
+        STRIPE_TEST_ENABLED: 'false',
+      }),
+    ).toThrow('showcase')
+    expect(() =>
+      validateEnvironment({
+        ...prod,
+        STRIPE_DEMO_MODE: 'true',
+        STRIPE_TEST_SECRET_KEY: 'sk_live_12345678901234567890',
+      }),
+    ).toThrow('Only Stripe test secret keys')
+    expect(() =>
+      validateEnvironment({
+        ...prod,
+        STRIPE_DEMO_MODE: 'true',
+        STRIPE_TEST_WEBHOOK_SECRET: '',
+      }),
+    ).toThrow('Stripe TEST mode requires')
+  })
   it('validates the separate email action encryption key without exposing it', () => {
     expect(() =>
       validateEnvironment({ AUTH_ACTION_TOKEN_ENCRYPTION_KEY: 'wrong' }),
