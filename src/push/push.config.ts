@@ -15,12 +15,7 @@ export function pushConfiguration(
 ): PushConfig {
   const value = (key: string, defaultValue = '') =>
     String(raw[key] ?? defaultValue).trim()
-  const mode = value('PUSH_DELIVERY_MODE', 'disabled')
-  if (
-    !['disabled', 'controlled', 'production'].includes(mode) ||
-    (mode === 'production' && nodeMode !== 'production')
-  )
-    throw new Error('Invalid push delivery mode/environment')
+  const requestedMode = value('PUSH_DELIVERY_MODE', 'disabled')
   const project = value('FCM_PROJECT_ID'),
     email = value('FCM_CLIENT_EMAIL'),
     key = value('FCM_PRIVATE_KEY').replace(/\\n/g, '\n'),
@@ -79,6 +74,18 @@ export function pushConfiguration(
     .split(',')
     .map((x) => x.trim())
     .filter(Boolean)
+  // In production, an enabled controlled deployment with no explicit recipient
+  // list means global delivery to otherwise eligible devices. Keep the safer
+  // explicit allowlist requirement in development/test.
+  const mode =
+    requestedMode === 'controlled' && !list.length && nodeMode === 'production'
+      ? 'production'
+      : requestedMode
+  if (
+    !['disabled', 'controlled', 'production'].includes(mode) ||
+    (mode === 'production' && nodeMode !== 'production')
+  )
+    throw new Error('Invalid push delivery mode/environment')
   if (
     list.length > 50 ||
     new Set(list).size !== list.length ||

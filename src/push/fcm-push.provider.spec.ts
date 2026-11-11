@@ -22,10 +22,12 @@ const message = {
   targetType: 'ORDER',
   link: 'https://store.example.test/account',
 }
-const provider = () =>
-  new FcmPushProvider({
-    get: (key: string) => values[key],
+const provider = (overrides: Record<string, unknown> = {}) => {
+  const configured = { ...values, ...overrides }
+  return new FcmPushProvider({
+    get: (key: string) => configured[key],
   } as unknown as ConfigService<Environment, true>)
+}
 describe('push messaging FCM HTTP v1 adapter (mocked fetch; execution release acceptance)', () => {
   afterEach(() => jest.restoreAllMocks())
   it('uses a valid scoped RS256 service assertion and caches only short-lived access credentials', async () => {
@@ -77,6 +79,47 @@ describe('push messaging FCM HTTP v1 adapter (mocked fetch; execution release ac
     expect(mock.mock.calls[1]![0]).toBe(
       'https://fcm.googleapis.com/v1/projects/eshop-demo/messages:send',
     )
+  })
+  it('submits globally in production without a recipient allowlist', async () => {
+    const mock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ access_token: 'test-oauth', expires_in: 3600 }),
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            name: 'projects/eshop-demo/messages/global-message',
+          }),
+        ),
+      )
+    await expect(
+      provider({
+        PUSH_DELIVERY_MODE: 'production',
+        PUSH_RECIPIENT_USER_IDS: '',
+      }).submit({
+        ...message,
+        userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      }),
+    ).resolves.toEqual({
+      messageId: 'projects/eshop-demo/messages/global-message',
+    })
+    expect(mock).toHaveBeenCalledTimes(2)
+  })
+  it('keeps controlled mode restricted to its explicit recipient list', async () => {
+    const mock = jest.spyOn(global, 'fetch')
+    await expect(
+      provider().submit({
+        ...message,
+        userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      }),
+    ).rejects.toMatchObject({
+      disposition: 'PERMANENT',
+      safeCode: 'PUSH_RECIPIENT_NOT_ALLOWLISTED',
+    })
+    expect(mock).not.toHaveBeenCalled()
   })
   it('supports the current explicit FID target without guessing registration identity', async () => {
     const mock = jest

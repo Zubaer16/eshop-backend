@@ -35,6 +35,20 @@ describe('push messaging push deployment/campaign controls (execution release ac
         pushConfiguration({ ...configured, ...patch }, 'development'),
       ).toThrow()
   })
+  it('uses global production delivery when controlled mode has no recipient allowlist', () => {
+    const global = pushConfiguration(
+      { ...configured, PUSH_RECIPIENT_USER_IDS: '' },
+      'production',
+    )
+    expect(global.PUSH_DELIVERY_MODE).toBe('production')
+    expect(global.PUSH_RECIPIENT_USER_IDS).toBe('')
+    expect(() =>
+      pushConfiguration(
+        { ...configured, PUSH_RECIPIENT_USER_IDS: '' },
+        'development',
+      ),
+    ).toThrow('Controlled push requires explicit user allowlist')
+  })
   it('keeps campaign worker preview-only by default and rejects ignored date/unknown arguments', () => {
     expect(parsePushCampaignOptions([])).toEqual({ limit: 50, apply: false })
     expect(parsePushCampaignOptions(['--apply', '--limit', '2'])).toEqual({
