@@ -452,6 +452,7 @@ try {
             ...(mode === 'cart-add'
               ? [
                   'cart-add.db.spec.ts',
+                  'hosted-checkout.db.spec.ts',
                   'cart.db.spec.ts',
                   'guest-cart.db.spec.ts',
                   'checkout.db.spec.ts',

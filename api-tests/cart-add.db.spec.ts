@@ -125,14 +125,15 @@ for (const guest of [false, true])
       expect(changed.status()).toBe(200)
       expect((await changed.json()).items[0].quantity).toBe(8)
       if (!guest) {
-        expect(
-          (
-            await request.post('/v1/checkout/estimate', {
-              headers,
-              data: { countryCode: 'US' },
-            })
-          ).status(),
-        ).toBe(409)
+        const finalCheck = await request.post('/v1/checkout/reservations', {
+          headers,
+          data: { countryCode: 'US', requestId: randomUUID() },
+        })
+        expect(finalCheck.status()).toBe(409)
+        expect(await finalCheck.json()).toMatchObject({
+          code: 'INSUFFICIENT_STOCK',
+          items: [{ requestedQuantity: 8, availableQuantity: 3 }],
+        })
       }
       await f.db.inventoryBalance.update({
         where: { productId: product.id },

@@ -1,5 +1,7 @@
 import {
   Body,
+  BadRequestException,
+  Query,
   Controller,
   Delete,
   Get,
@@ -19,6 +21,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
@@ -41,6 +44,12 @@ function guestCapability(request: Request): string {
 }
 
 /** Guest capability != JWT; no ability to call customer/admin endpoints. */
+function draftView(view?: string) {
+  if (view !== undefined && view !== 'draft')
+    throw new BadRequestException('Unsupported cart view')
+  return view === 'draft'
+}
+
 @ApiTags('Cart / Guest')
 @Controller('guest-cart')
 @ApiUnauthorizedResponse({
@@ -62,8 +71,9 @@ export class GuestCartController {
   @Get()
   @ApiSecurity('guest-cart-token')
   @ApiOkResponse({ type: CartQuoteResponseDto })
-  get(@Req() request: Request) {
-    return this.guest.getQuote(guestCapability(request))
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  get(@Req() request: Request, @Query('view') view?: string) {
+    return this.guest.getQuote(guestCapability(request), draftView(view))
   }
 
   @Get('quote')
@@ -86,8 +96,13 @@ export class GuestCartController {
     description:
       'Request reuse mismatch, unpublished product, mixed currency, full cart or active checkout reservation',
   })
-  add(@Req() req: Request, @Body() input: AddCartItemDto) {
-    return this.guest.addItem(guestCapability(req), input)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  add(
+    @Req() req: Request,
+    @Body() input: AddCartItemDto,
+    @Query('view') view?: string,
+  ) {
+    return this.guest.addItem(guestCapability(req), input, draftView(view))
   }
 
   @Put('items')
@@ -99,23 +114,34 @@ export class GuestCartController {
     description: 'Unpublished product, mixed currency or 50-line cap',
   })
   @ApiOkResponse({ type: CartQuoteResponseDto })
-  put(@Req() request: Request, @Body() input: SetCartItemDto) {
-    return this.guest.setItem(guestCapability(request), input)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  put(
+    @Req() request: Request,
+    @Body() input: SetCartItemDto,
+    @Query('view') view?: string,
+  ) {
+    return this.guest.setItem(guestCapability(request), input, draftView(view))
   }
 
   @Delete('items/:id')
   @ApiSecurity('guest-cart-token')
   @ApiNotFoundResponse({ description: 'Line not found in this guest cart' })
   @ApiOkResponse({ type: CartQuoteResponseDto })
-  remove(@Req() request: Request, @Param('id', ParseUUIDPipe) id: string) {
-    return this.guest.removeItem(guestCapability(request), id)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  remove(
+    @Req() request: Request,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('view') view?: string,
+  ) {
+    return this.guest.removeItem(guestCapability(request), id, draftView(view))
   }
 
   @Delete('items')
   @ApiSecurity('guest-cart-token')
   @ApiOkResponse({ type: CartQuoteResponseDto })
-  clear(@Req() request: Request) {
-    return this.guest.clear(guestCapability(request))
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  clear(@Req() request: Request, @Query('view') view?: string) {
+    return this.guest.clear(guestCapability(request), draftView(view))
   }
 
   @Delete()

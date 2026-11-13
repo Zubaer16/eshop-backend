@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 export class PaymentPreparationResponseDto {
+  @ApiProperty() checkoutStarted!: boolean
+  @ApiProperty({ nullable: true, type: String }) checkoutSessionId!:
+    | string
+    | null
   @ApiProperty({ format: 'uuid' }) orderId!: string
   @ApiProperty({ example: 'STRIPE_TEST' }) provider!: string
   @ApiProperty({ nullable: true, example: 'pi_3FakeTestIdentifier12345' })

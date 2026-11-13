@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "1.11.0",
+  "version": "1.12.0",
   "date": "2026-11-13",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "mediaStorage": {
@@ -292,6 +292,7 @@
       ],
       "authorization": "Guest capability in X-Guest-Cart-Token; customer Bearer JWT for owned cart/merge",
       "notes": [
+        "Cart read/add/set/remove/clear/merge accept optional view=draft. Draft responses set stockChecked=false and availableQuantity=null and select display fields with inventory joins omitted. Default live quote responses and explicit /quote support existing clients. Storefront uses draft requests for guest and account carts.",
         "Live product actions, header counts, drawer and cart page use server quotes and canonical item/variant IDs; no preview store import.",
         "Quantity edits recalculate display totals immediately and autosave absolute targets after 350ms, without an Update button. Slow writes serialize; latest unsent targets replace older targets, ambiguous writes pause for frozen-payload retry. Add/set/merge no longer reject insufficient stock: selection validation reads identity/publication/currency only. Existing quote responses still report live informational price/stock; checkout estimate/reservation/order enforce current prices and stock.",
         "Guest capability persists only in a separate host-only HttpOnly SameSite=Lax cookie (Secure/__Host- in production) through a narrow same-origin guest bridge. Fixed expiry matches Backend 14 days; no guest token in JSON/URLs/browser storage.",
@@ -404,6 +405,7 @@
       ],
       "authorization": "Customer JWT; checkout rate and delivery-zone policies OWNER only",
       "notes": [
+        "Final boundary POST /v1/checkout/start freezes requestId, country/service/coupon and shippingAddress, locks inventory balances in order, returns structured INSUFFICIENT_STOCK items or reserves stock and creates one order/Stripe TEST Checkout Session. Resume/cancel/reconcile live under /v1/checkout/orders/:orderId. Suggested quantity/removal actions require user choice. Delivery estimates select display data. Payment confirmation uses signed success receipts plus verified provider totals.",
         "Guest cart is supported, guest checkout is not. Require login before checkout and merge safely.",
         "UI standard/express delivery identifiers map to configured options. Other country is not an ISO country; unsupported/unconfigured destinations show a real error.",
         "UI tax is percent; backend basis points. Fee/cap/minimum values convert losslessly to minor units. Nullable unlimited caps/threshold semantics need explicit mapping.",
@@ -419,7 +421,12 @@
         "../eshop-user-frontend/components/shopping/checkout.tsx",
         "../eshop-admin-frontend/components/commerce/shipping.tsx",
         "web-integration-tests/checkout.spec.ts",
-        "api-tests/web-checkout.contract.smoke.spec.ts"
+        "api-tests/web-checkout.contract.smoke.spec.ts",
+        "src/payments/hosted-checkout.controller.ts",
+        "src/payments/hosted-checkout.dto.ts",
+        "src/payments/hosted-checkout.service.ts",
+        "src/payments/providers/stripe-checkout-gateway.ts",
+        "api-tests/hosted-checkout.db.spec.ts"
       ]
     },
     {

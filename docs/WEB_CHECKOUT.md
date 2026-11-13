@@ -1,5 +1,8 @@
 # Web checkout, shipping and promotions
 
+Current hosted Stripe checkout and stock reservation behavior is documented in [the final checkout flow](CART_QUANTITY_AUTOSAVE.md). Its draft-cart, final-reservation and explicit shortage-recovery sections describe the current implementation.
+
+
 Current combined validation is tracked in [Web validation](WEB_VALIDATION.md). Implementation-time test deferrals and earlier acceptance counts below are historical for their snapshots.
 
 Source delivery: **2026-11-08, IMPLEMENTED / FULL VALIDATION PENDING**. Test code is prepared; automated suites run only in the final integration window under the owner's instruction. Builds and source audits do not certify runtime behavior.

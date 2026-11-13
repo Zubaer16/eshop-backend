@@ -44,6 +44,27 @@ export const quoteIncludes = {
   },
 } satisfies Prisma.CartInclude
 
+// Draft cart totals omit inventory joins. Final checkout uses quoteIncludes.
+export const draftQuoteIncludes = {
+  items: {
+    ...quoteIncludes.items,
+    include: {
+      product: {
+        select: {
+          ...quoteIncludes.items.include.product.select,
+          inventoryBalance: false,
+        },
+      },
+      variant: {
+        select: {
+          ...quoteIncludes.items.include.variant.select,
+          inventoryBalance: false,
+        },
+      },
+    },
+  },
+} satisfies Prisma.CartInclude
+
 /** Call after locking the cart row, to serialize edits against hold creation. */
 export async function ensureCartEditable(
   tx: Prisma.TransactionClient,
@@ -63,22 +84,22 @@ export async function ensureCartEditable(
 export class CartService {
   constructor(private readonly database: DatabaseService) {}
 
-  async getQuote(customerId: string) {
+  async getQuote(customerId: string, draft = false) {
     // Repeatable read gives a consistent live price/stock view for this quote.
     // It is NOT a stock hold; final checkout must revalidate in a transaction.
     return this.database.client.$transaction(
       async (tx) => {
         const cart = await tx.cart.findUnique({
           where: { userId: customerId },
-          include: quoteIncludes,
+          include: draft ? draftQuoteIncludes : quoteIncludes,
         })
-        return calculateCartQuote(cart?.id ?? null, cart?.items ?? [])
+        return calculateCartQuote(cart?.id ?? null, cart?.items ?? [], !draft)
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     )
   }
 
-  async addItem(customerId: string, input: AddCartItemDto) {
+  async addItem(customerId: string, input: AddCartItemDto, draft = false) {
     return this.database.client.$transaction(async (tx) => {
       const cart = await tx.cart.upsert({
         where: { userId: customerId },
@@ -134,13 +155,13 @@ export class CartService {
       }
       const current = await tx.cart.findUniqueOrThrow({
         where: { id: cart.id },
-        include: quoteIncludes,
+        include: draft ? draftQuoteIncludes : quoteIncludes,
       })
-      return calculateCartQuote(current.id, current.items)
+      return calculateCartQuote(current.id, current.items, !draft)
     })
   }
 
-  async setItem(customerId: string, input: SetCartItemDto) {
+  async setItem(customerId: string, input: SetCartItemDto, draft = false) {
     await this.database.client.$transaction(async (tx) => {
       const cart = await tx.cart.upsert({
         where: { userId: customerId },
@@ -183,10 +204,10 @@ export class CartService {
         })
       }
     })
-    return this.getQuote(customerId)
+    return this.getQuote(customerId, draft)
   }
 
-  async removeItem(customerId: string, id: string) {
+  async removeItem(customerId: string, id: string, draft = false) {
     await this.database.client.$transaction(async (tx) => {
       const cart = await tx.cart.findUnique({
         where: { userId: customerId },
@@ -200,10 +221,10 @@ export class CartService {
       })
       if (!result.count) throw new NotFoundException('Cart item not found')
     })
-    return this.getQuote(customerId)
+    return this.getQuote(customerId, draft)
   }
 
-  async clear(customerId: string) {
+  async clear(customerId: string, draft = false) {
     await this.database.client.$transaction(async (tx) => {
       const cart = await tx.cart.findUnique({
         where: { userId: customerId },
@@ -214,6 +235,6 @@ export class CartService {
       await ensureCartEditable(tx, cart.id)
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } })
     })
-    return this.getQuote(customerId)
+    return this.getQuote(customerId, draft)
   }
 }

@@ -37,10 +37,14 @@ export class PaymentsService {
     status: string
     amountMinor: number
     currency: string
+    idempotencyKey: string
+    checkoutSessionId: string | null
   }) {
     return {
       orderId: entry.orderId,
       provider: 'STRIPE_TEST',
+      checkoutStarted: entry.idempotencyKey.startsWith('hosted-checkout-'),
+      checkoutSessionId: entry.checkoutSessionId,
       providerIntentId: entry.providerIntentId,
       preparationStatus: entry.status,
       amountMinor: entry.amountMinor,

@@ -1,5 +1,7 @@
 import {
   Body,
+  BadRequestException,
+  Query,
   Controller,
   Delete,
   Get,
@@ -20,6 +22,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
@@ -34,6 +37,12 @@ import {
   MergeGuestCartDto,
   SetCartItemDto,
 } from './cart.dto'
+
+function draftView(view?: string) {
+  if (view !== undefined && view !== 'draft')
+    throw new BadRequestException('Unsupported cart view')
+  return view === 'draft'
+}
 
 @ApiTags('Cart / Customer')
 @Controller('cart')
@@ -59,8 +68,13 @@ export class CartController {
     description:
       'Invalid item, unavailable stock, currency mismatch, full cart or token already consumed by another customer',
   })
-  merge(@Req() req: AuthenticatedRequest, @Body() body: MergeGuestCartDto) {
-    return this.guest.merge(req.authUser!.id, body.guestToken)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  merge(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: MergeGuestCartDto,
+    @Query('view') view?: string,
+  ) {
+    return this.guest.merge(req.authUser!.id, body.guestToken, draftView(view))
   }
 
   @Get()
@@ -69,8 +83,9 @@ export class CartController {
       'Read persisted customer cart with live quote; no stock reservation',
   })
   @ApiOkResponse({ type: CartQuoteResponseDto })
-  get(@Req() req: AuthenticatedRequest) {
-    return this.cart.getQuote(req.authUser!.id)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  get(@Req() req: AuthenticatedRequest, @Query('view') view?: string) {
+    return this.cart.getQuote(req.authUser!.id, draftView(view))
   }
 
   @Get('quote')
@@ -95,8 +110,13 @@ export class CartController {
     description:
       'Request reuse mismatch, unpublished product, mixed currency, full cart or active checkout reservation',
   })
-  add(@Req() req: AuthenticatedRequest, @Body() input: AddCartItemDto) {
-    return this.cart.addItem(req.authUser!.id, input)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  add(
+    @Req() req: AuthenticatedRequest,
+    @Body() input: AddCartItemDto,
+    @Query('view') view?: string,
+  ) {
+    return this.cart.addItem(req.authUser!.id, input, draftView(view))
   }
 
   @Put('items')
@@ -112,8 +132,13 @@ export class CartController {
       'Set absolute line quantity (idempotent); price/stock never accepted from client',
   })
   @ApiOkResponse({ type: CartQuoteResponseDto })
-  put(@Req() req: AuthenticatedRequest, @Body() input: SetCartItemDto) {
-    return this.cart.setItem(req.authUser!.id, input)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  put(
+    @Req() req: AuthenticatedRequest,
+    @Body() input: SetCartItemDto,
+    @Query('view') view?: string,
+  ) {
+    return this.cart.setItem(req.authUser!.id, input, draftView(view))
   }
 
   @Delete('items/:id')
@@ -124,17 +149,20 @@ export class CartController {
     summary: 'Remove only an item owned by authenticated customer',
   })
   @ApiOkResponse({ type: CartQuoteResponseDto })
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
   remove(
     @Req() req: AuthenticatedRequest,
     @Param('id', ParseUUIDPipe) id: string,
+    @Query('view') view?: string,
   ) {
-    return this.cart.removeItem(req.authUser!.id, id)
+    return this.cart.removeItem(req.authUser!.id, id, draftView(view))
   }
 
   @Delete()
   @ApiOperation({ summary: 'Clear the authenticated customer cart' })
   @ApiOkResponse({ type: CartQuoteResponseDto })
-  clear(@Req() req: AuthenticatedRequest) {
-    return this.cart.clear(req.authUser!.id)
+  @ApiQuery({ name: 'view', required: false, enum: ['draft'], description: 'Draft totals select display fields and defer inventory validation to final checkout' })
+  clear(@Req() req: AuthenticatedRequest, @Query('view') view?: string) {
+    return this.cart.clear(req.authUser!.id, draftView(view))
   }
 }

@@ -1,3 +1,8 @@
+import { CheckoutModule } from '../checkout/checkout.module'
+import { OrdersModule } from '../orders/orders.module'
+import { HostedCheckoutController } from './hosted-checkout.controller'
+import { HostedCheckoutService } from './hosted-checkout.service'
+import { StripeCheckoutGateway } from './providers/stripe-checkout-gateway'
 import { Module } from '@nestjs/common'
 import { AuthModule } from '../auth/auth.module'
 import { CustomerCartGuard } from '../cart/cart.customer.guard'
@@ -18,14 +23,17 @@ import {
 } from './refunds/refund-ledger.controller'
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, CheckoutModule, OrdersModule],
   controllers: [
+    HostedCheckoutController,
     PaymentCustomerController,
     PaymentWebhookController,
     RefundLedgerOwnerController,
     RefundLedgerCustomerController,
   ],
   providers: [
+    HostedCheckoutService,
+    StripeCheckoutGateway,
     PaymentsService,
     StripeTestGateway,
     PaymentSettlementService,

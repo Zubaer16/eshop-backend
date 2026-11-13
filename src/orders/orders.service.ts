@@ -417,6 +417,7 @@ export class OrdersService {
       where: {
         orderId: order.id,
         OR: [
+          { idempotencyKey: { startsWith: 'hosted-checkout-' }, status: { notIn: ['CANCELLED', 'SETTLED'] } },
           { status: { in: ['CONFIRMING', 'CAPTURING', 'AWAITING_WEBHOOK'] } },
           { status: 'REQUIRES_REVIEW', testCompletionAttempts: { gt: 0 } },
         ],
@@ -570,7 +571,8 @@ export class OrdersService {
           AND NOT EXISTS (
             SELECT 1 FROM payment_attempts pa2 WHERE pa2.order_id = o.id
               AND (pa2.status IN ('CONFIRMING', 'CAPTURING', 'AWAITING_WEBHOOK')
-                OR (pa2.status = 'REQUIRES_REVIEW' AND pa2.test_completion_attempts > 0))
+                OR (pa2.status = 'REQUIRES_REVIEW' AND pa2.test_completion_attempts > 0)
+                OR (pa2.idempotency_key LIKE 'hosted-checkout-%' AND pa2.status NOT IN ('CANCELLED', 'SETTLED')))
           )
           AND NOT EXISTS (
             SELECT 1 FROM payment_attempts pa

@@ -1,5 +1,17 @@
 # Integrated web validation
 
+## Live hosted checkout migration applied - 2026-11-13
+
+Owner explicitly authorized migration against the live URL in Backend .env. Prisma used DIRECT_URL for the Supabase postgres database. Preflight verified 40 applied migration checksums and zero unresolved failures, with only 20261113170000_hosted_checkout_session pending. The command npm run db:deploy applied that migration successfully.
+
+Post-migration db:status reports the schema is up to date. The read-only audit verifies 41 applied migrations, 41 matching source checksums, zero unresolved failures and zero unapplied source migrations. Independent read-only catalog queries verify the four nullable PaymentAttempt checkout columns, their declared types/lengths, and the valid unique payment_attempts_checkout_session_id_key index.
+
+The live database migration is complete. Application changes and the migration source remain local and await commit/push. Stripe provider, webhook/worker and application deployment acceptance remain pending. Credentials were kept private.
+
+
+Current hosted Stripe checkout and stock reservation behavior is documented in [the final checkout flow](CART_QUANTITY_AUTOSAVE.md). Its draft-cart, final-reservation and explicit shortage-recovery sections describe the current implementation.
+
+
 Current quantity/save policy: [cart autosave and checkout validation](CART_QUANTITY_AUTOSAVE.md). This supersedes older manual quantity forms and Add-time stock-rejection notes below.
 
 

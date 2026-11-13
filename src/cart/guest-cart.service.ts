@@ -9,7 +9,11 @@ import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
 import { SetCartItemDto, AddCartItemDto } from './cart.dto'
 import { addWasApplied, addedQuantity, recordAdd } from './cart.add'
-import { ensureCartEditable, quoteIncludes } from './cart.service'
+import {
+  ensureCartEditable,
+  quoteIncludes,
+  draftQuoteIncludes,
+} from './cart.service'
 import { calculateCartQuote } from './cart.quote'
 import { validateCartSelection } from './cart.selection'
 
@@ -19,6 +23,13 @@ const guestQuoteIncludes = {
   items: {
     orderBy: [{ createdAt: 'asc' as const }, { id: 'asc' as const }],
     include: quoteIncludes.items.include,
+  },
+} satisfies Prisma.GuestCartInclude
+
+const guestDraftIncludes = {
+  items: {
+    ...guestQuoteIncludes.items,
+    include: draftQuoteIncludes.items.include,
   },
 } satisfies Prisma.GuestCartInclude
 
@@ -47,7 +58,11 @@ export class GuestCartService {
     }
   }
 
-  private async lockActive(tx: Prisma.TransactionClient, token: string) {
+  private async lockActive(
+    tx: Prisma.TransactionClient,
+    token: string,
+    draft = false,
+  ) {
     const hash = digest(token)
     const found = await tx.guestCart.findUnique({
       where: { tokenHash: hash },
@@ -58,32 +73,32 @@ export class GuestCartService {
     await tx.$queryRaw`SELECT id FROM guest_carts WHERE id = ${found.id}::uuid FOR UPDATE`
     const guest = await tx.guestCart.findUnique({
       where: { id: found.id },
-      include: guestQuoteIncludes,
+      include: draft ? guestDraftIncludes : guestQuoteIncludes,
     })
     if (!guest || guest.expiresAt <= new Date())
       throw new UnauthorizedException('Guest cart expired or unavailable')
     return guest
   }
 
-  async getQuote(token: string) {
+  async getQuote(token: string, draft = false) {
     // No stock hold: current product/variant price, currency and SKU inventory.
     return this.database.client.$transaction(
       async (tx) => {
         const guest = await tx.guestCart.findUnique({
           where: { tokenHash: digest(token) },
-          include: guestQuoteIncludes,
+          include: draft ? guestDraftIncludes : guestQuoteIncludes,
         })
         if (!guest || guest.expiresAt <= new Date() || guest.mergedAt)
           throw new UnauthorizedException('Guest cart expired or consumed')
-        return calculateCartQuote(guest.id, guest.items)
+        return calculateCartQuote(guest.id, guest.items, !draft)
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     )
   }
 
-  async addItem(token: string, input: AddCartItemDto) {
+  async addItem(token: string, input: AddCartItemDto, draft = false) {
     return this.database.client.$transaction(async (tx) => {
-      const cart = await this.lockActive(tx, token)
+      const cart = await this.lockActive(tx, token, draft)
       if (cart.mergedAt)
         throw new ConflictException('Guest cart already merged')
       const scope = 'cart-add:guest:' + cart.id
@@ -137,15 +152,15 @@ export class GuestCartService {
       }
       const current = await tx.guestCart.findUniqueOrThrow({
         where: { id: cart.id },
-        include: guestQuoteIncludes,
+        include: draft ? guestDraftIncludes : guestQuoteIncludes,
       })
-      return calculateCartQuote(current.id, current.items)
+      return calculateCartQuote(current.id, current.items, !draft)
     })
   }
 
-  async setItem(token: string, input: SetCartItemDto) {
+  async setItem(token: string, input: SetCartItemDto, draft = false) {
     await this.database.client.$transaction(async (tx) => {
-      const guest = await this.lockActive(tx, token)
+      const guest = await this.lockActive(tx, token, draft)
       if (guest.mergedAt)
         throw new ConflictException('Guest cart already merged')
       const { product, variantId } = await validateCartSelection(tx, input)
@@ -184,12 +199,12 @@ export class GuestCartService {
         })
       }
     })
-    return this.getQuote(token)
+    return this.getQuote(token, draft)
   }
 
-  async removeItem(token: string, id: string) {
+  async removeItem(token: string, id: string, draft = false) {
     await this.database.client.$transaction(async (tx) => {
-      const guest = await this.lockActive(tx, token)
+      const guest = await this.lockActive(tx, token, draft)
       if (guest.mergedAt)
         throw new ConflictException('Guest cart already merged')
       const result = await tx.guestCartItem.deleteMany({
@@ -198,23 +213,23 @@ export class GuestCartService {
       if (!result.count)
         throw new NotFoundException('Guest cart item not found')
     })
-    return this.getQuote(token)
+    return this.getQuote(token, draft)
   }
 
-  async clear(token: string) {
+  async clear(token: string, draft = false) {
     await this.database.client.$transaction(async (tx) => {
-      const guest = await this.lockActive(tx, token)
+      const guest = await this.lockActive(tx, token, draft)
       if (guest.mergedAt)
         throw new ConflictException('Guest cart already merged')
       await tx.guestCartItem.deleteMany({ where: { guestCartId: guest.id } })
     })
-    return this.getQuote(token)
+    return this.getQuote(token, draft)
   }
 
   /** Revoking a capability makes it immediately unusable. */
-  async revoke(token: string) {
+  async revoke(token: string, draft = true) {
     await this.database.client.$transaction(async (tx) => {
-      const guest = await this.lockActive(tx, token)
+      const guest = await this.lockActive(tx, token, draft)
       if (guest.mergedAt)
         throw new ConflictException('Guest cart already merged')
       await tx.guestCart.delete({ where: { id: guest.id } })
@@ -223,9 +238,9 @@ export class GuestCartService {
   }
 
   /** Entire transfer is atomic; the row lock makes retries exactly-once. */
-  async merge(customerId: string, token: string) {
+  async merge(customerId: string, token: string, draft = false) {
     await this.database.client.$transaction(async (tx) => {
-      const guest = await this.lockActive(tx, token)
+      const guest = await this.lockActive(tx, token, draft)
       if (guest.mergedAt) {
         if (guest.mergedUserId !== customerId)
           throw new ConflictException('Guest cart already claimed')
@@ -329,8 +344,8 @@ export class GuestCartService {
     // The guest token cannot read this account's cart: JWT is required here.
     const cart = await this.database.client.cart.findUnique({
       where: { userId: customerId },
-      include: quoteIncludes,
+      include: draft ? draftQuoteIncludes : quoteIncludes,
     })
-    return calculateCartQuote(cart?.id ?? null, cart?.items ?? [])
+    return calculateCartQuote(cart?.id ?? null, cart?.items ?? [], !draft)
   }
 }

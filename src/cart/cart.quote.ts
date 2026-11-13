@@ -10,14 +10,14 @@ export type QuoteInputLine = {
     currency: string
     priceMinor: number
     hasVariants: boolean
-    inventoryBalance: { onHand: number; reservedQuantity?: number } | null
+    inventoryBalance?: { onHand: number; reservedQuantity?: number } | null
   }
   variant: {
     id: string
     productId: string
     sku: string
     priceMinor: number | null
-    inventoryBalance: { onHand: number; reservedQuantity?: number } | null
+    inventoryBalance?: { onHand: number; reservedQuantity?: number } | null
   } | null
 }
 
@@ -25,6 +25,7 @@ export type QuoteInputLine = {
 export function calculateCartQuote(
   cartId: string | null,
   items: QuoteInputLine[],
+  checkStock = true,
 ) {
   const currency = items[0]?.product.currency ?? null
   const issues: string[] = []
@@ -43,24 +44,27 @@ export function calculateCartQuote(
       variant?.priceMinor !== undefined
         ? variant.priceMinor
         : product.priceMinor
-    const availableQuantity = validVariant
-      ? product.hasVariants
-        ? Math.max(
-            0,
-            (variant?.inventoryBalance?.onHand ?? 0) -
-              (variant?.inventoryBalance?.reservedQuantity ?? 0),
-          )
-        : Math.max(
-            0,
-            (product.inventoryBalance?.onHand ?? 0) -
-              (product.inventoryBalance?.reservedQuantity ?? 0),
-          )
-      : 0
+    const availableQuantity = !checkStock
+      ? null
+      : validVariant
+        ? product.hasVariants
+          ? Math.max(
+              0,
+              (variant?.inventoryBalance?.onHand ?? 0) -
+                (variant?.inventoryBalance?.reservedQuantity ?? 0),
+            )
+          : Math.max(
+              0,
+              (product.inventoryBalance?.onHand ?? 0) -
+                (product.inventoryBalance?.reservedQuantity ?? 0),
+            )
+        : 0
     let status = 'AVAILABLE'
     if (product.status !== 'ACTIVE') status = 'UNPUBLISHED'
     else if (!validVariant) status = 'VARIANT_INVALID'
     else if (currency !== product.currency) status = 'CURRENCY_MISMATCH'
-    else if (availableQuantity < item.quantity) status = 'OUT_OF_STOCK'
+    else if (availableQuantity !== null && availableQuantity < item.quantity)
+      status = 'OUT_OF_STOCK'
     const lineTotalMinor = price * item.quantity
     if (status !== 'AVAILABLE') issues.push(`${item.id}:${status}`)
     else subtotalMinor += lineTotalMinor
@@ -88,6 +92,7 @@ export function calculateCartQuote(
     amountDueMinor: null,
     checkoutReady,
     issues,
+    stockChecked: checkStock,
     quotedAt: new Date().toISOString(),
   }
 }

@@ -157,11 +157,48 @@ export class ReservationService {
               )
             await this.transition(tx, active.id, 'EXPIRED')
           }
-          const cart = await tx.cart.findUniqueOrThrow({
+          let cart = await tx.cart.findUniqueOrThrow({
+            where: { id: cartRef.id },
+            include: quoteIncludes,
+          })
+          const balanceIds = [
+            ...new Set(
+              cart.items.flatMap((line) => {
+                const balance = line.product.hasVariants
+                  ? line.variant?.inventoryBalance
+                  : line.product.inventoryBalance
+                return balance ? [balance.id] : []
+              }),
+            ),
+          ].sort()
+          for (const balanceId of balanceIds) {
+            await tx.$queryRaw`SELECT id FROM inventory_balances WHERE id = ${balanceId}::uuid FOR UPDATE`
+          }
+          // Read again after acquiring every balance lock so conflict quantities
+          // include other customers' reservations committed while we waited.
+          cart = await tx.cart.findUniqueOrThrow({
             where: { id: cartRef.id },
             include: quoteIncludes,
           })
           const quote = calculateCartQuote(cart.id, cart.items)
+          const shortages = quote.items
+            .filter((line) => line.status === 'OUT_OF_STOCK')
+            .map((line) => ({
+              itemId: line.id,
+              productId: line.productId,
+              variantId: line.variantId,
+              title: line.title,
+              sku: line.sku,
+              requestedQuantity: line.quantity,
+              availableQuantity: line.availableQuantity,
+            }))
+          if (shortages.length)
+            throw new ConflictException({
+              code: 'INSUFFICIENT_STOCK',
+              message:
+                'Some items have less stock than requested. Update their quantities or remove them.',
+              items: shortages,
+            })
           if (!quote.checkoutReady || !quote.currency)
             throw new ConflictException({
               message: 'Cart is not checkout-ready',

@@ -674,6 +674,10 @@ enum PaymentAttemptStatus {
 }
 
 model PaymentAttempt {
+  checkoutSessionId String? @unique @map("checkout_session_id") @db.VarChar(128)
+  checkoutUrl String? @map("checkout_url") @db.VarChar(2048)
+  checkoutExpiresAt DateTime? @map("checkout_expires_at")
+  checkoutReturnOrigin String? @map("checkout_return_origin") @db.VarChar(512)
   id                String @id @default(uuid()) @db.Uuid
   orderId           String @unique @map("order_id") @db.Uuid
   order             Order @relation(fields: [orderId], references: [id], onDelete: Restrict)

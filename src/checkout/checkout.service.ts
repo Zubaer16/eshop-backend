@@ -6,7 +6,7 @@ import {
 import { PromotionsService } from '../promotions/promotions.service'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
-import { quoteIncludes } from '../cart/cart.service'
+import { draftQuoteIncludes } from '../cart/cart.service'
 import { calculateCartQuote } from '../cart/cart.quote'
 import { CheckoutEstimateDto, PutCheckoutRateDto } from './checkout.dto'
 import { estimateConfiguredCharges } from './checkout.pricing'
@@ -27,9 +27,13 @@ export class CheckoutService {
       async (tx) => {
         const cart = await tx.cart.findUnique({
           where: { userId: customerId },
-          include: quoteIncludes,
+          include: draftQuoteIncludes,
         })
-        const quote = calculateCartQuote(cart?.id ?? null, cart?.items ?? [])
+        const quote = calculateCartQuote(
+          cart?.id ?? null,
+          cart?.items ?? [],
+          false,
+        )
         if (!quote.checkoutReady || !quote.cartId || !quote.currency)
           throw new ConflictException({
             message: 'Cart is not checkout-ready',
@@ -105,9 +109,13 @@ export class CheckoutService {
       async (tx) => {
         const cart = await tx.cart.findUnique({
           where: { userId: customerId },
-          include: quoteIncludes,
+          include: draftQuoteIncludes,
         })
-        const quote = calculateCartQuote(cart?.id ?? null, cart?.items ?? [])
+        const quote = calculateCartQuote(
+          cart?.id ?? null,
+          cart?.items ?? [],
+          false,
+        )
         if (!quote.checkoutReady || !quote.currency)
           throw new ConflictException('Cart is not checkout-ready')
         const currency = quote.currency

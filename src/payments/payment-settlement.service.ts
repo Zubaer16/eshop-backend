@@ -1,10 +1,18 @@
+import { HostedCheckoutService } from './hosted-checkout.service'
 import { createHash } from 'node:crypto'
-import { Injectable, ServiceUnavailableException } from '@nestjs/common'
+import {
+  Injectable,
+  ServiceUnavailableException,
+  NotFoundException,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Prisma } from '../generated/prisma/client'
 import { DatabaseService } from '../database/database.service'
 import { Environment } from '../config/environment'
-import { StripeTestGateway, VerifiedStripeIntentState } from './providers/stripe-gateway'
+import {
+  StripeTestGateway,
+  VerifiedStripeIntentState,
+} from './providers/stripe-gateway'
 
 const LEASE_MS = 90_000
 const MAX_RETRIES = 7
@@ -30,6 +38,7 @@ export class PaymentSettlementService {
     private readonly db: DatabaseService,
     private readonly config: ConfigService<Environment, true>,
     private readonly gateway: StripeTestGateway,
+    private readonly hosted?: HostedCheckoutService,
   ) {}
 
   private enabled() {
@@ -44,6 +53,7 @@ export class PaymentSettlementService {
     this.enabled()
     if (!Number.isInteger(limit) || limit < 1 || limit > MAX_BATCH)
       throw new Error('Invalid Stripe reconciliation batch size')
+    await this.hosted?.syncBatch(limit)
     const now = new Date()
     const receipts = await this.db.client.paymentWebhookReceipt.findMany({
       where: {
@@ -73,6 +83,35 @@ export class PaymentSettlementService {
       else skipped++
     }
     return { checked: receipts.length, settled, reviewed, retry, skipped }
+  }
+
+  async reconcileOrder(customerId: string, orderId: string) {
+    this.enabled()
+    const order = await this.db.client.order.findFirst({
+      where: { id: orderId, customerId },
+      select: { id: true },
+    })
+    if (!order) throw new NotFoundException('Order not found')
+    const attempt = await this.db.client.paymentAttempt.findUnique({
+      where: { orderId },
+    })
+    if (!attempt) return
+    if (attempt.idempotencyKey.startsWith('hosted-checkout-'))
+      await this.hosted?.sync(attempt.id)
+    const current = await this.db.client.paymentAttempt.findUniqueOrThrow({
+      where: { orderId },
+    })
+    if (!current.providerIntentId) return
+    const receipts = await this.db.client.paymentWebhookReceipt.findMany({
+      where: {
+        providerIntentId: current.providerIntentId,
+        eventType: 'payment_intent.succeeded',
+        status: 'RECEIVED',
+      },
+      take: 10,
+      select: { id: true },
+    })
+    for (const receipt of receipts) await this.reconcileReceipt(receipt.id)
   }
 
   /** Testable with a fake provider; only live worker enables it with test keys. */
@@ -121,6 +160,26 @@ export class PaymentSettlementService {
       provider.status !== 'succeeded'
     )
       return this.retryOrReview(receiptId, receipt.attempts)
+    if (this.hosted && provider.orderId) {
+      const hosted = await this.db.client.paymentAttempt.findUnique({
+        where: { orderId: provider.orderId },
+      })
+      if (
+        hosted?.idempotencyKey.startsWith('hosted-checkout-') &&
+        !hosted.providerIntentId
+      ) {
+        try {
+          await this.hosted.sync(hosted.id)
+        } catch {
+          return this.retryOrReview(receiptId, receipt.attempts)
+        }
+        const linked = await this.db.client.paymentAttempt.findUniqueOrThrow({
+          where: { id: hosted.id },
+        })
+        if (linked.providerIntentId !== provider.id)
+          return this.retryOrReview(receiptId, receipt.attempts)
+      }
+    }
     try {
       return await this.db.client.$transaction(
         async (tx) => this.settleWithLock(tx, receiptId, provider),

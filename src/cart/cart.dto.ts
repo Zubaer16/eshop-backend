@@ -36,7 +36,9 @@ export class CartLineResponseDto {
   @ApiProperty() title!: string
   @ApiProperty({ nullable: true, type: String }) sku!: string | null
   @ApiProperty() quantity!: number
-  @ApiProperty() availableQuantity!: number
+  @ApiProperty({ nullable: true, type: Number }) availableQuantity!:
+    | number
+    | null
   @ApiProperty() unitPriceMinor!: number
   @ApiProperty() lineTotalMinor!: number
   @ApiProperty() currency!: string
@@ -53,6 +55,7 @@ export class CartLineResponseDto {
 }
 
 export class CartQuoteResponseDto {
+  @ApiProperty() stockChecked!: boolean
   @ApiProperty({ format: 'uuid', nullable: true }) cartId!: string | null
   @ApiProperty({ type: [CartLineResponseDto] }) items!: CartLineResponseDto[]
   @ApiProperty({ nullable: true, type: String }) currency!: string | null
