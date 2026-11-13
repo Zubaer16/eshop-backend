@@ -10,7 +10,7 @@ const { evaluate, resolveRoots } = require('./check-frontend-alignment.cjs')
 test('cross-repo audit reports actual baseline without claiming runtime integration', (t) => {
   const roots = resolveRoots()
   if (
-    !fs.existsSync(path.join(roots.admin, 'lib/types.ts')) ||
+    !fs.existsSync(path.join(roots.admin, 'lib/api/catalog.ts')) ||
     !fs.existsSync(path.join(roots.storefront, 'lib/api/catalog.ts'))
   ) {
     t.skip('Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks')
@@ -118,7 +118,7 @@ test('eShop directory settings override compatible legacy settings', () => {
 test('removing the coupon creation operation cannot remain source-aligned', (t) => {
   const roots = resolveRoots()
   if (
-    !fs.existsSync(path.join(roots.admin, 'lib/types.ts')) ||
+    !fs.existsSync(path.join(roots.admin, 'lib/api/catalog.ts')) ||
     !fs.existsSync(path.join(roots.storefront, 'lib/api/catalog.ts'))
   ) {
     t.skip('Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks')

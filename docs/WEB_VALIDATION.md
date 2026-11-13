@@ -1,5 +1,13 @@
 # Integrated web validation
 
+## Single Admin workspace — 2026-11-13 (current source)
+
+Owner approved one API-backed Admin using the pre-Backend design, with consistent shared design for new features and no API changes. Removed Admin runtime mode branches, mock store/fixtures/policies, duplicate preview components and old preview-only tests. Retained the existing authenticated transport, feature actions, canonical IDs/minor units, current grants, revision/idempotency and uncertain-write safeguards. Restored dashboard cards/chart, catalog table, order/staff tables and shared headings/record presentation. Runtime preview mode is now retired in both frontends.
+
+Backend API/business/schema remained byte-identical: 401 src/prisma files, SHA-256 `ce787ee70d35598b670593e3699e7ac6d1a267a4323e18cf820f05c6c5ebdfae` before/after (src then prisma, each sorted path+bytes). Backend changes are audit source-evidence paths/metadata only; no endpoint/DTO/schema/business change. Strict alignment: 7 MATCH, 15 ADAPTER, 0 REVIEW_REQUIRED; 4 audit regressions passed. Web source audit covers 202 operations / 22 feature groups / 21 Admin pages and 21 Storefront pages.
+
+Admin local validation: 48 API/session/security/presentation unit tests passed; typecheck, lint, source guard and production build passed. API-shaped browser suite covers connected design, minor-unit write payload, mobile widths, permissions and unavailable/retry states; 24/24 passed against the production build; final results: `../../eshop-admin-frontend/test-results/admin/results.json`. Browser requests are intercepted; these checks do not claim real database/provider or deployed Vercel acceptance. No production writes, commit, push or deployment. Existing local `.env.example` edits preserved. See [Admin consolidation](../../eshop-admin-frontend/docs/ADMIN_CONSOLIDATION_2026-11-13.md).
+
 ## Media folder change - 2026-11-09
 
 Media upload source changed after the full local receipt below. See [MEDIA_STORAGE.md](MEDIA_STORAGE.md) for current focused validation: Backend build/lint, 41 media/config tests, Admin check and source alignment passed. Cloudinary authenticated ping/settings passed; actual upload lifecycle, full release and cross-app browser suites have not been rerun for this change. Earlier full local receipts are historical for this source revision.

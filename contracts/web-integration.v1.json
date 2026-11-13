@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "1.9.1",
+  "version": "1.9.2",
   "date": "2026-11-13",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "mediaStorage": {
@@ -142,10 +142,10 @@
       ],
       "authorization": "Public ACTIVE-only reads; staff reads, catalog.manage mutations",
       "notes": [
-        "Live views use canonical UUIDs, scalar English fields, all categoryIds and explicit DRAFT/ACTIVE/ARCHIVED status; fixtures stay in explicit preview mode.",
+        "Live views use canonical UUIDs, scalar English fields, all categoryIds and explicit DRAFT/ACTIVE/ARCHIVED status; runtime sample data and the duplicate UI have been removed.",
         "Backend adds optional currency filter. User price filters target USD with exact minor units; variant prices inherit only when override is null.",
         "Search is server title search; no pretend global SKU/description search. Legacy price presets map to USD caps 25/60/120, stock=1 maps to true, featured maps to visibly labeled newest.",
-        "Live product metadata/detail requests are no-store and use actual slugs. Static fixture slugs are generated only in preview mode.",
+        "Live product metadata/detail requests are no-store and use actual slugs. Product routes use canonical API slugs.",
         "Source implemented; unit/API/browser test code prepared but execution deferred to step 8 under owner policy."
       ],
       "sourceFiles": [
@@ -492,7 +492,7 @@
       "sourceFiles": [
         "src/payments/payments.controller.ts",
         "src/payments/refunds/refund-ledger.controller.ts",
-        "../eshop-admin-frontend/lib/payment-report.ts",
+        "../eshop-admin-frontend/components/commerce/payments.tsx",
         "../eshop-user-frontend/components/shopping/checkout.tsx",
         "../eshop-admin-frontend/components/commerce/payments.tsx",
         "src/reporting/reporting.controller.ts"
@@ -573,7 +573,7 @@
       ],
       "sourceFiles": [
         "src/merchandising/merchandising.controller.ts",
-        "../eshop-admin-frontend/components/admin/store-content.tsx",
+        "../eshop-admin-frontend/components/management/content.tsx",
         "../eshop-user-frontend/components/store/store-content.tsx",
         "../eshop-user-frontend/app/collections/[slug]/page.tsx",
         "../eshop-admin-frontend/components/management/content.tsx",
@@ -683,7 +683,7 @@
       "sourceFiles": [
         "src/auth/workspace/workspace.controller.ts",
         "src/auth/workspace/workspace.dto.ts",
-        "../eshop-admin-frontend/components/admin/staff.tsx",
+        "../eshop-admin-frontend/components/management/staff.tsx",
         "../eshop-admin-frontend/components/management/staff.tsx",
         "../eshop-admin-frontend/components/management/shared.tsx",
         "../eshop-admin-frontend/lib/api/management-payload.ts",
@@ -725,7 +725,7 @@
       "sourceFiles": [
         "src/reporting/reporting.controller.ts",
         "src/reporting/reporting.policy.ts",
-        "../eshop-admin-frontend/lib/reporting.ts",
+        "../eshop-admin-frontend/components/management/reports.tsx",
         "../eshop-admin-frontend/components/management/reports.tsx",
         "../eshop-admin-frontend/lib/api/runtime.ts",
         "../eshop-admin-frontend/tests/csv-export.test.mjs",
@@ -885,12 +885,12 @@
       "operationPrefixes": [],
       "authorization": "OWNER in live mode; development diagnostic, never an authorization source",
       "notes": [
-        "Live /alignment explains shared server authority and separate test/provider acceptance; explicit preview retains its local diagnostics. Page files own feature rendering, boundaries enforce only current authentication/permissions."
+        "Live /alignment explains shared server authority and separate test/provider acceptance; the retired mock workspace and its local diagnostics are removed. Page files own feature rendering, boundaries enforce only current authentication/permissions."
       ],
       "sourceFiles": [
         "../eshop-admin-frontend/app/(admin)/alignment/page.tsx",
         "../eshop-admin-frontend/components/management/alignment.tsx",
-        "../eshop-admin-frontend/components/admin/alignment.tsx",
+        "../eshop-admin-frontend/components/management/alignment.tsx",
         "../eshop-admin-frontend/components/auth/workspace-boundary.tsx",
         "../eshop-user-frontend/components/auth/user-boundary.tsx",
         "docs/WEB_VALIDATION.md"
@@ -1100,5 +1100,9 @@
     "model": "One API-backed storefront with the approved design; runtime preview mode, mock catalog/store/orders and preview-only tests removed.",
     "runtime": "Backend UUID, price/stock, auth, checkout/recovery and ownership remain authoritative.",
     "source": "../eshop-user-frontend/components/store/store-content.tsx"
+  },
+  "adminPresentation": {
+    "model": "One API-backed admin workspace using the approved pre-Backend design and shared components; no runtime mock mode.",
+    "apiStability": "No domain endpoint, DTO, permission, money, stock, fulfillment or provider rule changed. Source-evidence paths updated for removed mock files."
   }
 }

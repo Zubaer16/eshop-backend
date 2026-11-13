@@ -1,9 +1,9 @@
 {
-  "version": "1.26.0",
+  "version": "1.27.0",
   "purpose": "Source compatibility and explicit adapter mapping; runtime acceptance is recorded separately in the validation report",
   "sourceBaselines": {
     "backend": "Current eshop-backend source; source-bound local release receipt and external acceptance remain distinct.",
-    "admin": "Current ../eshop-admin-frontend source; explicit preview remains separate.",
+    "admin": "Current ../eshop-admin-frontend source; one API-backed workspace uses the approved design. Retired mock mode and duplicate rendering paths are removed.",
     "storefront": "Current ../eshop-user-frontend source; one API-backed storefront uses the approved design; the retired fixture mode and duplicate UI are removed."
   },
   "apiPrefix": "/v1",
@@ -136,7 +136,7 @@
       "id": "fixture-protection",
       "priority": "P0",
       "status": "MATCH",
-      "summary": "Storefront canonical UUID/product/selection guards and no runtime fixture catalog; Admin fixture snapshots remain non-authoritative.",
+      "summary": "Storefront canonical UUID/product/selection guards and no runtime fixture catalog; Admin runtime fixtures and the duplicate mock workspace are removed.",
       "action": "Preserve canonical identity validation and keep runtime fixtures out of the storefront."
     },
     {

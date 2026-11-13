@@ -29,7 +29,7 @@ function evaluate(roots) {
       roots.backend,
       'src/reporting/reporting-data.service.ts',
     ),
-    adminReporting: read(roots.admin, 'lib/reporting.ts'),
+    adminReporting: read(roots.admin, 'components/management/reports.tsx'),
     backendPushController: read(roots.backend, 'src/push/push.controller.ts'),
     backendPushProvider: read(roots.backend, 'src/push/fcm-push.provider.ts'),
     backendEmailController: read(
@@ -111,10 +111,10 @@ function evaluate(roots) {
       roots.backend,
       'src/catalog/catalog.presentation.ts',
     ),
-    adminTypes: read(roots.admin, 'lib/types.ts'),
-    adminStore: read(roots.admin, 'lib/store.ts'),
-    adminPermissions: read(roots.admin, 'lib/workspace-policy.ts'),
-    adminCompatibilityDraft: read(roots.admin, 'lib/compatibility-contract.ts'),
+    adminTypes: read(roots.admin, 'lib/api/catalog.ts'),
+    adminStore: read(roots.admin, 'components/catalog/inventory.tsx'),
+    adminPermissions: read(roots.admin, 'lib/admin-access.ts'),
+    adminCompatibilityDraft: read(roots.admin, 'lib/api/catalog.ts'),
     storefrontTransport: read(roots.storefront, 'lib/api/client.ts'),
     storefrontRuntime: read(roots.storefront, 'lib/api/runtime.ts'),
     adminRuntime: read(roots.admin, 'lib/api/runtime.ts'),
@@ -137,7 +137,7 @@ function evaluate(roots) {
       'src/inventory/inventory.controller.ts',
       'src/auth/customer-auth.controller.ts',
     ],
-    admin: ['lib/types.ts', 'lib/store.ts', 'lib/workspace-policy.ts'],
+    admin: ['lib/api/catalog.ts', 'components/catalog/inventory.tsx', 'lib/admin-access.ts'],
     storefront: [
       'lib/api/catalog.ts',
       'lib/api/client.ts',
@@ -165,7 +165,7 @@ function evaluate(roots) {
     'catalog-pricing':
       /priceMinor!: number/.test(source.backendCatalogDto) &&
       /priceMinor: number/.test(source.storefrontContracts) &&
-      /price: number/.test(source.adminTypes),
+      /priceMinor: number/.test(source.adminTypes),
     'catalog-identity':
       /@default\(uuid\(\)\)/.test(source.backendSchema) &&
       /id: string/.test(source.storefrontContracts),
@@ -184,7 +184,7 @@ function evaluate(roots) {
         source.backendInventoryController,
       ) &&
       /requestId!: string/.test(source.backendInventoryDto) &&
-      /adjustStock:\s*\(/.test(source.adminStore) &&
+      /requestId: crypto.randomUUID\(\)/.test(source.adminStore) && /\/adjustments/.test(source.adminStore) &&
       /productId\?: string/.test(source.backendInventoryDto) &&
       /variantId\?: string/.test(source.backendInventoryDto),
     'catalog-stock-guard':
@@ -210,13 +210,13 @@ function evaluate(roots) {
       /accessToken!: string/.test(source.backendAuthDto) &&
       /authorization/i.test(source.backendAuthGuard),
     'staff-permissions':
-      /'Catalog Editor'/.test(source.adminPermissions) &&
+      /sectionAccess/.test(source.adminPermissions) && /user.permissions.includes/.test(source.adminPermissions) &&
       /model StaffRole\s*\{/.test(source.backendSchema) &&
       /model StaffRolePermission\s*\{/.test(source.backendSchema) &&
       /model StaffRoleAssignment\s*\{/.test(source.backendSchema),
     'product-media':
       /gallery: GalleryImage\[\]/.test(source.storefrontContracts) &&
-      /images\?: ProductMedia\[\]/.test(source.adminTypes) &&
+      /gallery: GalleryImage\[\]/.test(source.adminTypes) &&
       /model MediaAsset\s*\{/.test(source.backendSchema) &&
       /@Put\('products\/:id\/media'\)/.test(source.backendMediaController) &&
       /gallery/.test(source.backendCatalogPresentation),
@@ -256,7 +256,7 @@ function evaluate(roots) {
       ) &&
       /payment_transactions/.test(source.backendReportingData) &&
       /refund_requests/.test(source.backendReportingData) &&
-      /buildReports/.test(source.adminReporting),
+      /\/v1\/admin\/reports/.test(source.adminReporting),
     'push-campaigns':
       /@Controller\('notifications\/push'\)/.test(
         source.backendPushController,
@@ -284,12 +284,12 @@ function evaluate(roots) {
       /@Post\('collections'\)/.test(source.backendMerchandisingController) &&
       /model StoreBanner\s*\{/.test(source.backendSchema) &&
       /model FeaturedCollection\s*\{/.test(source.backendSchema) &&
-      /type StoreBanner/.test(source.adminTypes) &&
-      /type FeaturedCollection/.test(source.adminTypes) &&
+       /SaveStoreBannerDto/.test(read(roots.admin, 'lib/api/management-contract.ts')) &&
+      /SaveFeaturedCollectionDto/.test(read(roots.admin, 'lib/api/management-contract.ts')) &&
       /type Home/.test(source.storefrontContentDraft) &&
       /\/v1\/store\/homepage/.test(source.storefrontContentDraft),
     'status-shape':
-      /'Active' \| 'Draft'/.test(source.adminTypes) &&
+      /'ACTIVE' \| 'DRAFT' \| 'ARCHIVED'/.test(source.adminTypes) &&
       /ARCHIVED/.test(source.backendCatalogDto),
     'page-shape':
       /limit: number/.test(source.storefrontContracts) &&
@@ -302,7 +302,7 @@ function evaluate(roots) {
       /readProduct/.test(source.storefrontCatalog) &&
       /validateSelection/.test(source.storefrontAdapters) &&
       !fs.existsSync(path.join(roots.storefront, 'lib/catalog.ts')) &&
-      /FIXTURE snapshots/.test(source.adminCompatibilityDraft),
+      !fs.existsSync(path.join(roots.admin, 'lib/fixtures.ts')) && !fs.existsSync(path.join(roots.admin, 'lib/store.ts')) && /isUuid/.test(source.adminCompatibilityDraft),
   }
 
   const results = rules.findings.map((finding) => ({
