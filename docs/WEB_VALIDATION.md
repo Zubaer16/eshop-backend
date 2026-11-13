@@ -1,5 +1,15 @@
 # Integrated web validation
 
+## Optimistic atomic cart Add — 2026-11-13
+
+Owner explicitly approved optimistic cart UI, background checks and fewer server round trips. Add now immediately shows item/quantity/estimated subtotal with Syncing, coalesces rapid positive additions (180 ms), and posts one replay-safe atomic delta operation. Definite rejections roll estimates back/cancel unsent work; uncertain outcomes pause and retry only with the identical request UUID/payload. Confirmed quotes, current stock, ownership, reservation and payment authority remain on Backend. Pending estimates block checkout and never become canonical prices. Account changes clear local work; closing the drawer is respected.
+
+Added `POST /v1/cart/items/add` and `POST /v1/guest-cart/items/add`, accepting `{productId,variantId?,quantity,requestId}` and returning the existing CartQuote. Same-owner row locks protect increment + request-hash receipt + fresh quote in one transaction. Identical retry increments once; mismatched reuse is 409. Existing absolute PUT and all other clients remain supported. Uses the existing IdempotencyRecord table (30-day receipt timestamp); no migration, Redis or new dependency. Existing guest cookie/CSRF/Web Lock rules are retained. First guest creation can still require an upstream capability-create before Add within one browser bridge request. **Deploy Backend first, then Frontend.**
+
+Validation: frontend 63 unit + 28 production-browser tests, backend 10 unit + 9 guarded local PostgreSQL cart/guest/checkout/reservation tests PASS; typecheck/lint/build and web-test types PASS. Tested concurrent replay, distinct increments, stock rejection, account fences, uncertain retry and checkout protection. Browser writes are mocked; real writes occurred only in the guarded local test DB. Canonical OpenAPI regenerated (204 operations/198 success schemas/6 existing absences); integration source audit and ordinary alignment audit PASS (7 MATCH/15 ADAPTER/0 REVIEW_REQUIRED). Strict release policy still rejects P0 ADAPTER classifications; full release/provider/deployment acceptance is not claimed. Web contract 1.10.0 / alignment 1.28.0. No commit, push or deployment.
+
+Details: [Frontend architecture and receipts](../../eshop-user-frontend/docs/OPTIMISTIC_CART_ADD_2026-11-13.md), [Backend atomic Add contract](CART_ATOMIC_ADD.md).
+
 ## Single Admin workspace — 2026-11-13 (current source)
 
 Owner approved one API-backed Admin using the pre-Backend design, with consistent shared design for new features and no API changes. Removed Admin runtime mode branches, mock store/fixtures/policies, duplicate preview components and old preview-only tests. Retained the existing authenticated transport, feature actions, canonical IDs/minor units, current grants, revision/idempotency and uncertain-write safeguards. Restored dashboard cards/chart, catalog table, order/staff tables and shared headings/record presentation. Runtime preview mode is now retired in both frontends.

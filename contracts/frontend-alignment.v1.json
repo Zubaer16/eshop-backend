@@ -1,5 +1,5 @@
 {
-  "version": "1.27.0",
+  "version": "1.28.0",
   "purpose": "Source compatibility and explicit adapter mapping; runtime acceptance is recorded separately in the validation report",
   "sourceBaselines": {
     "backend": "Current eshop-backend source; source-bound local release receipt and external acceptance remain distinct.",
@@ -101,14 +101,14 @@
       "id": "customer-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live customer cart/profile/addresses/wishlist use owned canonical API data and session/account fences; no fixture import or local price authority.",
+      "summary": "Customer cart displays clearly labelled optimistic additions, syncs via atomic replay-safe Add, and preserves owned canonical quotes as checkout authority.",
       "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "guest-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live guest cart uses a separate HttpOnly capability cookie and explicit current-customer merge; conflicts preserve guest items.",
+      "summary": "Guest cart uses the existing HttpOnly capability bridge, atomic request-ID additions and explicit owned login merge; optimistic estimates never become stock/financial authority.",
       "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {

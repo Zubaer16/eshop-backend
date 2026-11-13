@@ -30,6 +30,7 @@ import { CustomerCartGuard } from './cart.customer.guard'
 import { GuestCartService } from './guest-cart.service'
 import {
   CartQuoteResponseDto,
+  AddCartItemDto,
   MergeGuestCartDto,
   SetCartItemDto,
 } from './cart.dto'
@@ -80,6 +81,22 @@ export class CartController {
   @ApiOkResponse({ type: CartQuoteResponseDto })
   quote(@Req() req: AuthenticatedRequest) {
     return this.cart.getQuote(req.authUser!.id)
+  }
+
+  @Post('items/add')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Atomically add quantity once per requestId; returns current authoritative cart quote',
+  })
+  @ApiOkResponse({ type: CartQuoteResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid UUID, quantity or variant' })
+  @ApiConflictResponse({
+    description:
+      'Request reuse mismatch, unavailable stock, mixed currency, full cart or active checkout reservation',
+  })
+  add(@Req() req: AuthenticatedRequest, @Body() input: AddCartItemDto) {
+    return this.cart.addItem(req.authUser!.id, input)
   }
 
   @Put('items')

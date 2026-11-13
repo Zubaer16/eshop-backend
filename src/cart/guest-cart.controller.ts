@@ -25,6 +25,7 @@ import {
 import type { Request } from 'express'
 import {
   CartQuoteResponseDto,
+  AddCartItemDto,
   GuestCartCreatedDto,
   GuestCartRevokedDto,
   SetCartItemDto,
@@ -70,6 +71,23 @@ export class GuestCartController {
   @ApiOkResponse({ type: CartQuoteResponseDto })
   quote(@Req() request: Request) {
     return this.guest.getQuote(guestCapability(request))
+  }
+
+  @Post('items/add')
+  @HttpCode(HttpStatus.OK)
+  @ApiSecurity('guest-cart-token')
+  @ApiOperation({
+    summary:
+      'Atomically add quantity once per requestId; returns current authoritative cart quote',
+  })
+  @ApiOkResponse({ type: CartQuoteResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid UUID, quantity or variant' })
+  @ApiConflictResponse({
+    description:
+      'Request reuse mismatch, unavailable stock, mixed currency, full cart or active checkout reservation',
+  })
+  add(@Req() req: Request, @Body() input: AddCartItemDto) {
+    return this.guest.addItem(guestCapability(req), input)
   }
 
   @Put('items')

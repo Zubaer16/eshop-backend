@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
-import { MergeGuestCartDto, SetCartItemDto } from './cart.dto'
+import { AddCartItemDto, MergeGuestCartDto, SetCartItemDto } from './cart.dto'
 
 const validId = '11111111-1111-4111-8111-111111111111'
 const check = async (value: Record<string, unknown>) => {
@@ -49,5 +49,29 @@ describe('guest cart guest merge token validation', () => {
         (await validate(plainToInstance(MergeGuestCartDto, obj))).length,
       ).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('atomic cart additions', () => {
+  it('requires a request UUID in addition to inherited product, variant and quantity boundaries', async () => {
+    const value = {
+      productId: validId,
+      variantId: null,
+      quantity: 2,
+      requestId: validId,
+    }
+    expect(await validate(plainToInstance(AddCartItemDto, value))).toHaveLength(
+      0,
+    )
+    for (const invalid of [
+      { ...value, requestId: undefined },
+      { ...value, requestId: 'bad' },
+      { ...value, quantity: 0 },
+      { ...value, quantity: 1.5 },
+      { ...value, quantity: 100 },
+    ])
+      expect(
+        (await validate(plainToInstance(AddCartItemDto, invalid))).length,
+      ).toBeGreaterThan(0)
   })
 })

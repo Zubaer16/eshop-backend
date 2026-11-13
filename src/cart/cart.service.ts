@@ -5,7 +5,8 @@ import {
 } from '@nestjs/common'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
-import { SetCartItemDto } from './cart.dto'
+import { SetCartItemDto, AddCartItemDto } from './cart.dto'
+import { addWasApplied, addedQuantity, recordAdd } from './cart.add'
 import { validateCartSelection } from './cart.selection'
 import { calculateCartQuote } from './cart.quote'
 
@@ -75,6 +76,68 @@ export class CartService {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
     )
+  }
+
+  async addItem(customerId: string, input: AddCartItemDto) {
+    return this.database.client.$transaction(async (tx) => {
+      const cart = await tx.cart.upsert({
+        where: { userId: customerId },
+        create: { userId: customerId },
+        update: { updatedAt: new Date() },
+      })
+      await tx.$queryRaw`SELECT id FROM carts WHERE id = ${cart.id}::uuid FOR UPDATE`
+      const scope = 'cart-add:customer:' + cart.id
+      if (!(await addWasApplied(tx, scope, input))) {
+        await ensureCartEditable(tx, cart.id)
+        const existing = await tx.cartItem.findFirst({
+          where: {
+            cartId: cart.id,
+            productId: input.productId,
+            variantId: input.variantId ?? null,
+          },
+          select: { id: true, quantity: true },
+        })
+        const quantity = addedQuantity(existing?.quantity ?? 0, input.quantity)
+        const { product, variantId } = await validateCartSelection(tx, {
+          ...input,
+          quantity,
+        })
+        const mixed = await tx.cartItem.findFirst({
+          where: {
+            cartId: cart.id,
+            product: { currency: { not: product.currency } },
+          },
+          select: { id: true },
+        })
+        if (mixed)
+          throw new ConflictException(
+            'Cart cannot combine different currencies',
+          )
+        if (existing) {
+          await tx.cartItem.update({
+            where: { id: existing.id },
+            data: { quantity },
+          })
+        } else {
+          if ((await tx.cartItem.count({ where: { cartId: cart.id } })) >= 50)
+            throw new ConflictException('Cart cannot exceed 50 distinct lines')
+          await tx.cartItem.create({
+            data: {
+              cartId: cart.id,
+              productId: product.id,
+              variantId,
+              quantity,
+            },
+          })
+        }
+        await recordAdd(tx, scope, input)
+      }
+      const current = await tx.cart.findUniqueOrThrow({
+        where: { id: cart.id },
+        include: quoteIncludes,
+      })
+      return calculateCartQuote(current.id, current.items)
+    })
   }
 
   async setItem(customerId: string, input: SetCartItemDto) {

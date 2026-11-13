@@ -85,7 +85,8 @@
     "release:local": "node scripts/release-run-local.cjs",
     "release:gate": "node scripts/release-acceptance-gate.cjs",
     "release:tooling:test": "node --test scripts/release-*.spec.cjs",
-    "test:web:integration": "npm run build && npm run test:web:auth:types && node scripts/run-api-tests.cjs web-integration"
+    "test:web:integration": "npm run build && npm run test:web:auth:types && node scripts/run-api-tests.cjs web-integration",
+    "test:api:cart-add": "npm run build && node scripts/run-api-tests.cjs cart-add"
   },
   "engines": {
     "node": ">=24.11.0 <25"

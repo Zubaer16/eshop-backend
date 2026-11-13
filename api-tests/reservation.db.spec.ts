@@ -108,6 +108,14 @@ test('reservation real DB: concurrent customers, idempotent hold, inventory guar
     expect((await reserve(winner.token, randomUUID())).status()).toBe(409)
     expect(
       (
+        await request.post('/v1/cart/items/add', {
+          headers: bearer(winner.token),
+          data: { productId, quantity: 1, requestId: randomUUID() },
+        })
+      ).status(),
+    ).toBe(409)
+    expect(
+      (
         await request.put('/v1/cart/items', {
           headers: bearer(winner.token),
           data: { productId, quantity: 1 },

@@ -7,7 +7,9 @@ const { randomBytes } = require('node:crypto')
 const root = path.resolve(__dirname, '..')
 const destination = path.join(root, 'artifacts', 'release', 'openapi.json')
 if (!fs.existsSync(path.join(root, 'dist', 'bootstrap.js'))) {
-  process.stderr.write('Run npm run build before release acceptance OpenAPI export.\n')
+  process.stderr.write(
+    'Run npm run build before release acceptance OpenAPI export.\n',
+  )
   process.exit(2)
 }
 const override = {
@@ -23,6 +25,7 @@ const override = {
   AUTH_ACTION_TOKEN_ENCRYPTION_KEY: '',
   PUSH_DELIVERY_MODE: 'disabled',
   EMAIL_DELIVERY_MODE: 'disabled',
+  STRIPE_DEMO_MODE: 'false',
   STRIPE_TEST_ENABLED: 'false',
   STRIPE_TEST_CHECKOUT_ENABLED: 'false',
   STRIPE_TEST_REFUNDS_ENABLED: 'false',

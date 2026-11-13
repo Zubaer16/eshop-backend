@@ -12,6 +12,7 @@ const { config } = require('dotenv')
 const root = path.resolve(__dirname, '..')
 const mode = process.argv[2]
 const allowed = [
+  'cart-add',
   'smoke',
   'db',
   'db-deploy',
@@ -105,6 +106,7 @@ function baseEnv() {
     MEDIA_API_SECRET: '',
     MEDIA_NAMESPACE: 'projects/kookaburra/products',
     MEDIA_PROVIDER: 'cloudinary',
+    STRIPE_DEMO_MODE: 'false',
     STRIPE_TEST_ENABLED: 'false',
     STRIPE_TEST_REFUNDS_ENABLED: 'false',
     STRIPE_TEST_CHECKOUT_ENABLED: 'false',
@@ -443,7 +445,20 @@ try {
         ]
       : mode === 'security'
         ? ['test', '--config=playwright.api.config.mjs', '--project=security']
-        : ['test', '--config=playwright.api.config.mjs', '--project=db'],
+        : [
+            'test',
+            '--config=playwright.api.config.mjs',
+            '--project=db',
+            ...(mode === 'cart-add'
+              ? [
+                  'cart-add.db.spec.ts',
+                  'cart.db.spec.ts',
+                  'guest-cart.db.spec.ts',
+                  'checkout.db.spec.ts',
+                  'reservation.db.spec.ts',
+                ]
+              : []),
+          ],
     safe,
   )
 } catch (error) {

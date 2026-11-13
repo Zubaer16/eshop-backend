@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "1.9.2",
+  "version": "1.10.0",
   "date": "2026-11-13",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "mediaStorage": {
@@ -296,8 +296,10 @@
         "Guest capability persists only in a separate host-only HttpOnly SameSite=Lax cookie (Secure/__Host- in production) through a narrow same-origin guest bridge. Fixed expiry matches Backend 14 days; no guest token in JSON/URLs/browser storage.",
         "After login, guest items stay separate until explicit merge into the current customer. Conflicts preserve items and allow guest quantity/removal while signed in. Successful merge consumes the guest capability.",
         "Merge restores the current customer through the existing session handler under the same auth Web Lock, verifies expected customer UUID, and sends only server-owned Bearer/capability to Backend. Cookie rotation/expiry rules are preserved.",
-        "Same-browser write serialization reads a fresh quote before converting Add into an absolute quantity. Unconfirmed writes retain the same frozen desired change for explicit retry; no automatic write replay or subtotal-as-payment claim.",
-        "Checkout remains step 5. Guest checkout is not enabled. No tests/DB writes executed for this source delivery."
+        "Checkout remains step 5. Guest checkout is not enabled. No tests/DB writes executed for this source delivery.",
+        "Optimistic item/quantity/estimated subtotal is display-only and owner-fenced. Add batches serialize and coalesce before dispatch; checkout remains blocked while pending. Confirmed canonical quotes alone authorize checkout.",
+        "POST /v1/cart/items/add and POST /v1/guest-cart/items/add accept {productId,variantId?,quantity,requestId}. Under the cart row lock, add delta, validation, scoped request-hash receipt and returned quote share one transaction. Identical retries do not increment twice; mismatched request reuse is 409. Existing PUT remains absolute quantity.",
+        "Ambiguous failures pause additions and retain the exact request ID/payload for explicit retry. Definitive rejections roll back local estimates. Existing IdempotencyRecord storage is reused with a 30-day retention timestamp; no migration/Redis required. Deploy Backend before the new Frontend."
       ],
       "sourceFiles": [
         "src/cart/cart.controller.ts",
@@ -1104,5 +1106,11 @@
   "adminPresentation": {
     "model": "One API-backed admin workspace using the approved pre-Backend design and shared components; no runtime mock mode.",
     "apiStability": "No domain endpoint, DTO, permission, money, stock, fulfillment or provider rule changed. Source-evidence paths updated for removed mock files."
+  },
+  "atomicCartAdd": {
+    "customer": "POST /v1/cart/items/add",
+    "guest": "POST /v1/guest-cart/items/add",
+    "request": "AddCartItemDto: productId, optional variantId, delta quantity 1..99, requestId UUID",
+    "rollout": "Backend first; old absolute PUT and all checkout validations remain intact."
   }
 }

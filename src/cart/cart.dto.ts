@@ -22,6 +22,13 @@ export class SetCartItemDto {
   quantity!: number
 }
 
+/** Add a positive delta once. Reuse the same requestId only for the same retry. */
+export class AddCartItemDto extends SetCartItemDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  requestId!: string
+}
+
 export class CartLineResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string
   @ApiProperty({ format: 'uuid' }) productId!: string
