@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "1.10.0",
+  "version": "1.11.0",
   "date": "2026-11-13",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "mediaStorage": {
@@ -293,6 +293,7 @@
       "authorization": "Guest capability in X-Guest-Cart-Token; customer Bearer JWT for owned cart/merge",
       "notes": [
         "Live product actions, header counts, drawer and cart page use server quotes and canonical item/variant IDs; no preview store import.",
+        "Quantity edits recalculate display totals immediately and autosave absolute targets after 350ms, without an Update button. Slow writes serialize; latest unsent targets replace older targets, ambiguous writes pause for frozen-payload retry. Add/set/merge no longer reject insufficient stock: selection validation reads identity/publication/currency only. Existing quote responses still report live informational price/stock; checkout estimate/reservation/order enforce current prices and stock.",
         "Guest capability persists only in a separate host-only HttpOnly SameSite=Lax cookie (Secure/__Host- in production) through a narrow same-origin guest bridge. Fixed expiry matches Backend 14 days; no guest token in JSON/URLs/browser storage.",
         "After login, guest items stay separate until explicit merge into the current customer. Conflicts preserve items and allow guest quantity/removal while signed in. Successful merge consumes the guest capability.",
         "Merge restores the current customer through the existing session handler under the same auth Web Lock, verifies expected customer UUID, and sends only server-owned Bearer/capability to Backend. Cookie rotation/expiry rules are preserved.",

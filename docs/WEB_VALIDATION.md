@@ -1,5 +1,8 @@
 # Integrated web validation
 
+Current quantity/save policy: [cart autosave and checkout validation](CART_QUANTITY_AUTOSAVE.md). This supersedes older manual quantity forms and Add-time stock-rejection notes below.
+
+
 ## Optimistic atomic cart Add — 2026-11-13
 
 Owner explicitly approved optimistic cart UI, background checks and fewer server round trips. Add now immediately shows item/quantity/estimated subtotal with Syncing, coalesces rapid positive additions (180 ms), and posts one replay-safe atomic delta operation. Definite rejections roll estimates back/cancel unsent work; uncertain outcomes pause and retry only with the identical request UUID/payload. Confirmed quotes, current stock, ownership, reservation and payment authority remain on Backend. Pending estimates block checkout and never become canonical prices. Account changes clear local work; closing the drawer is respected.

@@ -84,7 +84,7 @@ export class GuestCartController {
   @ApiBadRequestResponse({ description: 'Invalid UUID, quantity or variant' })
   @ApiConflictResponse({
     description:
-      'Request reuse mismatch, unavailable stock, mixed currency, full cart or active checkout reservation',
+      'Request reuse mismatch, unpublished product, mixed currency, full cart or active checkout reservation',
   })
   add(@Req() req: Request, @Body() input: AddCartItemDto) {
     return this.guest.addItem(guestCapability(req), input)
@@ -96,7 +96,7 @@ export class GuestCartController {
     description: 'Invalid product, variant or quantity',
   })
   @ApiConflictResponse({
-    description: 'Stock unavailable, mixed currency or 50-line cap',
+    description: 'Unpublished product, mixed currency or 50-line cap',
   })
   @ApiOkResponse({ type: CartQuoteResponseDto })
   put(@Req() request: Request, @Body() input: SetCartItemDto) {

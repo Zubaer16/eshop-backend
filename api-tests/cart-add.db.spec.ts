@@ -111,22 +111,38 @@ for (const guest of [false, true])
       expect(quote.items[0].unitPriceMinor).toBe(1350)
       expect(quote.items[0].status).toBe('OUT_OF_STOCK')
       expect(quote.checkoutReady).toBe(false)
-      const failed = { ...input, requestId: key(), quantity: 1 }
-      expect((await add(failed)).status()).toBe(409)
+      const saved = { ...input, requestId: key(), quantity: 1 }
+      expect((await add(saved)).status()).toBe(200)
       expect(
         await f.db.idempotencyRecord.count({
-          where: { key: failed.requestId },
+          where: { key: saved.requestId },
         }),
-      ).toBe(0)
+      ).toBe(1)
+      const changed = await request.put(base + '/items', {
+        headers,
+        data: { productId: product.id, quantity: 8 },
+      })
+      expect(changed.status()).toBe(200)
+      expect((await changed.json()).items[0].quantity).toBe(8)
+      if (!guest) {
+        expect(
+          (
+            await request.post('/v1/checkout/estimate', {
+              headers,
+              data: { countryCode: 'US' },
+            })
+          ).status(),
+        ).toBe(409)
+      }
       await f.db.inventoryBalance.update({
         where: { productId: product.id },
         data: { onHand: 30 },
       })
-      expect((await add(failed)).status()).toBe(200)
-      expect((await add(failed)).status()).toBe(200)
+      expect((await add(saved)).status()).toBe(200)
+      expect((await add(saved)).status()).toBe(200)
       expect(
         (await (await request.get(base, { headers })).json()).items[0].quantity,
-      ).toBe(5)
+      ).toBe(8)
       // Mixed currency and archived products remain rejected by the existing rules.
       await f.db.product.update({
         where: { id: product.id },

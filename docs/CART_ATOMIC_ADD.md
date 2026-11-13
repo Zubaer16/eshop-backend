@@ -1,5 +1,8 @@
 # Optimistic cart Add and atomic sync — 2026-11-13
 
+> Superseded in part by [quantity autosave and checkout validation](CART_QUANTITY_AUTOSAVE.md): quantity no longer needs submit; cart saves no longer reject insufficient stock. Earlier validation receipts below describe the previous implementation.
+
+
 Owner approved immediate item/quantity/estimated-subtotal display, background validation, batched rapid additions and an atomic replay-safe Add operation. This supersedes the earlier drawer-only change that waited for confirmation before showing new items.
 
 ## Browser behavior

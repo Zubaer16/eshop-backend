@@ -93,7 +93,7 @@ export class CartController {
   @ApiBadRequestResponse({ description: 'Invalid UUID, quantity or variant' })
   @ApiConflictResponse({
     description:
-      'Request reuse mismatch, unavailable stock, mixed currency, full cart or active checkout reservation',
+      'Request reuse mismatch, unpublished product, mixed currency, full cart or active checkout reservation',
   })
   add(@Req() req: AuthenticatedRequest, @Body() input: AddCartItemDto) {
     return this.cart.addItem(req.authUser!.id, input)
@@ -105,7 +105,7 @@ export class CartController {
   })
   @ApiConflictResponse({
     description:
-      'Unpublished product, insufficient stock, currency mismatch or cart full',
+      'Unpublished product, currency mismatch, cart full or active checkout reservation',
   })
   @ApiOperation({
     summary:

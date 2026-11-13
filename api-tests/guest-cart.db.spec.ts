@@ -57,7 +57,7 @@ test('guest cart: anonymous quantity, private ownership, exactly-once customer m
   }
 })
 
-test('guest cart: overstock/mixed-currency merge rolls back atomically; capability revocation', async ({ request }) => {
+test('guest cart: overstock merges intent; mixed-currency merge rolls back atomically; capability revocation', async ({ request }) => {
   const f = new CatalogTestFixture(request)
   const guestIds: string[] = []
   try {
@@ -76,9 +76,9 @@ test('guest cart: overstock/mixed-currency merge rolls back atomically; capabili
     const headers = { 'X-Guest-Cart-Token': create.guestToken }
     expect((await request.put('/v1/guest-cart/items', { headers, data: { productId, quantity: 4 } })).status()).toBe(200)
     expect((await request.put('/v1/cart/items', { headers: bearer(customer.token), data: { productId, quantity: 2 } })).status()).toBe(200)
-    expect((await request.post('/v1/cart/merge', { headers: bearer(customer.token), data: { guestToken: create.guestToken } })).status()).toBe(409)
-    expect((await (await request.get('/v1/cart', { headers: bearer(customer.token) })).json()).items[0].quantity).toBe(2)
-    expect((await (await request.get('/v1/guest-cart', { headers })).json()).items[0].quantity).toBe(4)
+    expect((await request.post('/v1/cart/merge', { headers: bearer(customer.token), data: { guestToken: create.guestToken } })).status()).toBe(200)
+    expect((await (await request.get('/v1/cart', { headers: bearer(customer.token) })).json()).items[0].quantity).toBe(6)
+    expect((await request.get('/v1/guest-cart', { headers })).status()).toBe(401)
     // A second guest USD/EUR merge into an existing USD cart must not add any line.
     const eurProduct = await request.post('/v1/admin/products', { headers: bearer(owner.token), data: {
       title: 'EUR Tee', slug: f.slug('eur'), sku: f.sku('eur'), priceMinor: 2000,

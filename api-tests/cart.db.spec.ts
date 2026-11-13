@@ -87,7 +87,8 @@ test('04A real DB: customer cart persistence, idempotent quantities, live prices
       headers: auth,
       data: { productId: item.id, quantity: 6 },
     })
-    expect(blocked.status()).toBe(409)
+    expect(blocked.status()).toBe(200)
+    expect((await blocked.json()).items[0].quantity).toBe(6)
     await f.db.inventoryBalance.update({
       where: { productId: item.id },
       data: { onHand: 7 },
@@ -174,7 +175,8 @@ test('04A real DB: variant-specific pricing and stock, wrong variants and simple
       headers: auth,
       data: { ...base, quantity: 3, variantId: p.variants[0].id },
     })
-    expect(tooMany.status()).toBe(409)
+    expect(tooMany.status()).toBe(200)
+    expect((await tooMany.json()).checkoutReady).toBe(false)
   } finally {
     await f.close()
   }
