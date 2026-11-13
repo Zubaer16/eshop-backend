@@ -55,7 +55,7 @@ function evaluate(roots) {
     ),
     storefrontContentDraft: read(
       roots.storefront,
-      'lib/api/content-alignment.ts',
+      'components/store/store-content.tsx',
     ),
     backendCatalogController: read(
       roots.backend,
@@ -120,12 +120,15 @@ function evaluate(roots) {
     adminRuntime: read(roots.admin, 'lib/api/runtime.ts'),
     storefrontSession: read(roots.storefront, 'lib/api/session-server.ts'),
     adminSession: read(roots.admin, 'lib/api/session-server.ts'),
-    storefrontContracts: read(roots.storefront, 'lib/api/contracts.ts'),
-    storefrontAdapters: read(
-      roots.storefront,
-      'lib/api/storefront-adapters.ts',
-    ),
-    storefrontCatalog: read(roots.storefront, 'lib/catalog.ts'),
+    storefrontContracts: [
+      'lib/api/catalog.ts',
+      'lib/api/shopping.ts',
+      'lib/api/checkout.ts',
+    ]
+      .map((file) => read(roots.storefront, file))
+      .join('\n'),
+    storefrontAdapters: read(roots.storefront, 'lib/api/shopping.ts'),
+    storefrontCatalog: read(roots.storefront, 'lib/api/catalog.ts'),
   }
 
   const required = {
@@ -135,7 +138,12 @@ function evaluate(roots) {
       'src/auth/customer-auth.controller.ts',
     ],
     admin: ['lib/types.ts', 'lib/store.ts', 'lib/workspace-policy.ts'],
-    storefront: ['lib/api/contracts.ts', 'lib/api/client.ts', 'lib/catalog.ts'],
+    storefront: [
+      'lib/api/catalog.ts',
+      'lib/api/client.ts',
+      'lib/api/shopping.ts',
+      'lib/api/checkout.ts',
+    ],
   }
   const missing = Object.entries(required).flatMap(([repo, files]) =>
     files
@@ -156,14 +164,16 @@ function evaluate(roots) {
       /@Get\('products\/:slug'\)/.test(source.backendCatalogController),
     'catalog-pricing':
       /priceMinor!: number/.test(source.backendCatalogDto) &&
-      /amountMinor: number/.test(source.storefrontContracts) &&
+      /priceMinor: number/.test(source.storefrontContracts) &&
       /price: number/.test(source.adminTypes),
     'catalog-identity':
       /@default\(uuid\(\)\)/.test(source.backendSchema) &&
       /id: string/.test(source.storefrontContracts),
     'variant-shape':
       /options!: VariantOptionsDto/.test(source.backendCatalogDto) &&
-      /options: Record<string, string>/.test(source.storefrontContracts),
+      /options: \{ size\?: string; color\?: string \}/.test(
+        source.storefrontContracts,
+      ),
     'category-shape':
       /parentId/.test(source.backendSchema) &&
       /parentId: string \| null/.test(source.storefrontContracts) &&
@@ -205,7 +215,7 @@ function evaluate(roots) {
       /model StaffRolePermission\s*\{/.test(source.backendSchema) &&
       /model StaffRoleAssignment\s*\{/.test(source.backendSchema),
     'product-media':
-      /images:/.test(source.storefrontContracts) &&
+      /gallery: GalleryImage\[\]/.test(source.storefrontContracts) &&
       /images\?: ProductMedia\[\]/.test(source.adminTypes) &&
       /model MediaAsset\s*\{/.test(source.backendSchema) &&
       /@Put\('products\/:id\/media'\)/.test(source.backendMediaController) &&
@@ -216,16 +226,16 @@ function evaluate(roots) {
       /@Get\('quote'\)/.test(source.backendCartController) &&
       /model Cart\s*\{/.test(source.backendSchema) &&
       /model CartItem\s*\{/.test(source.backendSchema) &&
-      /ApiCheckoutQuote/.test(source.storefrontContracts),
+      /type CartQuote/.test(source.storefrontContracts),
     'guest-cart':
       /@Controller\('guest-cart'\)/.test(source.backendGuestController) &&
       /@Put\('items'\)/.test(source.backendGuestController) &&
       /@Post\('merge'\)/.test(source.backendCartController) &&
       /model GuestCart\s*\{/.test(source.backendSchema) &&
       /model GuestCartItem\s*\{/.test(source.backendSchema) &&
-      /ApiCheckoutQuote/.test(source.storefrontContracts),
+      /type CartQuote/.test(source.storefrontContracts),
     'commerce-future':
-      /ApiCheckoutQuote/.test(source.storefrontContracts) &&
+      /type CartQuote/.test(source.storefrontContracts) &&
       /@Controller\('checkout'\)/.test(source.backendCheckoutController) &&
       /@Post\('estimate'\)/.test(source.backendCheckoutController) &&
       /@Post\('reservations'\)/.test(source.backendCheckoutController) &&
@@ -276,17 +286,22 @@ function evaluate(roots) {
       /model FeaturedCollection\s*\{/.test(source.backendSchema) &&
       /type StoreBanner/.test(source.adminTypes) &&
       /type FeaturedCollection/.test(source.adminTypes) &&
-      /PublicHomepageContent/.test(source.storefrontContentDraft),
+      /type Home/.test(source.storefrontContentDraft) &&
+      /\/v1\/store\/homepage/.test(source.storefrontContentDraft),
     'status-shape':
       /'Active' \| 'Draft'/.test(source.adminTypes) &&
       /ARCHIVED/.test(source.backendCatalogDto),
     'page-shape':
-      /pageSize: number/.test(source.storefrontContracts) &&
+      /limit: number/.test(source.storefrontContracts) &&
+      /pages: number/.test(source.storefrontContracts) &&
       /presentPage\(items\.map\(presentCatalogProduct\)/.test(
         source.backendCatalogService,
       ),
     'fixture-protection':
-      /NOT a backend UUID/.test(source.storefrontAdapters) &&
+      /isUuid/.test(source.storefrontCatalog) &&
+      /readProduct/.test(source.storefrontCatalog) &&
+      /validateSelection/.test(source.storefrontAdapters) &&
+      !fs.existsSync(path.join(roots.storefront, 'lib/catalog.ts')) &&
       /FIXTURE snapshots/.test(source.adminCompatibilityDraft),
   }
 

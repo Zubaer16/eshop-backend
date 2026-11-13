@@ -149,9 +149,7 @@ function frontendInventory(base) {
     }
     visit(source)
     const fixtureImports = imports.filter((name) =>
-      /fixture|preview|(?:^|\/)catalog$|(?:^|\/)store$|commerce-store/.test(
-        name,
-      ),
+      /fixture|preview|^@\/lib\/(?:catalog|store)$|commerce-store/.test(name),
     )
     if (!fixtureImports.length && !networkCalls.length) return []
     return [

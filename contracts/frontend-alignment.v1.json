@@ -1,10 +1,10 @@
 {
-  "version": "1.25.0",
+  "version": "1.26.0",
   "purpose": "Source compatibility and explicit adapter mapping; runtime acceptance is recorded separately in the validation report",
   "sourceBaselines": {
     "backend": "Current eshop-backend source; source-bound local release receipt and external acceptance remain distinct.",
     "admin": "Current ../eshop-admin-frontend source; explicit preview remains separate.",
-    "storefront": "Current ../eshop-user-frontend source; canonical live API adapters and explicit preview remain separate."
+    "storefront": "Current ../eshop-user-frontend source; one API-backed storefront uses the approved design; the retired fixture mode and duplicate UI are removed."
   },
   "apiPrefix": "/v1",
   "canonicalRules": {
@@ -45,7 +45,7 @@
       "id": "catalog-identity",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Live adapters preserve canonical product/category/variant UUIDs and slugs; preview identities remain separate.",
+      "summary": "Canonical product/category/variant UUIDs and published slugs flow through the single Storefront; runtime sample identity sources are removed.",
       "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
@@ -130,14 +130,14 @@
       "priority": "P1",
       "status": "MATCH",
       "summary": "Product and Inventory pages now expose additive pageSize alias with existing limit/pages",
-      "action": "Use pageSize in Storefront adapter without removing limit compatibility"
+      "action": "Use the canonical Storefront limit/pages projection; retain Backend pageSize compatibility for other clients."
     },
     {
       "id": "fixture-protection",
       "priority": "P0",
       "status": "MATCH",
-      "summary": "Both UIs already warn that fixture identities are not authoritative",
-      "action": "Do not map demos by product names, prices or slugs without reviewed import data"
+      "summary": "Storefront canonical UUID/product/selection guards and no runtime fixture catalog; Admin fixture snapshots remain non-authoritative.",
+      "action": "Preserve canonical identity validation and keep runtime fixtures out of the storefront."
     },
     {
       "id": "store-merchandising",

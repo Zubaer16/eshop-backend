@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "1.9.0",
-  "date": "2026-11-09",
+  "version": "1.9.1",
+  "date": "2026-11-13",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "mediaStorage": {
     "uploadModule": "Optional: products (default), categories, brands, banners, branding, notifications",
@@ -71,7 +71,10 @@
         "/sign-up",
         "/verify-email"
       ],
-      "adminRoutes": ["/", "/sign-in"],
+      "adminRoutes": [
+        "/",
+        "/sign-in"
+      ],
       "actions": [
         "register",
         "sign in",
@@ -80,7 +83,10 @@
         "read current identity",
         "guard private routes"
       ],
-      "operationPrefixes": ["/v1/auth", "/v1/admin/auth"],
+      "operationPrefixes": [
+        "/v1/auth",
+        "/v1/admin/auth"
+      ],
       "authorization": "Customer credentials vs staff login; no public Admin registration",
       "notes": [
         "Owner superseded memory-only reload behavior on 2026-11-07: persistent HttpOnly same-origin refresh cookies restore web login across reload, tabs and browser restart. Access tokens stay in memory; domain/mobile/API contracts remain Bearer JWT. Exact-origin CSRF and separate customer/staff cookies are required.",
@@ -112,8 +118,15 @@
       "id": "catalog",
       "step": 3,
       "title": "Catalog navigation, search and product pages",
-      "userRoutes": ["/categories", "/shop", "/product/[slug]"],
-      "adminRoutes": ["/categories", "/products"],
+      "userRoutes": [
+        "/categories",
+        "/shop",
+        "/product/[slug]"
+      ],
+      "adminRoutes": [
+        "/categories",
+        "/products"
+      ],
       "actions": [
         "list/search/filter/page",
         "product detail",
@@ -154,7 +167,12 @@
       "step": 3,
       "title": "Verified uploads, product galleries and reusable assets",
       "userRoutes": [],
-      "adminRoutes": ["/products", "/content", "/settings", "/media"],
+      "adminRoutes": [
+        "/products",
+        "/content",
+        "/settings",
+        "/media"
+      ],
       "actions": [
         "sign upload",
         "provider-specific direct upload",
@@ -192,7 +210,9 @@
       "step": 3,
       "title": "Physical stock, reservations and adjustments",
       "userRoutes": [],
-      "adminRoutes": ["/inventory"],
+      "adminRoutes": [
+        "/inventory"
+      ],
       "actions": [
         "list/page",
         "read SKU balance",
@@ -200,7 +220,9 @@
         "idempotent adjustment",
         "movement history"
       ],
-      "operationPrefixes": ["/v1/admin/inventory"],
+      "operationPrefixes": [
+        "/v1/admin/inventory"
+      ],
       "authorization": "All existing staff may read balances/movements; inventory.adjust is required for threshold/adjustment writes.",
       "notes": [
         "Use InventoryBalance ID, not product ID, as adjustment identity. Physical, reserved and available quantities are separate.",
@@ -219,7 +241,11 @@
       "id": "profile",
       "step": 4,
       "title": "Customer profile and addresses",
-      "userRoutes": ["/account", "/account/addresses", "/account/settings"],
+      "userRoutes": [
+        "/account",
+        "/account/addresses",
+        "/account/settings"
+      ],
       "adminRoutes": [],
       "actions": [
         "read/update own profile",
@@ -227,7 +253,9 @@
         "password change",
         "notification preferences"
       ],
-      "operationPrefixes": ["/v1/account"],
+      "operationPrefixes": [
+        "/v1/account"
+      ],
       "authorization": "Customer-owned identity; current email/role are not editable profile fields",
       "notes": [
         "Live account overview reads the owned profile and edits displayName only. Email/role are not editable; existing verification/password security flows remain separate.",
@@ -248,7 +276,9 @@
       "id": "cart",
       "step": 4,
       "title": "Guest/customer cart and login merge",
-      "userRoutes": ["/cart"],
+      "userRoutes": [
+        "/cart"
+      ],
       "adminRoutes": [],
       "actions": [
         "guest cart creation/token",
@@ -256,7 +286,10 @@
         "quote",
         "login merge and replay"
       ],
-      "operationPrefixes": ["/v1/cart", "/v1/guest-cart"],
+      "operationPrefixes": [
+        "/v1/cart",
+        "/v1/guest-cart"
+      ],
       "authorization": "Guest capability in X-Guest-Cart-Token; customer Bearer JWT for owned cart/merge",
       "notes": [
         "Live product actions, header counts, drawer and cart page use server quotes and canonical item/variant IDs; no preview store import.",
@@ -284,7 +317,9 @@
       "id": "wishlist",
       "step": 4,
       "title": "Owned wishlist",
-      "userRoutes": ["/wishlist"],
+      "userRoutes": [
+        "/wishlist"
+      ],
       "adminRoutes": [],
       "actions": [
         "read owned saved items",
@@ -292,7 +327,9 @@
         "restore account list after reload",
         "sign in with safe return to product"
       ],
-      "operationPrefixes": ["/v1/wishlist"],
+      "operationPrefixes": [
+        "/v1/wishlist"
+      ],
       "authorization": "Customer-owned Bearer JWT",
       "notes": [
         "Web saved items require customer login. Anonymous Save links return to the product after sign-in/signup; no unauthenticated local wishlist or implicit import is introduced.",
@@ -314,14 +351,18 @@
       "step": 4,
       "title": "Staff customer directory and detail",
       "userRoutes": [],
-      "adminRoutes": ["/customers"],
+      "adminRoutes": [
+        "/customers"
+      ],
       "actions": [
         "search/page/status filter",
         "detail",
         "recent orders",
         "separate financial performance"
       ],
-      "operationPrefixes": ["/v1/admin/customers"],
+      "operationPrefixes": [
+        "/v1/admin/customers"
+      ],
       "authorization": "customers.view; financial customer reports additionally require payments.view",
       "notes": [
         "Live read-only directory uses Backend email/display-name search, ACTIVE/DISABLED filters and pagination.",
@@ -341,8 +382,12 @@
       "id": "checkout",
       "step": 5,
       "title": "Delivery quote, stock holds and unpaid order creation",
-      "userRoutes": ["/checkout"],
-      "adminRoutes": ["/shipping"],
+      "userRoutes": [
+        "/checkout"
+      ],
+      "adminRoutes": [
+        "/shipping"
+      ],
       "actions": [
         "configured country/currency estimate",
         "delivery options",
@@ -350,7 +395,10 @@
         "reserve/release",
         "create/replay order"
       ],
-      "operationPrefixes": ["/v1/checkout", "/v1/admin/checkout"],
+      "operationPrefixes": [
+        "/v1/checkout",
+        "/v1/admin/checkout"
+      ],
       "authorization": "Customer JWT; checkout rate and delivery-zone policies OWNER only",
       "notes": [
         "Guest cart is supported, guest checkout is not. Require login before checkout and merge safely.",
@@ -375,15 +423,23 @@
       "id": "orders",
       "step": 6,
       "title": "Customer history and staff fulfillment",
-      "userRoutes": ["/account/orders", "/account/orders/[orderId]"],
-      "adminRoutes": ["/orders"],
+      "userRoutes": [
+        "/account/orders",
+        "/account/orders/[orderId]"
+      ],
+      "adminRoutes": [
+        "/orders"
+      ],
       "actions": [
         "create unpaid order",
         "own history/detail/cancel",
         "staff order list/detail",
         "fulfillment start/ship/deliver"
       ],
-      "operationPrefixes": ["/v1/orders", "/v1/admin/orders"],
+      "operationPrefixes": [
+        "/v1/orders",
+        "/v1/admin/orders"
+      ],
       "authorization": "Customer ownership; orders.manage for staff actions",
       "notes": [
         "Live order lists use existing server page/limit and exact UUID lookup; global text/status/date/customer filters are explicitly unavailable, with no fake single-page global filtering.",
@@ -409,15 +465,22 @@
       "id": "payments",
       "step": 5,
       "title": "Owned TEST payment preparation and safe payment state",
-      "userRoutes": ["/checkout"],
-      "adminRoutes": ["/payments"],
+      "userRoutes": [
+        "/checkout"
+      ],
+      "adminRoutes": [
+        "/payments"
+      ],
       "actions": [
         "prepare",
         "read verified state",
         "controlled fixed-card TEST completion",
         "staff ledger reporting"
       ],
-      "operationPrefixes": ["/v1/payments", "/v1/admin/payments"],
+      "operationPrefixes": [
+        "/v1/payments",
+        "/v1/admin/payments"
+      ],
       "authorization": "Customer-owned payment APIs; refunds OWNER; reporting payments.view",
       "notes": [
         "Current provider is STRIPE_TEST only; prepare never returns client_secret. Do not wire a real card/Stripe Elements form or claim production charging from current endpoints.",
@@ -439,8 +502,13 @@
       "id": "recovery",
       "step": 6,
       "title": "Returns, same-SKU replacements and owned tracking",
-      "userRoutes": ["/account/orders/[orderId]", "/track"],
-      "adminRoutes": ["/orders"],
+      "userRoutes": [
+        "/account/orders/[orderId]",
+        "/track"
+      ],
+      "adminRoutes": [
+        "/orders"
+      ],
       "actions": [
         "customer return request/withdraw",
         "staff approve/reject/receive/restock",
@@ -478,8 +546,13 @@
       "id": "merchandising",
       "step": 7,
       "title": "Homepage, collections and safe publication",
-      "userRoutes": ["/", "/collections/[slug]"],
-      "adminRoutes": ["/content"],
+      "userRoutes": [
+        "/",
+        "/collections/[slug]"
+      ],
+      "adminRoutes": [
+        "/content"
+      ],
       "actions": [
         "banner/collection CRUD",
         "revision-aware publish/archive",
@@ -501,7 +574,7 @@
       "sourceFiles": [
         "src/merchandising/merchandising.controller.ts",
         "../eshop-admin-frontend/components/admin/store-content.tsx",
-        "../eshop-user-frontend/components/store/live-store.tsx",
+        "../eshop-user-frontend/components/store/store-content.tsx",
         "../eshop-user-frontend/app/collections/[slug]/page.tsx",
         "../eshop-admin-frontend/components/management/content.tsx",
         "web-integration-tests/management.spec.ts",
@@ -513,14 +586,19 @@
       "step": 5,
       "title": "Financial coupons and editorial campaigns",
       "userRoutes": [],
-      "adminRoutes": ["/promotions"],
+      "adminRoutes": [
+        "/promotions"
+      ],
       "actions": [
         "coupon rules/limits/windows/categories",
         "campaign linkage",
         "usage",
         "disable/archive"
       ],
-      "operationPrefixes": ["/v1/admin/promotions", "/v1/promotions"],
+      "operationPrefixes": [
+        "/v1/admin/promotions",
+        "/v1/promotions"
+      ],
       "authorization": "marketing.manage or OWNER",
       "notes": [
         "Financial campaigns and approved rich push campaigns are separate APIs; do not merge their states/approvals.",
@@ -536,8 +614,14 @@
       "id": "settings",
       "step": 7,
       "title": "Store profile, SEO/content, verified branding and operations",
-      "userRoutes": ["/", "/policies/[kind]"],
-      "adminRoutes": ["/settings", "/content"],
+      "userRoutes": [
+        "/",
+        "/policies/[kind]"
+      ],
+      "adminRoutes": [
+        "/settings",
+        "/content"
+      ],
       "actions": [
         "profile",
         "content/policies",
@@ -545,7 +629,10 @@
         "bootstrap",
         "operations"
       ],
-      "operationPrefixes": ["/v1/store", "/v1/admin/store"],
+      "operationPrefixes": [
+        "/v1/store",
+        "/v1/admin/store"
+      ],
       "authorization": "OWNER for configuration; public safe projections only",
       "notes": [
         "Current one-form settings must split profile fields from revisioned operations/content/branding. orderPrefix is reserved and does not generate human-readable order IDs.",
@@ -559,7 +646,7 @@
         "src/store-branding/store-branding.controller.ts",
         "src/store-operations/store-operations.controller.ts",
         "src/store-bootstrap/store-bootstrap.controller.ts",
-        "../eshop-user-frontend/components/store/live-store.tsx",
+        "../eshop-user-frontend/components/store/store-content.tsx",
         "../eshop-user-frontend/app/layout.tsx",
         "../eshop-user-frontend/app/policies/[kind]/page.tsx",
         "../eshop-admin-frontend/components/management/settings.tsx",
@@ -574,13 +661,18 @@
       "step": 7,
       "title": "Staff lifecycle, fresh grants and immutable OWNER",
       "userRoutes": [],
-      "adminRoutes": ["/staff"],
+      "adminRoutes": [
+        "/staff"
+      ],
       "actions": [
         "list/create",
         "role/status update",
         "role permission update"
       ],
-      "operationPrefixes": ["/v1/admin/staff", "/v1/admin/roles"],
+      "operationPrefixes": [
+        "/v1/admin/staff",
+        "/v1/admin/roles"
+      ],
       "authorization": "Current backend OWNER/staff.manage rules; OWNER cannot be created/delegated by the browser",
       "notes": [
         "UI display roles map explicitly to persistent uppercase role keys. Never authorize from browser seedRolePermissions.",
@@ -604,7 +696,12 @@
       "step": 7,
       "title": "Permission-aware financial reports, dashboard and audit",
       "userRoutes": [],
-      "adminRoutes": ["/dashboard", "/payments", "/reports", "/activity"],
+      "adminRoutes": [
+        "/dashboard",
+        "/payments",
+        "/reports",
+        "/activity"
+      ],
       "actions": [
         "server aggregates",
         "bounded filters/page",
@@ -640,15 +737,23 @@
       "id": "notifications",
       "step": 7,
       "title": "Own inbox/preferences and guarded template/failure tools",
-      "userRoutes": ["/account/notifications"],
-      "adminRoutes": ["/notifications", "/settings"],
+      "userRoutes": [
+        "/account/notifications"
+      ],
+      "adminRoutes": [
+        "/notifications",
+        "/settings"
+      ],
       "actions": [
         "inbox/unread/read/read-all",
         "consent/preferences",
         "typed target navigation",
         "owner templates/failures"
       ],
-      "operationPrefixes": ["/v1/notifications", "/v1/admin/notifications"],
+      "operationPrefixes": [
+        "/v1/notifications",
+        "/v1/admin/notifications"
+      ],
       "authorization": "Owned authenticated inbox; current staff grants/consent, OWNER administration",
       "notes": [
         "Header bells are missing/disabled UI, not missing notification APIs. Add User/Admin inbox surfaces and sign-out cache clearing.",
@@ -670,14 +775,19 @@
       "step": 7,
       "title": "Email readiness, templates and safe delivery history",
       "userRoutes": [],
-      "adminRoutes": ["/settings", "/operations"],
+      "adminRoutes": [
+        "/settings",
+        "/operations"
+      ],
       "actions": [
         "owner readiness",
         "template overrides",
         "submission history",
         "planning failures"
       ],
-      "operationPrefixes": ["/v1/admin/email"],
+      "operationPrefixes": [
+        "/v1/admin/email"
+      ],
       "authorization": "OWNER only",
       "notes": [
         "Missing Admin UI, existing backend. Keep SMTP credentials deployment-only, no public test-send or token-debug endpoint.",
@@ -695,8 +805,14 @@
       "id": "push",
       "step": 7,
       "title": "Web device lifecycle and approved rich campaigns",
-      "userRoutes": ["/account/notifications"],
-      "adminRoutes": ["/notifications", "/messaging", "/operations"],
+      "userRoutes": [
+        "/account/notifications"
+      ],
+      "adminRoutes": [
+        "/notifications",
+        "/messaging",
+        "/operations"
+      ],
       "actions": [
         "explicit permission",
         "register/refresh/revoke installation",
@@ -704,7 +820,10 @@
         "metrics",
         "authenticated tap routing"
       ],
-      "operationPrefixes": ["/v1/notifications/push", "/v1/admin/push"],
+      "operationPrefixes": [
+        "/v1/notifications/push",
+        "/v1/admin/push"
+      ],
       "authorization": "Owned devices and current consent; marketing.manage composer, OWNER approval/operations per route",
       "notes": [
         "Both clients lack Firebase setup/service worker and device lifecycle integration. Provider/browser project configuration is required for actual display tests.",
@@ -729,12 +848,16 @@
       "step": 7,
       "title": "Read-only operations and bounded in-app recovery",
       "userRoutes": [],
-      "adminRoutes": ["/operations"],
+      "adminRoutes": [
+        "/operations"
+      ],
       "actions": [
         "owner status/runs/failures",
         "approved in-app notification retry"
       ],
-      "operationPrefixes": ["/v1/admin/jobs"],
+      "operationPrefixes": [
+        "/v1/admin/jobs"
+      ],
       "authorization": "OWNER only",
       "notes": [
         "Missing operational Admin surface, existing backend. Do not expose internal cron secrets or create generic payment/refund/SMTP/FCM retry buttons.",
@@ -752,9 +875,11 @@
       "step": 8,
       "title": "Integration compatibility and validation guidance",
       "userRoutes": [],
-      "adminRoutes": ["/alignment"],
+      "adminRoutes": [
+        "/alignment"
+      ],
       "actions": [
-        "review canonical identifiers, currency and preview boundaries",
+        "review canonical identifiers, currency and ownership boundaries",
         "read validation scope and evidence guidance"
       ],
       "operationPrefixes": [],
@@ -799,7 +924,14 @@
       "title": "Success schemas missing on part of OpenAPI",
       "disposition": "Guest revoke acknowledgement now has an explicit DTO; account/cart/wishlist/customer read contracts already typed. Current canonical capture has 188 success schemas and 11 remaining absent responses owned by later features/triage.",
       "status": "PARTIALLY_RESOLVED",
-      "steps": [2, 3, 4, 5, 6, 7]
+      "steps": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
     },
     {
       "id": "GAP-IDENTITY",
@@ -946,7 +1078,7 @@
     "The read-only source audit performs no provider calls, production writes, dependency installation, database resets or fixture-ID imports.",
     "Update all three external master docs with evidence after each integration delivery.",
     "Step 1 inventories gaps; implementation is tracked in steps 2-8.",
-    "Each page renders its own live/preview feature; shared boundaries enforce only authentication/current permissions."
+    "Storefront pages render one API-backed feature; shared boundaries enforce current authentication/permissions. Admin presentation modes are unchanged."
   ],
   "validationPolicy": {
     "ownerInstructionDate": "2026-11-07",
@@ -963,5 +1095,10 @@
     "acceptance": "Resolve failures and rerun affected suites before final acceptance; do not weaken tests or infer runtime PASS from builds."
   },
   "validationReport": "docs/WEB_VALIDATION.md",
-  "implementationHistory": "Implementation-time deferral and next-step notes are historical for their delivery. Current results and remaining external acceptance are recorded in the validation report."
+  "implementationHistory": "Implementation-time deferral and next-step notes are historical for their delivery. Current results and remaining external acceptance are recorded in the validation report.",
+  "storefrontPresentation": {
+    "model": "One API-backed storefront with the approved design; runtime preview mode, mock catalog/store/orders and preview-only tests removed.",
+    "runtime": "Backend UUID, price/stock, auth, checkout/recovery and ownership remain authoritative.",
+    "source": "../eshop-user-frontend/components/store/store-content.tsx"
+  }
 }

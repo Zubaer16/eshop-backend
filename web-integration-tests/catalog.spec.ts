@@ -152,8 +152,13 @@ test('Admin publishes verified media and variants; User sees the same UUID, exac
         productId,
       )
       await user
-        .getByLabel('Size / color', { exact: true })
-        .selectOption({ label: 'Large / Blue — $19.95' })
+        .getByRole('group', { name: 'Size / color', exact: true })
+        .getByRole('button', { name: /Large \/ Blue.*19\.95/ })
+        .click()
+      await expect(
+        user.getByRole('group', { name: 'Size / color', exact: true })
+          .getByRole('button', { name: /Large \/ Blue.*19\.95/ }),
+      ).toHaveAttribute('aria-pressed', 'true')
       await expect(
         user.getByText('Selected option is in stock', { exact: true }),
       ).toBeVisible()

@@ -11,7 +11,7 @@ test('cross-repo audit reports actual baseline without claiming runtime integrat
   const roots = resolveRoots()
   if (
     !fs.existsSync(path.join(roots.admin, 'lib/types.ts')) ||
-    !fs.existsSync(path.join(roots.storefront, 'lib/api/contracts.ts'))
+    !fs.existsSync(path.join(roots.storefront, 'lib/api/catalog.ts'))
   ) {
     t.skip('Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks')
     return
@@ -119,7 +119,7 @@ test('removing the coupon creation operation cannot remain source-aligned', (t) 
   const roots = resolveRoots()
   if (
     !fs.existsSync(path.join(roots.admin, 'lib/types.ts')) ||
-    !fs.existsSync(path.join(roots.storefront, 'lib/api/contracts.ts'))
+    !fs.existsSync(path.join(roots.storefront, 'lib/api/catalog.ts'))
   ) {
     t.skip('Set ESHOP_ADMIN_DIR and ESHOP_STOREFRONT_DIR for cross-repo checks')
     return
