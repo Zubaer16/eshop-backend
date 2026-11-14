@@ -1,0 +1,3 @@
+# Preserve applied migration bytes for Prisma checksum verification.
+prisma/migrations/20261114153000_checkout_default_rates/migration.sql -text
+prisma/migrations/20261114160000_remove_checkout_tax_configuration/migration.sql -text
