@@ -136,12 +136,12 @@ test('hosted checkout isolated DB: final shortages, exclusive holds, uncertain r
         countryCode,
         currency,
         shippingMinor: 50,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 50,
-        taxBps: 0,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },

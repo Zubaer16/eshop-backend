@@ -42,12 +42,12 @@ test('tracking real DB: customer-owned timeline joins shipment, inspected return
         countryCode,
         currency,
         shippingMinor: 0,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 0,
-        taxBps: 0,
+
         enabled: true,
         freeOverSubtotalMinor: null,
       },
@@ -259,7 +259,7 @@ test('tracking real DB: customer-owned timeline joins shipment, inspected return
         where: { countryCode_currency: { countryCode, currency } },
         data: {
           shippingMinor: previous.shippingMinor,
-          taxBps: previous.taxBps,
+
           freeOverSubtotalMinor: previous.freeOverSubtotalMinor,
           enabled: previous.enabled,
         },

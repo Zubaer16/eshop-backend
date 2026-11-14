@@ -1,14 +1,15 @@
-import {
-  ConflictException,
-  Injectable,
-  UnprocessableEntityException,
-} from '@nestjs/common'
+import { resolveCheckoutRate } from './checkout-rates'
+import { ConflictException, Injectable } from '@nestjs/common'
 import { PromotionsService } from '../promotions/promotions.service'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
 import { loadCheckoutItems } from './checkout-items'
 import { calculateCartQuote } from './cart.quote'
-import { CheckoutEstimateDto, PutCheckoutRateDto } from './checkout.dto'
+import {
+  CheckoutEstimateDto,
+  PutCheckoutRateDto,
+  PutCheckoutDefaultRateDto,
+} from './checkout.dto'
 import { estimateConfiguredCharges } from './checkout.pricing'
 import { DeliveryZonesService } from './delivery-zones.service'
 import type { AvailableDeliveryOptionsDto } from './delivery-zones.dto'
@@ -32,18 +33,11 @@ export class CheckoutService {
             message: 'Cart is not checkout-ready',
             issues: quote.issues,
           })
-        const rate = await tx.checkoutRate.findUnique({
-          where: {
-            countryCode_currency: {
-              countryCode: input.countryCode,
-              currency: quote.currency,
-            },
-          },
-        })
-        if (!rate || !rate.enabled)
-          throw new UnprocessableEntityException(
-            'No enabled shipping/tax policy for this country and cart currency',
-          )
+        const rate = await resolveCheckoutRate(
+          tx,
+          input.countryCode,
+          quote.currency,
+        )
         const delivery = await this.zones.resolve(
           tx,
           input.countryCode,
@@ -63,7 +57,6 @@ export class CheckoutService {
           quote.subtotalMinor,
           delivery.shippingMinor,
           delivery.freeOverSubtotalMinor,
-          rate.taxBps,
           discount.discountMinor,
         )
         return {
@@ -77,12 +70,11 @@ export class CheckoutService {
           deliveryKind: delivery.deliveryKind?.toLowerCase() ?? null,
           deliveryZoneName: delivery.zoneName,
           deliveryEtaNote: delivery.etaNote,
-          appliedTaxBps: rate.taxBps,
           quotedAt: quote.quotedAt,
           reservationStatus: 'NOT_RESERVED' as const,
           payable: false as const,
           notice:
-            'Estimate only. No stock reserved, order created or payment authorized. Verify jurisdiction-specific tax and address rules before checkout.',
+            'Estimate only. Stock and final prices are confirmed before payment.',
         }
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
@@ -90,7 +82,7 @@ export class CheckoutService {
   }
 
   /** Customer JWT only: quote server-defined delivery options for the live cart.
-   * A disabled/unconfigured tax lane fails closed; no guest checkout.
+   * Delivery defaults are resolved for the submitted cart currency.
    */
   async deliveryOptions(
     customerId: string,
@@ -104,13 +96,7 @@ export class CheckoutService {
         if (!quote.checkoutReady || !quote.currency)
           throw new ConflictException('Cart is not checkout-ready')
         const currency = quote.currency
-        const rate = await tx.checkoutRate.findUnique({
-          where: { countryCode_currency: { countryCode, currency } },
-        })
-        if (!rate?.enabled)
-          throw new UnprocessableEntityException(
-            'No enabled shipping/tax policy for this destination',
-          )
+        const rate = await resolveCheckoutRate(tx, countryCode, currency)
         const discount = await this.promotions.quote(
           tx,
           customerId,
@@ -136,7 +122,6 @@ export class CheckoutService {
               quote.subtotalMinor,
               option.shippingMinor,
               option.freeOverSubtotalMinor,
-              rate.taxBps,
               discount.discountMinor,
             )
             return {
@@ -149,7 +134,7 @@ export class CheckoutService {
                 ? option.deliveryKind === 'STANDARD'
                   ? 'Standard'
                   : 'Express'
-                : 'Legacy flat rate',
+                : 'Standard delivery',
               shippingMinor: price.shippingMinor,
               taxMinor: price.taxMinor,
               totalMinor: price.estimatedTotalMinor,
@@ -163,7 +148,62 @@ export class CheckoutService {
     )
   }
 
-  /** OWNER-only explicit lane configuration; no implicit fallbacks between countries/currencies. */
+  listDefaults() {
+    return this.database.client.checkoutDefaultRate.findMany({
+      orderBy: { currency: 'asc' },
+    })
+  }
+
+  async putDefault(input: PutCheckoutDefaultRateDto, actorId: string) {
+    try {
+      return await this.database.client.$transaction(async (tx) => {
+        const data = {
+          shippingMinor: input.shippingMinor,
+          freeOverSubtotalMinor: input.freeOverSubtotalMinor ?? null,
+        }
+        if (input.expectedRevision === 0) {
+          await tx.checkoutDefaultRate.create({
+            data: { currency: input.currency, ...data },
+          })
+        } else {
+          const updated = await tx.checkoutDefaultRate.updateMany({
+            where: {
+              currency: input.currency,
+              revision: input.expectedRevision,
+            },
+            data: { ...data, revision: { increment: 1 } },
+          })
+          if (updated.count !== 1)
+            throw new ConflictException(
+              'Default shipping policy changed. Reload its current revision.',
+            )
+        }
+        const rate = await tx.checkoutDefaultRate.findUniqueOrThrow({
+          where: { currency: input.currency },
+        })
+        await tx.auditEvent.create({
+          data: {
+            actorId,
+            action: 'checkout.defaults.updated',
+            targetType: 'checkout_default_rate',
+            targetId: rate.currency,
+          },
+        })
+        return rate
+      })
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      )
+        throw new ConflictException(
+          'Default shipping policy already exists. Reload its current revision.',
+        )
+      throw error
+    }
+  }
+
+  /** OWNER-managed country delivery overrides. */
   listRates() {
     return this.database.client.checkoutRate.findMany({
       orderBy: [{ countryCode: 'asc' }, { currency: 'asc' }],
@@ -184,13 +224,11 @@ export class CheckoutService {
           currency: input.currency,
           shippingMinor: input.shippingMinor,
           freeOverSubtotalMinor: input.freeOverSubtotalMinor ?? null,
-          taxBps: input.taxBps,
           enabled: input.enabled,
         },
         update: {
           shippingMinor: input.shippingMinor,
           freeOverSubtotalMinor: input.freeOverSubtotalMinor ?? null,
-          taxBps: input.taxBps,
           enabled: input.enabled,
         },
       })

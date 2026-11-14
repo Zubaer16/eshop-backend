@@ -455,6 +455,7 @@ try {
               ? [
                   'hosted-checkout.db.spec.ts',
                   'checkout.db.spec.ts',
+                  'checkout-defaults.db.spec.ts',
                   'reservation.db.spec.ts',
                 ]
               : []),

@@ -1,23 +1,29 @@
 import { estimateConfiguredCharges } from './checkout.pricing'
-
-describe('checkout estimate configured checkout estimate arithmetic', () => {
-  it('keeps integer minor units; tax applies to subtotal only', () => {
-    expect(estimateConfiguredCharges(1299, 500, null, 750)).toEqual({
+describe('checkout delivery arithmetic', () => {
+  it('calculates merchandise and delivery with zero tax', () => {
+    expect(estimateConfiguredCharges(1299, 500, null)).toEqual({
       shippingMinor: 500,
-      taxMinor: 97,
-      estimatedTotalMinor: 1896,
+      taxMinor: 0,
+      estimatedTotalMinor: 1799,
     })
   })
-  it('uses inclusive free-shipping threshold and rounds tax half up', () => {
-    expect(estimateConfiguredCharges(100, 999, 100, 500)).toEqual({
-      shippingMinor: 0, taxMinor: 5, estimatedTotalMinor: 105,
+  it('applies the free-delivery threshold inclusively after discounts', () => {
+    expect(estimateConfiguredCharges(100, 999, 100)).toEqual({
+      shippingMinor: 0,
+      taxMinor: 0,
+      estimatedTotalMinor: 100,
     })
-    expect(estimateConfiguredCharges(1, 0, null, 5000).taxMinor).toBe(1)
-    expect(estimateConfiguredCharges(0, 250, null, 1000).estimatedTotalMinor).toBe(250)
+    expect(
+      estimateConfiguredCharges(2000, 300, 1800, 400).estimatedTotalMinor,
+    ).toBe(1900)
+    expect(
+      estimateConfiguredCharges(2000, 300, 1600, 400).estimatedTotalMinor,
+    ).toBe(1600)
   })
-  it('fails closed on amount overflow and inconsistent config', () => {
-    expect(() => estimateConfiguredCharges(2147483647, 100, null, 200)).toThrow()
-    expect(() => estimateConfiguredCharges(-1, 100, null, 0)).toThrow()
-    expect(() => estimateConfiguredCharges(100, 100, null, 10001)).toThrow()
+  it('rejects unsafe money, negative charges and invalid discounts', () => {
+    expect(() => estimateConfiguredCharges(2147483647, 100, null)).toThrow()
+    expect(() => estimateConfiguredCharges(-1, 100, null)).toThrow()
+    expect(() => estimateConfiguredCharges(100, -1, null)).toThrow()
+    expect(() => estimateConfiguredCharges(100, 0, null, 101)).toThrow()
   })
 })

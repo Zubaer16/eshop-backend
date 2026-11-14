@@ -42,12 +42,12 @@ test('returns and restock real DB: return quantity ceiling, inspection, exactly-
         countryCode,
         currency,
         shippingMinor: 0,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 0,
-        taxBps: 0,
+
         enabled: true,
         freeOverSubtotalMinor: null,
       },
@@ -623,7 +623,7 @@ test('returns and restock real DB: return quantity ceiling, inspection, exactly-
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

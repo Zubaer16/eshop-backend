@@ -15,7 +15,6 @@ test('checkout estimate role gates, country validation and rate configuration ma
       currency: 'USD',
       shippingMinor: 50,
       freeOverSubtotalMinor: null,
-      taxBps: 500,
       enabled: true,
     }
     for (const who of [customer, staff, admin]) {

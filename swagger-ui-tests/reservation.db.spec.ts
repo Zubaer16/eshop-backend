@@ -46,12 +46,12 @@ test('reservation Swagger Chromium: reservation create/read/replay/release and v
         countryCode,
         currency,
         shippingMinor: 100,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 100,
-        taxBps: 0,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },
@@ -117,7 +117,7 @@ test('reservation Swagger Chromium: reservation create/read/replay/release and v
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

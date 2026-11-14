@@ -59,12 +59,12 @@ test('Stripe TEST payment preparation real DB: one prepared test intent, safe re
         countryCode,
         currency,
         shippingMinor: 50,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 50,
-        taxBps: 0,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },
@@ -198,7 +198,7 @@ test('Stripe TEST payment preparation real DB: one prepared test intent, safe re
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

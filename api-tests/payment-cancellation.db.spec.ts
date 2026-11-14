@@ -60,12 +60,12 @@ test('payment cancellation real DB: closed-order Stripe TEST intent cancellation
         countryCode,
         currency,
         shippingMinor: 50,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 50,
-        taxBps: 0,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },
@@ -240,7 +240,7 @@ test('payment cancellation real DB: closed-order Stripe TEST intent cancellation
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

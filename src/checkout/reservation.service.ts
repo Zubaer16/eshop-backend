@@ -1,3 +1,4 @@
+import { resolveCheckoutRate } from './checkout-rates'
 import {
   ConflictException,
   Injectable,
@@ -179,18 +180,11 @@ export class ReservationService {
               message: 'Cart is not checkout-ready',
               issues: quote.issues,
             })
-          const rate = await tx.checkoutRate.findUnique({
-            where: {
-              countryCode_currency: {
-                countryCode: input.countryCode,
-                currency: quote.currency,
-              },
-            },
-          })
-          if (!rate?.enabled)
-            throw new UnprocessableEntityException(
-              'No enabled shipping/tax policy for this country/currency',
-            )
+          const rate = await resolveCheckoutRate(
+            tx,
+            input.countryCode,
+            quote.currency,
+          )
           const delivery = await this.zones.resolve(
             tx,
             input.countryCode,
@@ -211,7 +205,6 @@ export class ReservationService {
             quote.subtotalMinor,
             delivery.shippingMinor,
             delivery.freeOverSubtotalMinor,
-            rate.taxBps,
             discount.discountMinor,
           )
           if (discount.couponId && charges.estimatedTotalMinor === 0)

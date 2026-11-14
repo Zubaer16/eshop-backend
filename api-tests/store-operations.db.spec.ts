@@ -143,13 +143,13 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
         countryCode,
         currency,
         shippingMinor: 99,
-        taxBps: 1000,
+
         enabled: true,
       },
       update: {
         shippingMinor: 99,
         freeOverSubtotalMinor: null,
-        taxBps: 1000,
+
         enabled: true,
       },
     })
@@ -201,42 +201,42 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
         expect.objectContaining({
           kind: 'express',
           shippingMinor: 350,
-          taxMinor: 130,
-          totalMinor: 1779,
+          taxMinor: 0,
+          totalMinor: 1649,
         }),
         expect.objectContaining({
           kind: 'standard',
           shippingMinor: 150,
-          taxMinor: 130,
-          totalMinor: 1579,
+          taxMinor: 0,
+          totalMinor: 1449,
         }),
       ]),
     })
     expect(await (await quote()).json()).toMatchObject({
       deliveryKind: 'standard',
       shippingMinor: 150,
-      taxMinor: 130,
-      estimatedTotalMinor: 1579,
+      taxMinor: 0,
+      estimatedTotalMinor: 1449,
     })
     expect(await (await quote('express')).json()).toMatchObject({
       deliveryKind: 'express',
       shippingMinor: 350,
-      taxMinor: 130,
-      estimatedTotalMinor: 1779,
+      taxMinor: 0,
+      estimatedTotalMinor: 1649,
     })
     // The configured threshold applies to standard only; express retains its fee.
     f.selectItems(customerAuth, { productId, quantity: 2 })
     expect(await (await quote('standard')).json()).toMatchObject({
       subtotalMinor: 2598,
       shippingMinor: 0,
-      taxMinor: 260,
-      estimatedTotalMinor: 2858,
+      taxMinor: 0,
+      estimatedTotalMinor: 2598,
     })
     expect(await (await quote('express')).json()).toMatchObject({
       subtotalMinor: 2598,
       shippingMinor: 350,
-      taxMinor: 260,
-      estimatedTotalMinor: 3208,
+      taxMinor: 0,
+      estimatedTotalMinor: 2948,
     })
     f.selectItems(customerAuth, { productId, quantity: 1 })
     const requestId = randomUUID()
@@ -252,8 +252,8 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
     expect(hold).toMatchObject({
       deliveryKind: 'express',
       shippingMinor: 350,
-      taxMinor: 130,
-      estimatedTotalMinor: 1779,
+      taxMinor: 0,
+      estimatedTotalMinor: 1649,
     })
     expect(
       (
@@ -313,8 +313,8 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
     expect(await order.json()).toMatchObject({
       deliveryKind: 'express',
       shippingMinor: 350,
-      taxMinor: 130,
-      totalMinor: 1779,
+      taxMinor: 0,
+      totalMinor: 1649,
     })
     const dbOrder = await f.db.order.findUniqueOrThrow({
       where: { id: (await order.json()).id },

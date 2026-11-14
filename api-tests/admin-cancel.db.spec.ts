@@ -45,12 +45,12 @@ test('Admin unpaid cancellation real DB: fenced Admin unpaid cancellation, exact
         countryCode,
         currency,
         shippingMinor: 0,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 0,
-        taxBps: 0,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },
@@ -271,7 +271,7 @@ test('Admin unpaid cancellation real DB: fenced Admin unpaid cancellation, exact
         data: {
           shippingMinor: previous.shippingMinor,
           freeOverSubtotalMinor: previous.freeOverSubtotalMinor,
-          taxBps: previous.taxBps,
+
           enabled: previous.enabled,
         },
       })

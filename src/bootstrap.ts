@@ -223,7 +223,7 @@ export async function createHttpApp(
       )
       .addTag(
         'Checkout / Admin',
-        'OWNER-only country/currency shipping and estimate tax policies',
+        'OWNER-managed delivery defaults and country overrides',
       )
       .addTag(
         'Customers / Admin',

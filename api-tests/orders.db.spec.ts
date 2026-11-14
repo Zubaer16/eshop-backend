@@ -54,12 +54,12 @@ test('orders real DB: order allocation, immutable snapshot, replay, competition,
         countryCode,
         currency,
         shippingMinor: 50,
-        taxBps: 1000,
+
         enabled: true,
       },
       update: {
         shippingMinor: 50,
-        taxBps: 1000,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },
@@ -97,8 +97,8 @@ test('orders real DB: order allocation, immutable snapshot, replay, competition,
       currency,
       subtotalMinor: 1500,
       shippingMinor: 50,
-      taxMinor: 150,
-      totalMinor: 1700,
+      taxMinor: 0,
+      totalMinor: 1550,
       payable: false,
       lines: [{ title: 'Original title', quantity: 3, unitPriceMinor: 500 }],
     })
@@ -255,7 +255,7 @@ test('orders real DB: order allocation, immutable snapshot, replay, competition,
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

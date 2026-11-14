@@ -194,7 +194,7 @@ export class DeliveryZonesService {
   }
 
   /** Resolve inside the same transaction that prices/holds the cart.
-   * The existing country/currency rate is the mandatory tax policy.
+   * Optional country rates and currency defaults supply base delivery charges.
    * A configured zone overrides only its SHIPPING amount; no implicit country or FX fallback.
    */
   async resolve(
@@ -209,12 +209,12 @@ export class DeliveryZonesService {
       include: { zone: { include: { services: true } } },
     })
     if (!mapping) {
-      if (requested !== undefined)
+      if (requested === 'express')
         throw new UnprocessableEntityException(
           'No selectable delivery service configured for this destination',
         )
       return {
-        deliveryKind: null,
+        deliveryKind: requested === 'standard' ? 'STANDARD' : null,
         shippingMinor: legacy.shippingMinor,
         freeOverSubtotalMinor: legacy.freeOverSubtotalMinor,
         etaNote: '',

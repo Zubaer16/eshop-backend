@@ -34,6 +34,8 @@ import {
   CheckoutEstimateResponseDto,
   CheckoutRateResponseDto,
   PutCheckoutRateDto,
+  PutCheckoutDefaultRateDto,
+  CheckoutDefaultRateResponseDto,
 } from './checkout.dto'
 import { AvailableDeliveryOptionsDto } from './delivery-zones.dto'
 import { CheckoutOwnerGuard } from './checkout.owner.guard'
@@ -82,8 +84,7 @@ export class CheckoutCustomerController {
     description: 'Empty, unavailable or mixed-currency cart; quote changed',
   })
   @ApiUnprocessableEntityResponse({
-    description:
-      'No enabled configured country/currency shipping and tax policy',
+    description: 'Requested delivery service is unavailable',
   })
   estimate(@Req() req: AuthenticatedRequest, @Body() dto: CheckoutEstimateDto) {
     return this.checkout.estimate(req.authUser!.id, dto)
@@ -97,7 +98,7 @@ export class CheckoutCustomerController {
   })
   @ApiOkResponse({ type: AvailableDeliveryOptionsDto })
   @ApiUnprocessableEntityResponse({
-    description: 'No enabled country/currency lane',
+    description: 'Delivery service is unavailable for this destination',
   })
   deliveryOptions(
     @Req() req: AuthenticatedRequest,
@@ -122,7 +123,7 @@ export class CheckoutCustomerController {
       'Active hold exists, invalid cart, or insufficient unreserved stock',
   })
   @ApiUnprocessableEntityResponse({
-    description: 'No enabled country/currency policy',
+    description: 'Delivery service is unavailable for this destination',
   })
   reserve(@Req() req: AuthenticatedRequest, @Body() dto: CreateReservationDto) {
     return this.reservations.reserve(req.authUser!.id, dto)
@@ -161,7 +162,7 @@ export class CheckoutCustomerController {
 
 @ApiTags('Checkout / Admin')
 @ApiBearerAuth('access-token')
-@Controller('admin/checkout/rates')
+@Controller('admin/checkout')
 @UseGuards(AccessGuard, AdminGuard, CheckoutOwnerGuard)
 @ApiUnauthorizedResponse({ description: 'Admin bearer JWT required' })
 @ApiForbiddenResponse({
@@ -170,27 +171,54 @@ export class CheckoutCustomerController {
 export class CheckoutAdminController {
   constructor(private readonly checkout: CheckoutService) {}
 
-  @Get()
+  @Get('rates')
   @ApiOperation({
     summary:
-      'List explicitly configured country/currency shipping and tax estimate policies (OWNER)',
+      'List explicitly configured country/currency delivery estimate policies (OWNER)',
   })
   @ApiOkResponse({ type: [CheckoutRateResponseDto] })
   list() {
     return this.checkout.listRates()
   }
 
-  @Put()
+  @Put('rates')
   @ApiOperation({
     summary:
-      'Idempotently configure one country/currency shipping/tax estimate lane (OWNER)',
+      'Idempotently configure one country/currency delivery estimate lane (OWNER)',
   })
   @ApiOkResponse({ type: CheckoutRateResponseDto })
   @ApiBadRequestResponse({
-    description:
-      'Invalid rates, money bounds, tax basis points or unsupported fields',
+    description: 'Invalid delivery charges, currency or unsupported fields',
   })
   put(@Req() req: AuthenticatedRequest, @Body() dto: PutCheckoutRateDto) {
     return this.checkout.putRate(dto, req.authUser!.id)
+  }
+
+  @Get('defaults')
+  @ApiOperation({
+    summary: 'List store-wide default delivery policies by currency (OWNER)',
+  })
+  @ApiOkResponse({ type: [CheckoutDefaultRateResponseDto] })
+  defaults() {
+    return this.checkout.listDefaults()
+  }
+
+  @Put('defaults')
+  @ApiOperation({
+    summary:
+      'Configure a currency default used across destinations without a country policy (OWNER)',
+  })
+  @ApiOkResponse({ type: CheckoutDefaultRateResponseDto })
+  @ApiConflictResponse({
+    description: 'The default policy was edited concurrently',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid currency, charges or revision',
+  })
+  putDefault(
+    @Req() req: AuthenticatedRequest,
+    @Body() input: PutCheckoutDefaultRateDto,
+  ) {
+    return this.checkout.putDefault(input, req.authUser!.id)
   }
 }

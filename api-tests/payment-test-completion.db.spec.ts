@@ -59,12 +59,12 @@ test('test payment confirmation real DB: test-only confirm/capture, exactly-once
         countryCode,
         currency,
         shippingMinor: 20,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 20,
-        taxBps: 0,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },
@@ -215,7 +215,7 @@ test('test payment confirmation real DB: test-only confirm/capture, exactly-once
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

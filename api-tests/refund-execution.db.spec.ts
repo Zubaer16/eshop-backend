@@ -48,12 +48,12 @@ test('Stripe TEST refund execution real DB: verified Stripe TEST refund, replay,
         countryCode,
         currency,
         shippingMinor: 20,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 20,
-        taxBps: 0,
+
         enabled: true,
         freeOverSubtotalMinor: null,
       },
@@ -228,7 +228,7 @@ test('Stripe TEST refund execution real DB: verified Stripe TEST refund, replay,
         where: { countryCode_currency: { countryCode, currency } },
         data: {
           shippingMinor: prior.shippingMinor,
-          taxBps: prior.taxBps,
+
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
           enabled: prior.enabled,
         },

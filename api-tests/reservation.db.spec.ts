@@ -47,13 +47,13 @@ test('reservation real DB: concurrent customers, idempotent hold, inventory guar
         countryCode,
         currency,
         shippingMinor: 30,
-        taxBps: 500,
+
         enabled: true,
       },
       update: {
         shippingMinor: 30,
         freeOverSubtotalMinor: null,
-        taxBps: 500,
+
         enabled: true,
       },
     })
@@ -85,8 +85,8 @@ test('reservation real DB: concurrent customers, idempotent hold, inventory guar
       status: 'ACTIVE',
       subtotalMinor: 1000,
       shippingMinor: 30,
-      taxMinor: 50,
-      estimatedTotalMinor: 1080,
+      taxMinor: 0,
+      estimatedTotalMinor: 1030,
       payable: false,
     })
     expect(
@@ -183,7 +183,7 @@ test('reservation real DB: concurrent customers, idempotent hold, inventory guar
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })
@@ -238,10 +238,10 @@ test('reservation real DB: variant holds are independent and never mutate physic
         countryCode,
         currency,
         shippingMinor: 0,
-        taxBps: 0,
+
         enabled: true,
       },
-      update: { shippingMinor: 0, taxBps: 0, enabled: true },
+      update: { shippingMinor: 0, enabled: true },
     })
     for (const [who, variant] of [
       [c1, red],
@@ -313,7 +313,7 @@ test('reservation real DB: variant holds are independent and never mutate physic
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

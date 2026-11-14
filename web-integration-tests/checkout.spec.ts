@@ -9,9 +9,16 @@ test('owner configures a real shipping lane and coupon; stale coupon edits fail 
   test.setTimeout(180000)
   const f = new CatalogTestFixture(request),
     credentials = f.browserCredentials()
+  const defaultCurrency = 'XTS'
+  const previousDefault = await f.db.checkoutDefaultRate.findUnique({
+    where: { currency: defaultCurrency },
+  })
   let rateId: string | undefined,
     fixtureCountry = ''
   try {
+    await f.db.checkoutDefaultRate.deleteMany({
+      where: { currency: defaultCurrency },
+    })
     const pair = await (
       await request.post('/v1/auth/register', { data: credentials })
     ).json()
@@ -45,15 +52,37 @@ test('owner configures a real shipping lane and coupon; stale coupon edits fail 
       .fill(credentials.password)
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
     await page
-      .getByRole('button', { name: 'Configure country/tax lane', exact: true })
+      .getByRole('button', { name: 'Configure default rate', exact: true })
+      .click()
+    await page
+      .getByLabel('Default currency code', { exact: true })
+      .fill(defaultCurrency)
+    await page
+      .getByLabel('Default shipping (minor units)', { exact: true })
+      .fill('500')
+    await page
+      .getByRole('button', { name: 'Save configuration', exact: true })
+      .click()
+    await expect(
+      page.getByRole('button', { name: 'Edit default XTS', exact: true }),
+    ).toBeVisible()
+    expect(
+      await f.db.checkoutDefaultRate.findUniqueOrThrow({
+        where: { currency: defaultCurrency },
+      }),
+    ).toMatchObject({ shippingMinor: 500 })
+    await page
+      .getByRole('button', {
+        name: 'Configure country delivery rate',
+        exact: true,
+      })
       .click()
     await page.getByLabel('ISO country code', { exact: true }).fill(countryCode)
     await page
       .getByLabel('Flat shipping (minor units)', { exact: true })
       .fill('150')
-    await page.getByLabel('Tax basis points', { exact: true }).fill('750')
     await page
-      .getByLabel('Enable this country/currency lane', { exact: true })
+      .getByLabel('Use this country delivery rate', { exact: true })
       .check()
     await page
       .getByRole('button', { name: 'Save configuration', exact: true })
@@ -69,7 +98,6 @@ test('owner configures a real shipping lane and coupon; stale coupon edits fail 
     })
     rateId = rate.id
     expect(rate).toMatchObject({
-      taxBps: 750,
       shippingMinor: 150,
       freeOverSubtotalMinor: null,
       enabled: true,
@@ -139,6 +167,11 @@ test('owner configures a real shipping lane and coupon; stale coupon edits fail 
       page.getByRole('heading', { name: 'TEST payment records', exact: true }),
     ).toBeVisible()
   } finally {
+    await f.db.checkoutDefaultRate.deleteMany({
+      where: { currency: defaultCurrency },
+    })
+    if (previousDefault)
+      await f.db.checkoutDefaultRate.create({ data: previousDefault })
     // Recover own records even if an assertion fails immediately after acknowledgement.
     await f.db.coupon.deleteMany({
       where: { code: 'ADMIN-' + f.key.toUpperCase() },
@@ -193,7 +226,7 @@ test('browser-local checkout prices submitted items, reports stock shortages and
         currency: 'USD',
         shippingMinor: 100,
         freeOverSubtotalMinor: null,
-        taxBps: 1000,
+
         enabled: true,
       },
     })
@@ -299,9 +332,9 @@ test('browser-local checkout prices submitted items, reports stock shortages and
     await page.getByLabel('Coupon code (optional)').fill(code)
     await page.getByRole('button', { name: 'Apply', exact: true }).click()
     await expect(page.getByLabel('Delivery service')).toContainText(
-      'Legacy flat rate',
+      'Standard delivery',
     )
-    await expect(page.getByText('$21.90', { exact: true })).toBeVisible()
+    await expect(page.getByText('$20.00', { exact: true }).last()).toBeVisible()
     const shortage = await request.post('/v1/checkout/reservations', {
       headers: auth,
       data: {
@@ -322,7 +355,7 @@ test('browser-local checkout prices submitted items, reports stock shortages and
     })
     expect(held.status()).toBe(200)
     const hold = await held.json()
-    expect(hold.estimatedTotalMinor).toBe(2190)
+    expect(hold.estimatedTotalMinor).toBe(2000)
     expect(
       (
         await request.get('/v1/checkout/reservations/' + hold.id, {

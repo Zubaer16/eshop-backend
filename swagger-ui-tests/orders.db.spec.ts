@@ -45,13 +45,13 @@ test('orders Swagger Chromium: unpaid order create/replay/read/cancel with stric
         countryCode,
         currency,
         shippingMinor: 50,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 50,
         freeOverSubtotalMinor: null,
-        taxBps: 0,
+
         enabled: true,
       },
     })
@@ -126,7 +126,7 @@ test('orders Swagger Chromium: unpaid order create/replay/read/cancel with stric
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

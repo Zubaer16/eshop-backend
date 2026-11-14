@@ -179,7 +179,7 @@ test('promotions Swagger Chromium: customer discounted delivery quote, hold/retr
     )
     expect(await available.json()).toMatchObject({
       discountMinor: 130,
-      options: [{ totalMinor: 1385 }],
+      options: [{ totalMinor: 1268 }],
     })
     await swaggerExecute(page, 'POST', '/v1/checkout/estimate', 400, {
       ...params,
@@ -194,7 +194,7 @@ test('promotions Swagger Chromium: customer discounted delivery quote, hold/retr
     )
     expect(await quote.json()).toMatchObject({
       discountMinor: 130,
-      estimatedTotalMinor: 1385,
+      estimatedTotalMinor: 1268,
     })
     const holdInput = { ...params, requestId: randomUUID() }
     const holdResponse = await swaggerExecute(
@@ -220,7 +220,7 @@ test('promotions Swagger Chromium: customer discounted delivery quote, hold/retr
     })
     expect(await order.json()).toMatchObject({
       discountMinor: 130,
-      totalMinor: 1385,
+      totalMinor: 1268,
       couponCode: coupon.code,
       lines: [{ discountMinor: 130, netLineTotalMinor: 1169 }],
     })

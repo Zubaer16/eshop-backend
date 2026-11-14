@@ -52,6 +52,8 @@ describe('Stripe hosted Checkout boundary', () => {
     expect(url).toBe('https://api.stripe.com/v1/checkout/sessions')
     const form = new URLSearchParams(request.body as string)
     expect(form.get('mode')).toBe('payment')
+    expect(form.has('automatic_tax[enabled]')).toBe(false)
+    expect(form.get('line_items[2][price_data][product_data][name]')).toBeNull()
     expect(form.get('payment_method_types[]')).toBe('card')
     expect(form.get('payment_intent_data[metadata][order_id]')).toBe(orderId)
     expect(form.get('line_items[0][price_data][unit_amount]')).toBe('1000')

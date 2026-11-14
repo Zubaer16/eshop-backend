@@ -24,24 +24,14 @@ export class CheckoutEstimateDto extends CheckoutItemsDto {
   @ApiPropertyOptional({
     enum: DELIVERY_KINDS,
     description:
-      'Standard by default for configured zones; omit for legacy flat rate',
+      'Standard delivery is used when a delivery zone is not configured',
   })
   @IsOptional()
   @IsIn(DELIVERY_KINDS)
   deliveryKind?: DeliveryKindInput
 }
 
-export class PutCheckoutRateDto {
-  @ApiProperty({ example: 'US' })
-  @IsString()
-  @Matches(/^[A-Z]{2}$/)
-  countryCode!: string
-
-  @ApiProperty({ example: 'USD' })
-  @IsString()
-  @Matches(/^[A-Z]{3}$/)
-  currency!: string
-
+export class CheckoutChargesDto {
   @ApiProperty({
     type: 'integer',
     minimum: 0,
@@ -67,22 +57,47 @@ export class PutCheckoutRateDto {
   @Min(0)
   @Max(MONEY_MAX)
   freeOverSubtotalMinor?: number | null
+}
+
+export class PutCheckoutDefaultRateDto extends CheckoutChargesDto {
+  @ApiProperty({ example: 'USD' })
+  @IsString()
+  @Matches(/^[A-Z]{3}$/)
+  currency!: string
 
   @ApiProperty({
     type: 'integer',
     minimum: 0,
-    maximum: 10000,
     description:
-      'Configured estimate rate in basis points, applied to merchandise subtotal only (tax-exclusive).',
+      'Zero creates a default. Updates require the current revision.',
   })
   @IsInt()
   @Min(0)
-  @Max(10000)
-  taxBps!: number
+  @Max(2147483646)
+  expectedRevision!: number
+}
+
+export class CheckoutDefaultRateResponseDto extends CheckoutChargesDto {
+  @ApiProperty({ example: 'USD' }) currency!: string
+  @ApiProperty({ type: 'integer' }) revision!: number
+  @ApiProperty({ format: 'date-time' }) createdAt!: Date
+  @ApiProperty({ format: 'date-time' }) updatedAt!: Date
+}
+
+export class PutCheckoutRateDto extends CheckoutChargesDto {
+  @ApiProperty({ example: 'US' })
+  @IsString()
+  @Matches(/^[A-Z]{2}$/)
+  countryCode!: string
+
+  @ApiProperty({ example: 'USD' })
+  @IsString()
+  @Matches(/^[A-Z]{3}$/)
+  currency!: string
 
   @ApiProperty({
     type: 'boolean',
-    description: 'Disabled lane blocks checkout estimate.',
+    description: 'Apply this country-specific delivery override when enabled.',
   })
   @IsBoolean()
   enabled!: boolean
@@ -113,7 +128,6 @@ export class CheckoutEstimateResponseDto {
   @ApiProperty({ type: String }) deliveryEtaNote!: string
   @ApiProperty({ type: 'integer' }) taxMinor!: number
   @ApiProperty({ type: 'integer' }) estimatedTotalMinor!: number
-  @ApiProperty({ type: 'integer' }) appliedTaxBps!: number
   @ApiProperty({ type: String, format: 'date-time' }) quotedAt!: string
   @ApiProperty({ enum: ['NOT_RESERVED'] }) reservationStatus!: 'NOT_RESERVED'
   @ApiProperty({
@@ -124,7 +138,7 @@ export class CheckoutEstimateResponseDto {
   payable!: false
   @ApiProperty({
     description:
-      'Estimate is live and can change. Country-only rates are not a substitute for local jurisdiction tax compliance.',
+      'Estimate is live and can change. Delivery charges use current store and country settings.',
   })
   notice!: string
 }

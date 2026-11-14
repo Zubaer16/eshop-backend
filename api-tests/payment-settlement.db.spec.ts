@@ -61,12 +61,12 @@ test('verified payment settlement real DB: Stripe-confirmed settlement, ledger/m
         countryCode,
         currency,
         shippingMinor: 50,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 50,
-        taxBps: 0,
+
         freeOverSubtotalMinor: null,
         enabled: true,
       },
@@ -284,7 +284,7 @@ test('verified payment settlement real DB: Stripe-confirmed settlement, ledger/m
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

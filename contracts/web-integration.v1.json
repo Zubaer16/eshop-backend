@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "1.13.0",
+  "version": "1.14.0",
   "date": "2026-11-14",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "mediaStorage": {
@@ -384,7 +384,8 @@
         "delivery options",
         "coupon",
         "reserve/release",
-        "create/replay order"
+        "create/replay order",
+        "configure optional default delivery charges"
       ],
       "operationPrefixes": [
         "/v1/checkout",
@@ -392,11 +393,10 @@
       ],
       "authorization": "Customer JWT; checkout rate and delivery-zone policies OWNER only",
       "notes": [
+        "Missing or disabled country delivery overrides use a currency default and fall back to zero delivery charges when no default exists. New checkout tax is zero. Country/default taxBps configuration fields are retired. Legacy financial taxMinor values remain part of stored order/reservation snapshots.",
         "Checkout requests contain items [{id,productId,variantId,quantity}]. Delivery options now use POST with the submitted items and destination/coupon. Draft delivery estimates omit inventory joins. Final reservation fingerprints freeze sorted selections and checkout policy. Customer row locks replace cart row locks.",
         "Final boundary POST /v1/checkout/start freezes requestId, country/service/coupon and shippingAddress, locks inventory balances in order, returns structured INSUFFICIENT_STOCK items or reserves stock and creates one order/Stripe TEST Checkout Session. Resume/cancel/reconcile live under /v1/checkout/orders/:orderId. Suggested quantity/removal actions require user choice. Delivery estimates select display data. Payment confirmation uses signed success receipts plus verified provider totals.",
         "Guest cart is supported, guest checkout is not. Require login before checkout and merge safely.",
-        "UI standard/express delivery identifiers map to configured options. Other country is not an ISO country; unsupported/unconfigured destinations show a real error.",
-        "UI tax is percent; backend basis points. Fee/cap/minimum values convert losslessly to minor units. Nullable unlimited caps/threshold semantics need explicit mapping.",
         "Estimate -> reservation -> order must preserve chosen address/country/service/coupon and request IDs; expire/requote on conflicts.",
         "Order creation is mapped separately by orders feature; do not send client totals or set PAID from a redirect.",
         "Step 5 source implemented; full runtime validation deferred. Owned no-store recovery discovers a live hold/latest unpaid order after reload or lost acknowledgement. Separate frozen request UUIDs, exact server totals and address snapshot allowlist; no browser-storage PII. See WEB_CHECKOUT.md."
@@ -417,7 +417,9 @@
         "api-tests/hosted-checkout.db.spec.ts",
         "../eshop-user-frontend/lib/stores/shopping-store.ts",
         "src/checkout/checkout-items.dto.ts",
-        "src/checkout/checkout-items.ts"
+        "src/checkout/checkout-items.ts",
+        "src/checkout/checkout-rates.ts",
+        "api-tests/checkout-defaults.db.spec.ts"
       ]
     },
     {
@@ -1112,5 +1114,15 @@
     "delivery": "POST /v1/checkout/delivery-options with submitted items, destination and optional coupon",
     "migration": "20261114120000_local_cart_checkout; drops former saved carts, retains order/payment/reservation history",
     "rollout": "Live migration 20261114120000_local_cart_checkout applied on 2026-11-14. Read-only audit verified 42 applied migrations with matching checksums, zero failures and zero pending migrations. One customer and five guest saved carts were removed. Updated frontend/backend application deployment and commit/push remain pending."
+  },
+  "deliveryDefaults": {
+    "rule": "Enabled country delivery override, otherwise currency default, otherwise zero delivery charge. Delivery zones define available services and their prices.",
+    "tax": "New estimates and reservations calculate taxMinor=0. Tax configuration and checkout tax controls are removed. Historical reservation/order financial snapshots preserve recorded tax amounts.",
+    "admin": "OWNER GET/PUT /v1/admin/checkout/defaults. Currency, shippingMinor, nullable freeOverSubtotalMinor and expectedRevision; concurrent stale writes return 409. Blank Admin charge entry becomes zero.",
+    "migrations": [
+      "20261114153000_checkout_default_rates",
+      "20261114160000_remove_checkout_tax_configuration"
+    ],
+    "rollout": "Both migrations applied to isolated local test database only. Application deployment, source push and live migrations remain pending."
   }
 }

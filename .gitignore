@@ -31,3 +31,4 @@ validation/web-integration/
 
 # Cross-app authentication browser artifacts
 test-results-web-auth/
+.vercel

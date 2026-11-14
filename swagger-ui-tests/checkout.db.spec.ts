@@ -47,7 +47,7 @@ test('checkout estimate Swagger Chromium: owner policy configuration and custome
       currency,
       shippingMinor: 350,
       freeOverSubtotalMinor: null,
-      taxBps: 1000,
+
       enabled: true,
     })
     await swaggerExecute(page, 'GET', '/v1/admin/checkout/rates', 200)
@@ -66,8 +66,8 @@ test('checkout estimate Swagger Chromium: owner policy configuration and custome
     expect(await result.json()).toMatchObject({
       subtotalMinor: 5000,
       shippingMinor: 350,
-      taxMinor: 500,
-      estimatedTotalMinor: 5850,
+      taxMinor: 0,
+      estimatedTotalMinor: 5350,
       reservationStatus: 'NOT_RESERVED',
       payable: false,
     })
@@ -78,7 +78,7 @@ test('checkout estimate Swagger Chromium: owner policy configuration and custome
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

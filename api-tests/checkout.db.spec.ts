@@ -46,9 +46,9 @@ test('checkout estimate isolated DB: configured country estimate, threshold, liv
         headers: auth,
         data: { ...{ countryCode }, items: f.selections(auth) },
       })
-    // Unconfigured lanes fail closed; no hidden default rate or implicit free shipping.
+    // Missing or disabled country overrides use the store default or free delivery.
     await f.db.checkoutRate.deleteMany({ where: { countryCode, currency } })
-    expect((await quote()).status()).toBe(422)
+    expect((await quote()).status()).toBe(200)
     const putRate = (
       shippingMinor: number,
       freeOverSubtotalMinor: number | null,
@@ -61,7 +61,7 @@ test('checkout estimate isolated DB: configured country estimate, threshold, liv
           currency,
           shippingMinor,
           freeOverSubtotalMinor,
-          taxBps: 750,
+
           enabled,
         },
       })
@@ -79,8 +79,8 @@ test('checkout estimate isolated DB: configured country estimate, threshold, liv
       currency,
       subtotalMinor: 2598,
       shippingMinor: 400,
-      taxMinor: 195,
-      estimatedTotalMinor: 3193,
+      taxMinor: 0,
+      estimatedTotalMinor: 2998,
       reservationStatus: 'NOT_RESERVED',
       payable: false,
     })
@@ -102,11 +102,11 @@ test('checkout estimate isolated DB: configured country estimate, threshold, liv
     expect(data).toMatchObject({
       subtotalMinor: 3000,
       shippingMinor: 0,
-      taxMinor: 225,
-      estimatedTotalMinor: 3225,
+      taxMinor: 0,
+      estimatedTotalMinor: 3000,
     })
     expect((await putRate(400, 5000, false)).status()).toBe(200)
-    expect((await quote()).status()).toBe(422)
+    expect((await quote()).status()).toBe(200)
     expect((await putRate(400, 5000)).status()).toBe(200)
     await f.db.inventoryBalance.update({
       where: { productId },
@@ -143,13 +143,13 @@ test('checkout estimate isolated DB: configured country estimate, threshold, liv
           currency,
           shippingMinor: originalRate.shippingMinor,
           freeOverSubtotalMinor: originalRate.freeOverSubtotalMinor,
-          taxBps: originalRate.taxBps,
+
           enabled: originalRate.enabled,
         },
         update: {
           shippingMinor: originalRate.shippingMinor,
           freeOverSubtotalMinor: originalRate.freeOverSubtotalMinor,
-          taxBps: originalRate.taxBps,
+
           enabled: originalRate.enabled,
         },
       })

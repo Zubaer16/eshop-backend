@@ -83,12 +83,12 @@ export class ReportingFixture extends PromotionsFixture {
             countryCode,
             currency,
             shippingMinor: 0,
-            taxBps: 0,
+
             enabled: true,
           },
           update: {
             shippingMinor: 0,
-            taxBps: 0,
+
             freeOverSubtotalMinor: null,
             enabled: true,
           },

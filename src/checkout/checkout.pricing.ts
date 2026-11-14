@@ -5,19 +5,16 @@ export function estimateConfiguredCharges(
   subtotalMinor: number,
   shippingMinor: number,
   freeOverSubtotalMinor: number | null,
-  taxBps: number,
   discountMinor = 0,
 ) {
   if (
-    ![subtotalMinor, shippingMinor, taxBps, discountMinor].every(
+    ![subtotalMinor, shippingMinor, discountMinor].every(
       Number.isSafeInteger,
     ) ||
     subtotalMinor < 0 ||
     discountMinor < 0 ||
     discountMinor > subtotalMinor ||
     shippingMinor < 0 ||
-    taxBps < 0 ||
-    taxBps > 10000 ||
     (freeOverSubtotalMinor !== null &&
       (!Number.isSafeInteger(freeOverSubtotalMinor) ||
         freeOverSubtotalMinor < 0))
@@ -28,10 +25,7 @@ export function estimateConfiguredCharges(
     subtotalMinor - discountMinor >= freeOverSubtotalMinor
       ? 0
       : shippingMinor
-  // Nonnegative minor units: round half up to the nearest whole minor unit.
-  const taxMinor = Math.floor(
-    ((subtotalMinor - discountMinor) * taxBps + 5000) / 10000,
-  )
+  const taxMinor = 0
   const estimatedTotalMinor =
     subtotalMinor - discountMinor + actualShippingMinor + taxMinor
   if (

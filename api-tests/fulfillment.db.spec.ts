@@ -42,12 +42,12 @@ test('fulfillment real DB: paid-only one-shipment lifecycle, idempotency, cross-
         countryCode,
         currency,
         shippingMinor: 20,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 20,
-        taxBps: 0,
+
         enabled: true,
         freeOverSubtotalMinor: null,
       },
@@ -218,7 +218,7 @@ test('fulfillment real DB: paid-only one-shipment lifecycle, idempotency, cross-
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })

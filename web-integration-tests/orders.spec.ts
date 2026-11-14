@@ -73,7 +73,7 @@ async function fixture(request: APIRequestContext) {
         countryCode,
         currency: 'USD',
         shippingMinor: 100,
-        taxBps: 0,
+
         enabled: true,
       },
     })

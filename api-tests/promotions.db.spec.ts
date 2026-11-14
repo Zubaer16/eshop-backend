@@ -35,8 +35,8 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
       subtotalMinor: 1299,
       discountMinor: 130,
       shippingMinor: 99,
-      taxMinor: 117,
-      estimatedTotalMinor: 1385,
+      taxMinor: 0,
+      estimatedTotalMinor: 1268,
       couponCode: coupon.code,
     })
     expect(
@@ -49,7 +49,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     expect(options.status()).toBe(200)
     expect(await options.json()).toMatchObject({
       discountMinor: 130,
-      options: [{ totalMinor: 1385 }],
+      options: [{ totalMinor: 1268 }],
     })
     const requestId = randomUUID()
     const reserve = () =>
@@ -63,7 +63,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     expect((await holds[1]!.json()).id).toBe(hold.id)
     expect(hold).toMatchObject({
       discountMinor: 130,
-      estimatedTotalMinor: 1385,
+      estimatedTotalMinor: 1268,
       items: [{ discountMinor: 130 }],
     })
     expect(
@@ -106,7 +106,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     const order = await orderResponse.json()
     expect(order).toMatchObject({
       discountMinor: 130,
-      totalMinor: 1385,
+      totalMinor: 1268,
       couponSnapshot: { revision: 1, kind: 'PERCENT', value: 1000 },
       lines: [
         { lineTotalMinor: 1299, discountMinor: 130, netLineTotalMinor: 1169 },
@@ -137,7 +137,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     expect(await (await usage()).json()).toMatchObject({ activeClaims: 0 })
     expect(
       await (await request.get('/v1/orders/' + order.id, { headers })).json(),
-    ).toMatchObject({ discountMinor: 130, totalMinor: 1385 })
+    ).toMatchObject({ discountMinor: 130, totalMinor: 1268 })
     expect(
       await (
         await request.post('/v1/checkout/estimate', {
@@ -145,7 +145,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
           data: { ...input, items: f.selections(headers) },
         })
       ).json(),
-    ).toMatchObject({ discountMinor: 500, estimatedTotalMinor: 978 })
+    ).toMatchObject({ discountMinor: 500, estimatedTotalMinor: 898 })
   } finally {
     await f.close()
   }
@@ -246,8 +246,8 @@ test('promotions DB: exact category eligibility, fixed cap, disabled/expired/cur
     expect(await (await quote(coupon.code)).json()).toMatchObject({
       discountMinor: 400,
       shippingMinor: 99,
-      taxMinor: 110,
-      estimatedTotalMinor: 1309,
+      taxMinor: 0,
+      estimatedTotalMinor: 1199,
     })
     for (const bad of [
       { enabled: false },
@@ -292,7 +292,7 @@ test('promotions DB: exact category eligibility, fixed cap, disabled/expired/cur
       where: {
         countryCode_currency: { countryCode: f.countryCode, currency: 'USD' },
       },
-      data: { shippingMinor: 0, freeOverSubtotalMinor: null, taxBps: 0 },
+      data: { shippingMinor: 0, freeOverSubtotalMinor: null },
     })
     const free = await f.coupon(owner.token, { value: 10000 })
     expect(
@@ -476,7 +476,7 @@ test('promotions DB: discounted amount drives verified settlement/refund ceiling
       id: string
       totalMinor: number
     }
-    expect(order.totalMinor).toBe(1385)
+    expect(order.totalMinor).toBe(1268)
     const secret = 'whsec_G4TESTONLY12345678901234567890'
     const config = {
       get: (name: string) =>
@@ -494,8 +494,8 @@ test('promotions DB: discounted amount drives verified settlement/refund ceiling
       retrieve: async () => ({
         id: providerId,
         status: 'succeeded',
-        amountMinor: 1385,
-        amountReceivedMinor: 1385,
+        amountMinor: 1268,
+        amountReceivedMinor: 1268,
         currency: 'USD',
         orderId: order.id,
         livemode: false,
@@ -504,7 +504,7 @@ test('promotions DB: discounted amount drives verified settlement/refund ceiling
     const db = { client: f.db } as unknown as DatabaseService
     const payments = new PaymentsService(db, config, gateway)
     await payments.prepare(customer.id, order.id)
-    expect(preparedAmount).toBe(1385)
+    expect(preparedAmount).toBe(1268)
     const raw = Buffer.from(
       JSON.stringify({
         id: eventId,
@@ -550,7 +550,7 @@ test('promotions DB: discounted amount drives verified settlement/refund ceiling
       '/v1/admin/payments/orders/' + order.id + '/refunds',
       {
         headers: admin,
-        data: { requestId: randomUUID(), amountMinor: 1385, reason: 'OTHER' },
+        data: { requestId: randomUUID(), amountMinor: 1268, reason: 'OTHER' },
       },
     )
     expect(refunded.status()).toBe(200)

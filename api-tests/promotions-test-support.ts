@@ -68,13 +68,13 @@ export class PromotionsFixture extends CatalogTestFixture {
         currency: 'USD',
         shippingMinor: 99,
         freeOverSubtotalMinor: 1200,
-        taxBps: 1000,
+
         enabled: true,
       },
       update: {
         shippingMinor: 99,
         freeOverSubtotalMinor: 1200,
-        taxBps: 1000,
+
         enabled: true,
       },
     })

@@ -54,18 +54,18 @@ describe('promotions exact discount allocation and charge arithmetic', () => {
     }
   })
   it('taxes discounted merchandise and evaluates free shipping on that same net basis', () => {
-    expect(estimateConfiguredCharges(2000, 300, 1800, 1000, 400)).toEqual({
+    expect(estimateConfiguredCharges(2000, 300, 1800, 400)).toEqual({
       shippingMinor: 300,
-      taxMinor: 160,
-      estimatedTotalMinor: 2060,
+      taxMinor: 0,
+      estimatedTotalMinor: 1900,
     })
-    expect(estimateConfiguredCharges(2000, 300, 1600, 1000, 400)).toEqual({
+    expect(estimateConfiguredCharges(2000, 300, 1600, 400)).toEqual({
       shippingMinor: 0,
-      taxMinor: 160,
-      estimatedTotalMinor: 1760,
+      taxMinor: 0,
+      estimatedTotalMinor: 1600,
     })
-    expect(() => estimateConfiguredCharges(100, 0, null, 0, 101)).toThrow()
-    expect(() => estimateConfiguredCharges(100, 0, null, 0, -1)).toThrow()
+    expect(() => estimateConfiguredCharges(100, 0, null, 101)).toThrow()
+    expect(() => estimateConfiguredCharges(100, 0, null, -1)).toThrow()
   })
   it('rejects unsupported rule and money bounds rather than silently rounding invalid input', () => {
     const lines = [{ id: 'a', amountMinor: 1, eligible: true }]

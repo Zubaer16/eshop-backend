@@ -49,12 +49,12 @@ test('refund ledger real PostgreSQL: partial refunds, ceilings, concurrent reque
         countryCode,
         currency,
         shippingMinor: 20,
-        taxBps: 0,
+
         enabled: true,
       },
       update: {
         shippingMinor: 20,
-        taxBps: 0,
+
         enabled: true,
         freeOverSubtotalMinor: null,
       },
@@ -208,7 +208,7 @@ test('refund ledger real PostgreSQL: partial refunds, ceilings, concurrent reque
         data: {
           shippingMinor: prior.shippingMinor,
           freeOverSubtotalMinor: prior.freeOverSubtotalMinor,
-          taxBps: prior.taxBps,
+
           enabled: prior.enabled,
         },
       })
