@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger'
 import { AccessGuard } from '../auth/access.guard'
 import { AuthenticatedRequest } from '../auth/auth.types'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import {
   WishlistMergeDto,
   WishlistRemoveResponseDto,
@@ -34,7 +34,7 @@ import { WishlistService } from './wishlist.service'
 
 @ApiTags('Wishlist / Customer')
 @Controller('wishlist')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @ApiBearerAuth('access-token')
 @ApiUnauthorizedResponse({ description: 'Valid customer bearer JWT required' })
 @ApiForbiddenResponse({ description: 'Customer account required' })

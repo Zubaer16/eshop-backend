@@ -7,8 +7,8 @@ import {
 import { PromotionsService } from '../promotions/promotions.service'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
-import { quoteIncludes } from '../cart/cart.service'
-import { calculateCartQuote } from '../cart/cart.quote'
+import { loadCheckoutItems, reservationFingerprint } from './checkout-items'
+import { calculateCartQuote } from './cart.quote'
 import { estimateConfiguredCharges } from './checkout.pricing'
 import { CreateReservationDto } from './reservation.dto'
 import { DeliveryZonesService } from './delivery-zones.service'
@@ -26,7 +26,6 @@ type Hold = Prisma.CheckoutReservationGetPayload<{
 function present(hold: Hold) {
   return {
     id: hold.id,
-    cartId: hold.cartId,
     requestId: hold.requestId,
     status: hold.status,
     countryCode: hold.countryCode,
@@ -94,6 +93,7 @@ export class ReservationService {
   }
 
   async reserve(customerId: string, input: CreateReservationDto) {
+    const requestHash = reservationFingerprint(input)
     const key = {
       customerId_requestId: { customerId, requestId: input.requestId },
     }
@@ -102,43 +102,24 @@ export class ReservationService {
       include: includeLines,
     })
     if (seen) {
-      if (
-        seen.countryCode !== input.countryCode ||
-        seen.couponCode !== (input.couponCode ?? null) ||
-        (seen.deliveryKind ?? null) !==
-          (input.deliveryKind?.toUpperCase() ??
-            (seen.deliveryKind === 'STANDARD' ? 'STANDARD' : null))
-      )
+      if (seen.requestHash !== requestHash)
         throw new ConflictException(
-          'Request UUID reused with different country',
+          'Checkout request UUID reused with different details',
         )
       return this.get(customerId, seen.id)
     }
     try {
       return await this.database.client.$transaction(
         async (tx) => {
-          const cartRef = await tx.cart.findUnique({
-            where: { userId: customerId },
-            select: { id: true },
-          })
-          if (!cartRef)
-            throw new ConflictException('Cart is not checkout-ready')
-          // Serialize cart edits, merge and requests for different idempotency keys.
-          await tx.$queryRaw`SELECT id FROM carts WHERE id = ${cartRef.id}::uuid FOR UPDATE`
+          await tx.$queryRaw`SELECT id FROM users WHERE id = ${customerId}::uuid FOR UPDATE`
           const replay = await tx.checkoutReservation.findUnique({
             where: key,
             include: includeLines,
           })
           if (replay) {
-            if (
-              replay.countryCode !== input.countryCode ||
-              replay.couponCode !== (input.couponCode ?? null) ||
-              (replay.deliveryKind ?? null) !==
-                (input.deliveryKind?.toUpperCase() ??
-                  (replay.deliveryKind === 'STANDARD' ? 'STANDARD' : null))
-            )
+            if (replay.requestHash !== requestHash)
               throw new ConflictException(
-                'Request UUID reused with different country',
+                'Checkout request UUID reused with different details',
               )
             return present(
               replay.status === 'ACTIVE' && replay.expiresAt <= new Date()
@@ -147,7 +128,7 @@ export class ReservationService {
             )
           }
           const active = await tx.checkoutReservation.findFirst({
-            where: { cartId: cartRef.id, status: 'ACTIVE' },
+            where: { customerId, status: 'ACTIVE' },
             select: { id: true, expiresAt: true },
           })
           if (active) {
@@ -157,13 +138,10 @@ export class ReservationService {
               )
             await this.transition(tx, active.id, 'EXPIRED')
           }
-          let cart = await tx.cart.findUniqueOrThrow({
-            where: { id: cartRef.id },
-            include: quoteIncludes,
-          })
+          let items = await loadCheckoutItems(tx, input.items, true)
           const balanceIds = [
             ...new Set(
-              cart.items.flatMap((line) => {
+              items.flatMap((line) => {
                 const balance = line.product.hasVariants
                   ? line.variant?.inventoryBalance
                   : line.product.inventoryBalance
@@ -176,11 +154,8 @@ export class ReservationService {
           }
           // Read again after acquiring every balance lock so conflict quantities
           // include other customers' reservations committed while we waited.
-          cart = await tx.cart.findUniqueOrThrow({
-            where: { id: cartRef.id },
-            include: quoteIncludes,
-          })
-          const quote = calculateCartQuote(cart.id, cart.items)
+          items = await loadCheckoutItems(tx, input.items, true)
+          const quote = calculateCartQuote(null, items)
           const shortages = quote.items
             .filter((line) => line.status === 'OUT_OF_STOCK')
             .map((line) => ({
@@ -228,7 +203,7 @@ export class ReservationService {
             customerId,
             quote.currency,
             quote.subtotalMinor,
-            cart.items,
+            items,
             input.couponCode,
             true,
           )
@@ -243,7 +218,7 @@ export class ReservationService {
             throw new UnprocessableEntityException(
               'Zero-total coupon checkout is not supported',
             )
-          const lines = cart.items
+          const lines = items
             .map((line) => {
               const balanceId = line.product.hasVariants
                 ? line.variant?.inventoryBalance?.id
@@ -278,7 +253,7 @@ export class ReservationService {
           const saved = await tx.checkoutReservation.create({
             data: {
               customerId,
-              cartId: cartRef.id,
+              requestHash,
               requestId: input.requestId,
               countryCode: input.countryCode,
               currency: quote.currency,
@@ -324,15 +299,7 @@ export class ReservationService {
             where: key,
             include: includeLines,
           })
-        if (
-          winner &&
-          winner.countryCode === input.countryCode &&
-          winner.couponCode === (input.couponCode ?? null) &&
-          (winner.deliveryKind ?? null) ===
-            (input.deliveryKind?.toUpperCase() ??
-              (winner.deliveryKind === 'STANDARD' ? 'STANDARD' : null))
-        )
-          return present(winner)
+        if (winner && winner.requestHash === requestHash) return present(winner)
       }
       throw error
     }

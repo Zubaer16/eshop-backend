@@ -58,18 +58,17 @@ test('reservation real DB: concurrent customers, idempotent hold, inventory guar
       },
     })
     for (const user of [first, second]) {
-      const cart = await request.put('/v1/cart/items', {
-        headers: bearer(user.token),
-        data: { productId, quantity: 2 },
-      })
-      expect(cart.status()).toBe(200)
+      f.selectItems(bearer(user.token), { productId, quantity: 2 })
     }
     const firstKey = randomUUID()
     const secondKey = randomUUID()
     const reserve = (token: string, requestId: string) =>
       request.post('/v1/checkout/reservations', {
         headers: bearer(token),
-        data: { requestId, countryCode },
+        data: {
+          ...{ requestId, countryCode },
+          items: f.selections(bearer(token)),
+        },
       })
     const simultaneous = await Promise.all([
       reserve(first.token, firstKey),
@@ -106,22 +105,7 @@ test('reservation real DB: concurrent customers, idempotent hold, inventory guar
       ).reservedQuantity,
     ).toBe(2)
     expect((await reserve(winner.token, randomUUID())).status()).toBe(409)
-    expect(
-      (
-        await request.post('/v1/cart/items/add', {
-          headers: bearer(winner.token),
-          data: { productId, quantity: 1, requestId: randomUUID() },
-        })
-      ).status(),
-    ).toBe(409)
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(winner.token),
-          data: { productId, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(409)
+
     expect(
       (
         await request.get(`/v1/checkout/reservations/${saved.id}`, {
@@ -191,14 +175,7 @@ test('reservation real DB: concurrent customers, idempotent hold, inventory guar
         })
       ).reservedQuantity,
     ).toBe(0)
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(loser.token),
-          data: { productId, quantity: 2 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(bearer(loser.token), { productId, quantity: 2 })
   } finally {
     if (prior) {
       await f.db.checkoutRate.update({
@@ -270,26 +247,25 @@ test('reservation real DB: variant holds are independent and never mutate physic
       [c1, red],
       [c2, blue],
     ] as const) {
-      expect(
-        (
-          await request.put('/v1/cart/items', {
-            headers: bearer(who.token),
-            data: {
-              productId: p.id,
-              variantId: variant.id,
-              quantity: 1,
-            },
-          })
-        ).status(),
-      ).toBe(200)
+      f.selectItems(bearer(who.token), {
+        productId: p.id,
+        variantId: variant.id,
+        quantity: 1,
+      })
     }
     const hold1 = await request.post('/v1/checkout/reservations', {
       headers: bearer(c1.token),
-      data: { requestId: randomUUID(), countryCode },
+      data: {
+        ...{ requestId: randomUUID(), countryCode },
+        items: f.selections(bearer(c1.token)),
+      },
     })
     const hold2 = await request.post('/v1/checkout/reservations', {
       headers: bearer(c2.token),
-      data: { requestId: randomUUID(), countryCode },
+      data: {
+        ...{ requestId: randomUUID(), countryCode },
+        items: f.selections(bearer(c2.token)),
+      },
     })
     expect([hold1.status(), hold2.status()]).toEqual([200, 200])
     expect(

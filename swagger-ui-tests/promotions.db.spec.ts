@@ -148,14 +148,10 @@ test('promotions Swagger Chromium: customer discounted delivery quote, hold/retr
       customer = await f.account('CUSTOMER')
     const product = await f.product(owner.token)
     const coupon = await f.coupon(owner.token)
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(customer.token),
-          data: { productId: product.id, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(bearer(customer.token), {
+      productId: product.id,
+      quantity: 1,
+    })
     await openSwagger(page)
     await swaggerExecute(page, 'POST', '/v1/checkout/estimate', 401, {
       countryCode: f.countryCode,
@@ -169,14 +165,16 @@ test('promotions Swagger Chromium: customer discounted delivery quote, hold/retr
       403,
       couponInput(f.code('DENIED')),
     )
-    const params = { countryCode: f.countryCode, couponCode: coupon.code }
+    const params = {
+      countryCode: f.countryCode,
+      couponCode: coupon.code,
+      items: f.selections(bearer(customer.token)),
+    }
     const available = await swaggerExecute(
       page,
-      'GET',
+      'POST',
       '/v1/checkout/delivery-options',
       200,
-      undefined,
-      {},
       params,
     )
     expect(await available.json()).toMatchObject({

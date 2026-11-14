@@ -55,17 +55,17 @@ test('orders Swagger Chromium: unpaid order create/replay/read/cancel with stric
         enabled: true,
       },
     })
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(customer.token),
-          data: { productId: (await product.json()).id, quantity: 2 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(bearer(customer.token), {
+      productId: (await product.json()).id,
+      quantity: 2,
+    })
     const holdResult = await request.post('/v1/checkout/reservations', {
       headers: bearer(customer.token),
-      data: { requestId: randomUUID(), countryCode },
+      data: {
+        requestId: randomUUID(),
+        countryCode,
+        items: f.selections(bearer(customer.token)),
+      },
     })
     expect(holdResult.status()).toBe(200)
     const hold = await holdResult.json()

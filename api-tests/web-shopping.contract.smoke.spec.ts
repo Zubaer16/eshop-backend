@@ -1,28 +1,18 @@
 import { test, expect } from '@playwright/test'
-test('web shopping contract keeps guest capability distinct, cart totals nonpayable and customer directory free of private address data', async ({
+test('web shopping contract accepts browser cart items and keeps customer directory free of private address data', async ({
   request,
 }) => {
   const doc = await (await request.get('/docs-json')).json()
-  expect(
-    doc.paths['/v1/guest-cart'].delete.responses['200'].content[
-      'application/json'
-    ].schema.$ref,
-  ).toBe('#/components/schemas/GuestCartRevokedDto')
-  expect(
-    doc.components.schemas.GuestCartRevokedDto.properties.revoked.type,
-  ).toBe('boolean')
-  expect(doc.paths['/v1/guest-cart'].get.security).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ 'guest-cart-token': [] }),
-    ]),
-  )
-  expect(doc.paths['/v1/cart/merge'].post.security).toEqual(
-    expect.arrayContaining([expect.objectContaining({ 'access-token': [] })]),
-  )
-  expect(
-    doc.components.schemas.CartQuoteResponseDto.properties.amountDueMinor
-      .nullable,
-  ).toBe(true)
+  for (const path of Object.keys(doc.paths))
+    expect(path).not.toMatch(/^\/v1\/(cart|guest-cart)(\/|$)/)
+  for (const path of ['/v1/cart', '/v1/guest-cart'])
+    expect((await request.get(path)).status()).toBe(404)
+  const checkout = doc.components.schemas.StartHostedCheckoutDto.properties
+  expect(checkout.items).toMatchObject({
+    type: 'array',
+    minItems: 1,
+    maxItems: 50,
+  })
   const profile = doc.components.schemas.UpdateCustomerProfileDto.properties
   expect(Object.keys(profile)).toEqual(['displayName'])
   for (const key of [

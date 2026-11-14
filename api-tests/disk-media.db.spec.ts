@@ -136,11 +136,12 @@ test('VPS disk media real DB + signed VPS disk PUT, byte verification, public re
       (await f.db.mediaDeletionJob.findUniqueOrThrow({ where: { mediaId } }))
         .status,
     ).toBe('PENDING')
-    expect(
-      await readFile(
-        join(root!, 'projects', 'kookaburra', 'products', mediaId),
-      ),
-    ).toEqual(png)
+    const stored = await f.db.mediaAsset.findUniqueOrThrow({
+      where: { id: mediaId },
+    })
+    expect(await readFile(join(root!, ...stored.objectKey.split('/')))).toEqual(
+      png,
+    )
   } finally {
     if (mediaId) {
       await f.db.productMedia.deleteMany({ where: { mediaId } })

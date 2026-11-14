@@ -1,5 +1,5 @@
 {
-  "version": "1.30.0",
+  "version": "1.31.0",
   "purpose": "Source compatibility and explicit adapter mapping; runtime acceptance is recorded separately in the validation report",
   "sourceBaselines": {
     "backend": "Current eshop-backend source; source-bound local release receipt and external acceptance remain distinct.",
@@ -17,7 +17,7 @@
     "media": "Canonical verified media IDs, signed provider-specific upload/complete and reference-aware gallery/deletion APIs. Existing rendition/reconcile tooling; actual external provider/CDN/deployment validation remains separate. Upload module is an optional allowlisted storage classification (products default); new keys are <namespace>/<module>/<UUID>. Dynamic Cloudinary signed asset_folder matches the path; folders grant no permissions and do not restrict cross-module media reuse.",
     "pagination": "Existing {items,total,page,limit,pages} needs a frontend adapter to ApiPage.pageSize or additive backend alias",
     "apiStability": "Keep /v1 and legacy endpoints stable; add new documented DTOs without breaking already-tested clients",
-    "cart": "Canonical guest/customer cart and login merge; customer JWT for configured country/currency checkout estimates, bounded reservations and unpaid order creation. Existing STRIPE_TEST-only payment capability; no guest checkout, automatic FX or address-specific tax inference."
+    "cart": "Browser-local Zustand cart with per-owner persistence. Customer-authenticated checkout reprices submitted product/variant IDs and quantities, atomically reserves stock and creates the existing Stripe TEST hosted session. Old cart endpoints/tables retired."
   },
   "findings": [
     {
@@ -101,14 +101,14 @@
       "id": "customer-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Customer cart uses draft display projections, autosaved quantities and immediate totals. The final checkout boundary reserves inventory and creates a replay-safe Stripe TEST hosted session, with explicit shortage recovery and verified settlement.",
+      "summary": "Customer cart is browser-local and account-scoped. Manual entry and plus/minus recalculate totals without cart requests. Checkout sends identity/quantity selections for final server pricing and stock reservation.",
       "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {
       "id": "guest-cart",
       "priority": "P0",
       "status": "ADAPTER",
-      "summary": "Guest cart uses the existing HttpOnly capability bridge, atomic request-ID additions and explicit owned login merge; optimistic estimates never become stock/financial authority.",
+      "summary": "Guest cart is browser-local, persists across reloads and merges explicitly into the signed-in local account cart. Capability endpoints and old persisted cart tables are removed.",
       "action": "Maintain the explicit server-to-view adapter and current grants. See docs/WEB_VALIDATION.md for executed local validation; external provider/deployment acceptance remains separate."
     },
     {

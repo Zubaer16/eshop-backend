@@ -18,7 +18,7 @@ import {
 import { AccessGuard } from '../../auth/access.guard'
 import { AdminGuard } from '../../auth/admin.guard'
 import { AuthenticatedRequest } from '../../auth/auth.types'
-import { CustomerCartGuard } from '../../cart/cart.customer.guard'
+import { CustomerGuard } from '../../auth/customer.guard'
 import { FulfillmentManageGuard } from '../fulfillment/fulfillment.guard'
 import { OrderTrackingResponseDto } from './tracking.dto'
 import { TrackingService } from './tracking.service'
@@ -26,7 +26,7 @@ import { TrackingService } from './tracking.service'
 @ApiTags('Tracking / Customer')
 @ApiBearerAuth('access-token')
 @Controller('orders/:id/tracking')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @ApiUnauthorizedResponse({ description: 'Customer JWT required' })
 @ApiForbiddenResponse({
   description: 'Only CUSTOMER accounts may access tracking',

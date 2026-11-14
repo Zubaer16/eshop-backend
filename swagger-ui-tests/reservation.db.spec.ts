@@ -56,20 +56,17 @@ test('reservation Swagger Chromium: reservation create/read/replay/release and v
         enabled: true,
       },
     })
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(user.token),
-          data: {
-            productId: (await product.json()).id,
-            quantity: 2,
-          },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(bearer(user.token), {
+      productId: (await product.json()).id,
+      quantity: 2,
+    })
     await openSwagger(page)
     await authorizeInSwagger(page, user.token)
-    const req = { countryCode, requestId: randomUUID() }
+    const req = {
+      countryCode,
+      requestId: randomUUID(),
+      items: f.selections(bearer(user.token)),
+    }
     await swaggerExecute(page, 'POST', '/v1/checkout/reservations', 400, {
       ...req,
       subtotalMinor: 1,

@@ -119,20 +119,16 @@ export class ReportingFixture extends PromotionsFixture {
     expect(product.status()).toBe(201)
     const productId = (await product.json()).id as string,
       customerHeaders = bearer(customer.token)
-    expect(
-      (
-        await this.http.put('/v1/cart/items', {
-          headers: customerHeaders,
-          data: { productId, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(200)
+    this.selectItems(customerHeaders, { productId, quantity: 1 })
     const hold = await this.http.post('/v1/checkout/reservations', {
       headers: customerHeaders,
       data: {
-        countryCode,
-        requestId: randomUUID(),
-        ...(couponCode ? { couponCode } : {}),
+        ...{
+          countryCode,
+          requestId: randomUUID(),
+          ...(couponCode ? { couponCode } : {}),
+        },
+        items: this.selections(customerHeaders),
       },
     })
     expect(hold.status()).toBe(200)

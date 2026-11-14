@@ -23,7 +23,7 @@ import {
 import { AccessGuard } from '../../auth/access.guard'
 import { AdminGuard } from '../../auth/admin.guard'
 import { AuthenticatedRequest } from '../../auth/auth.types'
-import { CustomerCartGuard } from '../../cart/cart.customer.guard'
+import { CustomerGuard } from '../../auth/customer.guard'
 import { FulfillmentManageGuard } from '../fulfillment/fulfillment.guard'
 import {
   ReplacementActionDto,
@@ -137,7 +137,7 @@ export class ReplacementsAdminController {
 @ApiTags('Replacements / Customer')
 @ApiBearerAuth('access-token')
 @Controller('orders/:id/replacements')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @ApiUnauthorizedResponse({ description: 'Customer JWT required' })
 @ApiForbiddenResponse({ description: 'CUSTOMER role required' })
 export class ReplacementsCustomerController {

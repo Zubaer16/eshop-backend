@@ -153,21 +153,17 @@ test('hosted checkout isolated DB: final shortages, exclusive holds, uncertain r
       city: 'Example',
       countryCode,
     }
-    const input = () => ({
+    const input = (token = customer.token) => ({
       requestId: randomUUID(),
       countryCode,
       shippingAddress: address,
+      items: f.selections(bearer(token)),
     })
     const quantity = async (customerToken: string, value: number) => {
-      const response = await request.put('/v1/cart/items?view=draft', {
-        headers: bearer(customerToken),
-        data: { productId: product.id, quantity: value },
+      f.selectItems(bearer(customerToken), {
+        productId: product.id,
+        quantity: value,
       })
-      expect(response.status()).toBe(200)
-      const cart = await response.json()
-      expect(cart.stockChecked).toBe(false)
-      expect(cart.items[0].availableQuantity).toBeNull()
-      expect(cart.items[0].lineTotalMinor).toBe(value * 500)
     }
     const balance = () =>
       f.db.inventoryBalance.findUniqueOrThrow({
@@ -189,7 +185,7 @@ test('hosted checkout isolated DB: final shortages, exclusive holds, uncertain r
     // Both customers reach the final boundary together. Only one can reserve.
     const competing = await Promise.allSettled([
       checkout.start(customer.id, input(), origin),
-      checkout.start(other.id, input(), origin),
+      checkout.start(other.id, input(other.token), origin),
     ])
     expect(competing.filter((row) => row.status === 'fulfilled')).toHaveLength(
       1,

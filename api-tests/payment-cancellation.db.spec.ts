@@ -107,14 +107,14 @@ test('payment cancellation real DB: closed-order Stripe TEST intent cancellation
     const payments = new PaymentsService(db, config, gateway)
     const cancellation = new PaymentCancellationService(db, config, gateway)
     const createOrder = async (qty: number) => {
-      const cart = await request.put('/v1/cart/items', {
-        headers: bearer(customer.token),
-        data: { productId, quantity: qty },
-      })
-      expect(cart.status()).toBe(200)
+      f.selectItems(bearer(customer.token), { productId, quantity: qty })
+
       const hold = await request.post('/v1/checkout/reservations', {
         headers: bearer(customer.token),
-        data: { countryCode, requestId: randomUUID() },
+        data: {
+          ...{ countryCode, requestId: randomUUID() },
+          items: f.selections(bearer(customer.token)),
+        },
       })
       expect(hold.status()).toBe(200)
       const placed = await request.post('/v1/orders', {

@@ -75,7 +75,7 @@ test('external evidence verifies all categories, file hashes and safe paths', ()
     fs.rmSync(dir, { recursive: true, force: true })
   }
 })
-test('OpenAPI structure asserts mandatory paths and two auth mechanisms', () => {
+test('OpenAPI structure asserts checkout paths, bearer authentication and retired cart absence', () => {
   const paths = {}
   for (const [verb, route] of required) {
     paths[route] ||= {}
@@ -87,7 +87,7 @@ test('OpenAPI structure asserts mandatory paths and two auth mechanisms', () => 
     openapi: '3.0.0',
     paths,
     components: {
-      securitySchemes: { 'access-token': {}, 'guest-cart-token': {} },
+      securitySchemes: { 'access-token': {} },
     },
   }
   assert.doesNotThrow(() => checkDocument(doc))

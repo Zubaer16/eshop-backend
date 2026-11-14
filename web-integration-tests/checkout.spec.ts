@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { test, expect } from '@playwright/test'
 import { CatalogTestFixture, bearer } from '../api-tests/catalog-test-support'
 
@@ -150,7 +151,7 @@ test('owner configures a real shipping lane and coupon; stale coupon edits fail 
     await f.close()
   }
 })
-test('checkout recovers lost reservation/order responses, keeps exact coupon totals and never fabricates settlement', async ({
+test('browser-local checkout prices submitted items, reports stock shortages and restores owned holds', async ({
   page,
   request,
 }) => {
@@ -234,14 +235,43 @@ test('checkout recovers lost reservation/order responses, keeps exact coupon tot
     })
     expect(productResponse.status()).toBe(201)
     const product = await productResponse.json()
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: auth,
-          data: { productId: product.id, quantity: 2 },
-        })
-      ).status(),
-    ).toBe(200)
+    const lineId = randomUUID()
+    const items = [
+      { id: lineId, productId: product.id, variantId: null, quantity: 2 },
+    ]
+    await page.addInitScript(
+      ({ userId, product, items }) => {
+        const key = 'eshop-cart-v1:' + userId
+        if (!localStorage.getItem(key))
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              version: 1,
+              cart: {
+                cartId: null,
+                currency: 'USD',
+                subtotalMinor: 2000,
+                amountDueMinor: null,
+                checkoutReady: true,
+                stockChecked: false,
+                issues: [],
+                quotedAt: new Date().toISOString(),
+                items: items.map((item) => ({
+                  ...item,
+                  title: product.title,
+                  sku: product.sku,
+                  currency: 'USD',
+                  unitPriceMinor: 1000,
+                  lineTotalMinor: 2000,
+                  availableQuantity: null,
+                  status: 'AVAILABLE',
+                })),
+              },
+            }),
+          )
+      },
+      { userId: customer.user.id, product, items },
+    )
     expect(
       (
         await request.post('/v1/account/addresses', {
@@ -267,126 +297,59 @@ test('checkout recovers lost reservation/order responses, keeps exact coupon tot
       page.getByRole('heading', { name: 'Checkout', exact: true }),
     ).toBeVisible()
     await page.getByLabel('Coupon code (optional)').fill(code)
-    await page
-      .getByRole('button', { name: 'Load delivery options', exact: true })
-      .click()
+    await page.getByRole('button', { name: 'Apply', exact: true }).click()
     await expect(page.getByLabel('Delivery service')).toContainText(
       'Legacy flat rate',
     )
-    await page
-      .getByRole('button', { name: 'Calculate current estimate', exact: true })
-      .click()
     await expect(page.getByText('$21.90', { exact: true })).toBeVisible()
-    let loseHold = true
-    await page.route('**/v1/checkout/reservations', async (route) => {
-      if (loseHold && route.request().method() === 'POST') {
-        loseHold = false
-        await route.fetch()
-        await route.abort('failed')
-      } else await route.continue()
+    const shortage = await request.post('/v1/checkout/reservations', {
+      headers: auth,
+      data: {
+        requestId: randomUUID(),
+        countryCode,
+        couponCode: code,
+        items: [{ ...items[0], quantity: 12 }],
+      },
     })
-    await page
-      .getByRole('button', {
-        name: 'Reserve current stock for 10 minutes',
-        exact: true,
-      })
-      .click()
-    await expect(
-      page.getByRole('button', { name: 'Retry same request', exact: true }),
-    ).toBeVisible()
-    await page
-      .getByRole('button', { name: 'Retry same request', exact: true })
-      .click()
-    await expect(
-      page.getByRole('heading', { name: 'Stock hold: ACTIVE', exact: true }),
-    ).toBeVisible()
-    expect(
-      await f.db.checkoutReservation.count({
-        where: { customerId: customer.user.id },
-      }),
-    ).toBe(1)
-    await page.reload()
-    await expect(
-      page.getByRole('heading', { name: 'Stock hold: ACTIVE', exact: true }),
-    ).toBeVisible()
-    const discovery = await (
-      await request.get('/v1/checkout/recovery', { headers: auth })
-    ).json()
-    expect(discovery.reservation.estimatedTotalMinor).toBe(2190)
-    const outsider = await (
-      await request.get('/v1/checkout/recovery', {
-        headers: bearer(other.token),
-      })
-    ).json()
-    expect(outsider).toEqual({ reservation: null, orderId: null })
+    expect(shortage.status()).toBe(409)
+    expect(await shortage.json()).toMatchObject({
+      code: 'INSUFFICIENT_STOCK',
+      items: [{ requestedQuantity: 12, availableQuantity: 5 }],
+    })
+    const held = await request.post('/v1/checkout/reservations', {
+      headers: auth,
+      data: { requestId: randomUUID(), countryCode, couponCode: code, items },
+    })
+    expect(held.status()).toBe(200)
+    const hold = await held.json()
+    expect(hold.estimatedTotalMinor).toBe(2190)
     expect(
       (
-        await request.get(
-          '/v1/checkout/reservations/' + discovery.reservation.id,
-          {
-            headers: bearer(other.token),
-          },
-        )
-      ).status(),
-    ).toBe(404)
-    let loseOrder = true
-    await page.route('**/v1/orders', async (route) => {
-      if (loseOrder && route.request().method() === 'POST') {
-        loseOrder = false
-        await route.fetch()
-        await route.abort('failed')
-      } else await route.continue()
-    })
-    await page
-      .getByRole('button', { name: 'Create unpaid order', exact: true })
-      .click()
-    await expect(
-      page.getByRole('button', { name: 'Retry same request', exact: true }),
-    ).toBeVisible()
-    await page.reload()
-    await expect(
-      page.getByText('PENDING_PAYMENT', { exact: true }),
-    ).toBeVisible()
-    expect(
-      await f.db.order.count({ where: { customerId: customer.user.id } }),
-    ).toBe(1)
-    await expect(
-      page.getByRole('button', { name: 'Simulate TEST payment', exact: true }),
-    ).toBeDisabled()
-    await expect(
-      page.getByText('Payment confirmed by the server.', { exact: true }),
-    ).toHaveCount(0)
-    const order = await f.db.order.findFirstOrThrow({
-      where: { customerId: customer.user.id },
-    })
-    expect(order.totalMinor).toBe(2190)
-    expect(
-      (
-        await request.get('/v1/orders/' + order.id, {
+        await request.get('/v1/checkout/reservations/' + hold.id, {
           headers: bearer(other.token),
         })
       ).status(),
     ).toBe(404)
-    expect(
-      (
-        await f.db.inventoryBalance.findUniqueOrThrow({
-          where: { productId: product.id },
-        })
-      ).onHand,
-    ).toBe(5)
-    page.once('dialog', (dialog) => dialog.accept())
+    await page.reload()
+    await expect(
+      page.getByRole('button', {
+        name: 'Release previous stock hold',
+        exact: true,
+      }),
+    ).toBeVisible()
     await page
-      .getByRole('button', { name: 'Cancel unpaid order', exact: true })
+      .getByRole('button', { name: 'Release previous stock hold', exact: true })
       .click()
-    await expect(page.getByText('CANCELLED', { exact: true })).toBeVisible()
-    expect(
-      (
-        await f.db.inventoryBalance.findUniqueOrThrow({
-          where: { productId: product.id },
-        })
-      ).reservedQuantity,
-    ).toBe(0)
-    expect(errors).toEqual([])
+    await expect(
+      page.getByRole('button', {
+        name: 'Continue to Stripe Checkout',
+        exact: true,
+      }),
+    ).toBeEnabled()
+    const balance = await f.db.inventoryBalance.findUniqueOrThrow({
+      where: { productId: product.id },
+    })
+    expect(balance).toMatchObject({ onHand: 5, reservedQuantity: 0 })
   } finally {
     if (couponId) {
       await f.db.couponRedemption.deleteMany({ where: { couponId } })

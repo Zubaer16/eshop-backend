@@ -20,14 +20,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     const headers = bearer(customer.token),
       admin = bearer(owner.token)
     const product = await f.product(owner.token)
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers,
-          data: { productId: product.id, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(headers, { productId: product.id, quantity: 1 })
     const coupon = await f.coupon(owner.token, { usageLimit: 1 })
     const input = {
       countryCode: f.countryCode,
@@ -35,7 +28,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     }
     const estimate = await request.post('/v1/checkout/estimate', {
       headers,
-      data: input,
+      data: { ...input, items: f.selections(headers) },
     })
     expect(estimate.status()).toBe(200)
     expect(await estimate.json()).toMatchObject({
@@ -49,9 +42,9 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     expect(
       await f.db.couponRedemption.count({ where: { couponId: coupon.id } }),
     ).toBe(0)
-    const options = await request.get('/v1/checkout/delivery-options', {
+    const options = await request.post('/v1/checkout/delivery-options', {
       headers,
-      params: input,
+      data: { ...input, items: f.selections(headers) },
     })
     expect(options.status()).toBe(200)
     expect(await options.json()).toMatchObject({
@@ -62,7 +55,7 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     const reserve = () =>
       request.post('/v1/checkout/reservations', {
         headers,
-        data: { ...input, requestId },
+        data: { ...{ ...input, requestId }, items: f.selections(headers) },
       })
     const holds = await Promise.all([reserve(), reserve()])
     expect(holds.map((r) => r.status())).toEqual([200, 200])
@@ -80,7 +73,10 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
       (
         await request.post('/v1/checkout/reservations', {
           headers,
-          data: { requestId, countryCode: f.countryCode },
+          data: {
+            ...{ requestId, countryCode: f.countryCode },
+            items: f.selections(headers),
+          },
         })
       ).status(),
     ).toBe(409)
@@ -144,7 +140,10 @@ test('promotions DB: discount quote/hold/order snapshots, retry, post-discount t
     ).toMatchObject({ discountMinor: 130, totalMinor: 1385 })
     expect(
       await (
-        await request.post('/v1/checkout/estimate', { headers, data: input })
+        await request.post('/v1/checkout/estimate', {
+          headers,
+          data: { ...input, items: f.selections(headers) },
+        })
       ).json(),
     ).toMatchObject({ discountMinor: 500, estimatedTotalMinor: 978 })
   } finally {
@@ -169,21 +168,17 @@ test('promotions DB: last global coupon slot is serialized across customers; rel
       perCustomerLimit: 1,
     })
     for (const user of users)
-      expect(
-        (
-          await request.put('/v1/cart/items', {
-            headers: bearer(user.token),
-            data: { productId: product.id, quantity: 1 },
-          })
-        ).status(),
-      ).toBe(200)
+      f.selectItems(bearer(user.token), { productId: product.id, quantity: 1 })
     const reserve = (index: number) =>
       request.post('/v1/checkout/reservations', {
         headers: bearer(users[index]!.token),
         data: {
-          requestId: randomUUID(),
-          countryCode: f.countryCode,
-          couponCode: coupon.code,
+          ...{
+            requestId: randomUUID(),
+            countryCode: f.countryCode,
+            couponCode: coupon.code,
+          },
+          items: f.selections(bearer(users[index]!.token)),
         },
       })
     const results = await Promise.all([reserve(0), reserve(1)])
@@ -233,14 +228,7 @@ test('promotions DB: exact category eligibility, fixed cap, disabled/expired/cur
     const a = await f.product(owner.token, 'eligible', 500, 1)
     const b = await f.product(owner.token, 'other', 1000)
     for (const product of [a, b])
-      expect(
-        (
-          await request.put('/v1/cart/items', {
-            headers,
-            data: { productId: product.id, quantity: 1 },
-          })
-        ).status(),
-      ).toBe(200)
+      f.selectItems(headers, { productId: product.id, quantity: 1 })
     const coupon = await f.coupon(owner.token, {
       kind: 'FIXED',
       value: 900,
@@ -250,7 +238,10 @@ test('promotions DB: exact category eligibility, fixed cap, disabled/expired/cur
     const quote = (code: string) =>
       request.post('/v1/checkout/estimate', {
         headers,
-        data: { countryCode: f.countryCode, couponCode: code },
+        data: {
+          ...{ countryCode: f.countryCode, couponCode: code },
+          items: f.selections(headers),
+        },
       })
     expect(await (await quote(coupon.code)).json()).toMatchObject({
       discountMinor: 400,
@@ -280,9 +271,12 @@ test('promotions DB: exact category eligibility, fixed cap, disabled/expired/cur
         await request.post('/v1/checkout/reservations', {
           headers,
           data: {
-            requestId: randomUUID(),
-            countryCode: f.countryCode,
-            couponCode: coupon.code,
+            ...{
+              requestId: randomUUID(),
+              countryCode: f.countryCode,
+              couponCode: coupon.code,
+            },
+            items: f.selections(headers),
           },
         })
       ).status(),
@@ -306,9 +300,12 @@ test('promotions DB: exact category eligibility, fixed cap, disabled/expired/cur
         await request.post('/v1/checkout/reservations', {
           headers,
           data: {
-            requestId: randomUUID(),
-            countryCode: f.countryCode,
-            couponCode: free.code,
+            ...{
+              requestId: randomUUID(),
+              countryCode: f.countryCode,
+              couponCode: free.code,
+            },
+            items: f.selections(headers),
           },
         })
       ).status(),
@@ -332,10 +329,7 @@ test('promotions DB: campaign scheduling/public privacy, linked coupon gating, r
     const admin = bearer(owner.token),
       headers = bearer(customer.token)
     const product = await f.product(owner.token)
-    await request.put('/v1/cart/items', {
-      headers,
-      data: { productId: product.id, quantity: 1 },
-    })
+    f.selectItems(headers, { productId: product.id, quantity: 1 })
     const active = await f.campaign(owner.token, { status: 'SCHEDULED' })
     const future = await f.campaign(owner.token, {
       startsAt: new Date(Date.now() + 100000).toISOString(),
@@ -364,7 +358,10 @@ test('promotions DB: campaign scheduling/public privacy, linked coupon gating, r
     const quote = () =>
       request.post('/v1/checkout/estimate', {
         headers,
-        data: { countryCode: f.countryCode, couponCode: coupon.code },
+        data: {
+          ...{ countryCode: f.countryCode, couponCode: coupon.code },
+          items: f.selections(headers),
+        },
       })
     expect((await quote()).status()).toBe(200)
     expect(
@@ -449,10 +446,7 @@ test('promotions DB: discounted amount drives verified settlement/refund ceiling
     const headers = bearer(customer.token),
       admin = bearer(owner.token)
     const product = await f.product(owner.token)
-    await request.put('/v1/cart/items', {
-      headers,
-      data: { productId: product.id, quantity: 1 },
-    })
+    f.selectItems(headers, { productId: product.id, quantity: 1 })
     const coupon = await f.coupon(owner.token, {
       usageLimit: null,
       perCustomerLimit: 1,
@@ -460,9 +454,12 @@ test('promotions DB: discounted amount drives verified settlement/refund ceiling
     const holdResponse = await request.post('/v1/checkout/reservations', {
       headers,
       data: {
-        requestId: randomUUID(),
-        countryCode: f.countryCode,
-        couponCode: coupon.code,
+        ...{
+          requestId: randomUUID(),
+          countryCode: f.countryCode,
+          couponCode: coupon.code,
+        },
+        items: f.selections(headers),
       },
     })
     expect(holdResponse.status()).toBe(200)
@@ -578,20 +575,23 @@ test('promotions DB: discounted amount drives verified settlement/refund ceiling
       (
         await request.post('/v1/checkout/estimate', {
           headers,
-          data: { countryCode: f.countryCode, couponCode: coupon.code },
+          data: {
+            ...{ countryCode: f.countryCode, couponCode: coupon.code },
+            items: f.selections(headers),
+          },
         })
       ).status(),
     ).toBe(422)
     const another = await f.account('CUSTOMER')
-    await request.put('/v1/cart/items', {
-      headers: bearer(another.token),
-      data: { productId: product.id, quantity: 1 },
-    })
+    f.selectItems(bearer(another.token), { productId: product.id, quantity: 1 })
     expect(
       (
         await request.post('/v1/checkout/estimate', {
           headers: bearer(another.token),
-          data: { countryCode: f.countryCode, couponCode: coupon.code },
+          data: {
+            ...{ countryCode: f.countryCode, couponCode: coupon.code },
+            items: f.selections(bearer(another.token)),
+          },
         })
       ).status(),
     ).toBe(200) // Per-customer restriction does not become an accidental global limit.
@@ -617,18 +617,21 @@ test('promotions DB: competing discounted holds cannot oversell one SKU or leave
       f.account('CUSTOMER'),
     ])
     for (const customer of customers)
-      await request.put('/v1/cart/items', {
-        headers: bearer(customer.token),
-        data: { productId: product.id, quantity: 1 },
+      f.selectItems(bearer(customer.token), {
+        productId: product.id,
+        quantity: 1,
       })
     const responses = await Promise.all(
       customers.map((customer) =>
         request.post('/v1/checkout/reservations', {
           headers: bearer(customer.token),
           data: {
-            requestId: randomUUID(),
-            countryCode: f.countryCode,
-            couponCode: coupon.code,
+            ...{
+              requestId: randomUUID(),
+              countryCode: f.countryCode,
+              couponCode: coupon.code,
+            },
+            items: f.selections(bearer(customer.token)),
           },
         }),
       ),

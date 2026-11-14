@@ -378,17 +378,13 @@ test('notifications DB: real order authority, owned target and forged unpaid set
     await p.rate()
     const product = await p.product(owner.token, 'notification-order', 1000, 20)
     const headers = bearer(customer.token)
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers,
-          data: { productId: product.id, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(headers, { productId: product.id, quantity: 1 })
     const hold = await request.post('/v1/checkout/reservations', {
       headers,
-      data: { requestId: randomUUID(), countryCode: p.countryCode },
+      data: {
+        ...{ requestId: randomUUID(), countryCode: p.countryCode },
+        items: f.selections(headers),
+      },
     })
     expect(hold.status()).toBe(200)
     const orderResponse = await request.post('/v1/orders', {

@@ -23,7 +23,7 @@ import {
 import type { Request, Response } from 'express'
 import { AccessGuard } from '../auth/access.guard'
 import { AuthenticatedRequest } from '../auth/auth.types'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import {
   PaymentPreparationResponseDto,
   TestCardCompletionResponseDto,
@@ -34,7 +34,7 @@ import { PaymentsService } from './payments.service'
 @ApiTags('Payments / Customer')
 @ApiBearerAuth('access-token')
 @Controller('payments/orders')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 export class PaymentCustomerController {
   constructor(
     private readonly payments: PaymentsService,

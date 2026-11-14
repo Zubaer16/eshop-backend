@@ -14,7 +14,6 @@ import { AuthModule } from './auth/auth.module'
 import { CatalogModule } from './catalog/catalog.module'
 import { InventoryModule } from './inventory/inventory.module'
 import { MediaModule } from './media/media.module'
-import { CartModule } from './cart/cart.module'
 import { CheckoutModule } from './checkout/checkout.module'
 import { OrdersModule } from './orders/orders.module'
 import { PaymentsModule } from './payments/payments.module'
@@ -43,7 +42,6 @@ import { StoreOperationsModule } from './store-operations/store-operations.modul
     CatalogModule,
     InventoryModule,
     MediaModule,
-    CartModule,
     CheckoutModule,
     OrdersModule,
     PaymentsModule,

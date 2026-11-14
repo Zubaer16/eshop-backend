@@ -8,7 +8,7 @@ import {
 import { CheckoutService } from './checkout.service'
 import { CheckoutOwnerGuard } from './checkout.owner.guard'
 import { ReservationService } from './reservation.service'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import { DeliveryZonesAdminController } from './delivery-zones.controller'
 import { DeliveryZonesService } from './delivery-zones.service'
 
@@ -23,7 +23,7 @@ import { DeliveryZonesService } from './delivery-zones.service'
     CheckoutService,
     ReservationService,
     CheckoutOwnerGuard,
-    CustomerCartGuard,
+    CustomerGuard,
     DeliveryZonesService,
   ],
   exports: [ReservationService],

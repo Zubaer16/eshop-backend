@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { CouponSelectionDto } from '../promotions/promotions.dto'
+import { CheckoutItemsDto } from './checkout-items.dto'
 import { DELIVERY_KINDS, type DeliveryKindInput } from './delivery-zones.dto'
 import {
   IsBoolean,
@@ -15,7 +15,7 @@ import {
 const MONEY_MAX = 2_147_483_647
 
 /** Country code is an ISO 3166-1 alpha-2 identifier; validate supported lanes via owner configuration. */
-export class CheckoutEstimateDto extends CouponSelectionDto {
+export class CheckoutEstimateDto extends CheckoutItemsDto {
   @ApiProperty({ example: 'US', minLength: 2, maxLength: 2 })
   @IsString()
   @Matches(/^[A-Z]{2}$/)
@@ -95,7 +95,6 @@ export class CheckoutRateResponseDto extends PutCheckoutRateDto {
 }
 
 export class CheckoutEstimateResponseDto {
-  @ApiProperty({ format: 'uuid' }) cartId!: string
   @ApiProperty({ example: 'US' }) countryCode!: string
   @ApiProperty({ example: 'USD' }) currency!: string
   @ApiProperty({ type: 'integer' }) discountMinor!: number

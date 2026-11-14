@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AuthModule } from '../auth/auth.module'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import { OrdersCustomerController } from './orders.controller'
 import { OrdersService } from './orders.service'
 import { FulfillmentAdminController } from './fulfillment/fulfillment.controller'
@@ -36,7 +36,7 @@ import {
   ],
   providers: [
     OrdersService,
-    CustomerCartGuard,
+    CustomerGuard,
     FulfillmentService,
     FulfillmentManageGuard,
     ReturnsService,

@@ -52,17 +52,13 @@ test('tracking real DB: customer-owned timeline joins shipment, inspected return
         freeOverSubtotalMinor: null,
       },
     })
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(customer.token),
-          data: { productId, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(bearer(customer.token), { productId, quantity: 1 })
     const hold = await request.post('/v1/checkout/reservations', {
       headers: bearer(customer.token),
-      data: { requestId: randomUUID(), countryCode },
+      data: {
+        ...{ requestId: randomUUID(), countryCode },
+        items: f.selections(bearer(customer.token)),
+      },
     })
     expect(hold.status()).toBe(200)
     const placed = await request.post('/v1/orders', {

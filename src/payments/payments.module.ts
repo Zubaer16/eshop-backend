@@ -5,7 +5,7 @@ import { HostedCheckoutService } from './hosted-checkout.service'
 import { StripeCheckoutGateway } from './providers/stripe-checkout-gateway'
 import { Module } from '@nestjs/common'
 import { AuthModule } from '../auth/auth.module'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import {
   PaymentCustomerController,
   PaymentWebhookController,
@@ -41,7 +41,7 @@ import {
     PaymentTestCompletionService,
     RefundLedgerService,
     RefundExecutionService,
-    CustomerCartGuard,
+    CustomerGuard,
   ],
   exports: [
     PaymentSettlementService,

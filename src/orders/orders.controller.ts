@@ -24,7 +24,7 @@ import {
 } from '@nestjs/swagger'
 import { AccessGuard } from '../auth/access.guard'
 import { AuthenticatedRequest } from '../auth/auth.types'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import { CreateOrderDto, OrderQueryDto, OrderResponseDto } from './orders.dto'
 import { OrdersService } from './orders.service'
 import { CustomerOrderPageDto } from './orders.response'
@@ -32,7 +32,7 @@ import { CustomerOrderPageDto } from './orders.response'
 @ApiTags('Orders / Customer')
 @ApiBearerAuth('access-token')
 @Controller('orders')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @ApiUnauthorizedResponse({ description: 'Customer JWT required' })
 @ApiForbiddenResponse({
   description: 'Only CUSTOMER accounts may access orders',

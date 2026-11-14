@@ -39,15 +39,12 @@ test('checkout estimate isolated DB: configured country estimate, threshold, liv
     })
     expect(created.status()).toBe(201)
     const productId = (await created.json()).id as string
-    const putCart = await request.put('/v1/cart/items', {
-      headers: auth,
-      data: { productId, quantity: 2 },
-    })
-    expect(putCart.status()).toBe(200)
+    f.selectItems(auth, { productId, quantity: 2 })
+
     const quote = () =>
       request.post('/v1/checkout/estimate', {
         headers: auth,
-        data: { countryCode },
+        data: { ...{ countryCode }, items: f.selections(auth) },
       })
     // Unconfigured lanes fail closed; no hidden default rate or implicit free shipping.
     await f.db.checkoutRate.deleteMany({ where: { countryCode, currency } })
@@ -118,7 +115,10 @@ test('checkout estimate isolated DB: configured country estimate, threshold, liv
     expect((await quote()).status()).toBe(200)
     const stockCheck = await request.post('/v1/checkout/reservations', {
       headers: auth,
-      data: { countryCode, requestId: randomUUID() },
+      data: {
+        ...{ countryCode, requestId: randomUUID() },
+        items: f.selections(auth),
+      },
     })
     expect(stockCheck.status()).toBe(409)
     expect(await stockCheck.json()).toMatchObject({

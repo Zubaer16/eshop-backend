@@ -14,7 +14,7 @@ test('store operations Swagger: public config and OWNER-only zone/operations con
     ['post', '/v1/admin/checkout/zones', 'Delivery Zones / Admin', true],
     ['put', '/v1/admin/checkout/zones/{id}', 'Delivery Zones / Admin', true],
     ['delete', '/v1/admin/checkout/zones/{id}', 'Delivery Zones / Admin', true],
-    ['get', '/v1/checkout/delivery-options', 'Checkout / Customer', true],
+    ['post', '/v1/checkout/delivery-options', 'Checkout / Customer', true],
   ] as const) {
     const op = doc.paths[path]?.[method]
     expect(op, `${method} ${path}`).toBeDefined()
@@ -46,8 +46,8 @@ test('store operations Swagger: public config and OWNER-only zone/operations con
   expect((await request.get('/v1/admin/store/operations')).status()).toBe(401)
   expect(
     (
-      await request.get('/v1/checkout/delivery-options', {
-        params: { countryCode: 'AQ' },
+      await request.post('/v1/checkout/delivery-options', {
+        data: { countryCode: 'AQ' },
       })
     ).status(),
   ).toBe(401)

@@ -136,14 +136,7 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
     })
     expect(product.status()).toBe(201)
     const productId: string = (await product.json()).id
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: customerAuth,
-          data: { productId, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(customerAuth, { productId, quantity: 1 })
     await f.db.checkoutRate.upsert({
       where: { countryCode_currency: { countryCode, currency } },
       create: {
@@ -163,7 +156,10 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
     const quote = (deliveryKind?: string) =>
       request.post('/v1/checkout/estimate', {
         headers: customerAuth,
-        data: deliveryKind ? { countryCode, deliveryKind } : { countryCode },
+        data: {
+          ...(deliveryKind ? { countryCode, deliveryKind } : { countryCode }),
+          items: f.selections(customerAuth),
+        },
       })
     // Old flat-rate lanes remain valid until a zone is configured.
     expect(await (await quote()).json()).toMatchObject({
@@ -191,9 +187,9 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
         })
       ).status(),
     ).toBe(409)
-    const available = await request.get('/v1/checkout/delivery-options', {
+    const available = await request.post('/v1/checkout/delivery-options', {
       headers: customerAuth,
-      params: { countryCode },
+      data: { ...{ countryCode }, items: f.selections(customerAuth) },
     })
     expect(available.status()).toBe(200)
     expect(await available.json()).toMatchObject({
@@ -229,14 +225,7 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
       estimatedTotalMinor: 1779,
     })
     // The configured threshold applies to standard only; express retains its fee.
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: customerAuth,
-          data: { productId, quantity: 2 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(customerAuth, { productId, quantity: 2 })
     expect(await (await quote('standard')).json()).toMatchObject({
       subtotalMinor: 2598,
       shippingMinor: 0,
@@ -249,18 +238,14 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
       taxMinor: 260,
       estimatedTotalMinor: 3208,
     })
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: customerAuth,
-          data: { productId, quantity: 1 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(customerAuth, { productId, quantity: 1 })
     const requestId = randomUUID()
     const reserved = await request.post('/v1/checkout/reservations', {
       headers: customerAuth,
-      data: { requestId, countryCode, deliveryKind: 'express' },
+      data: {
+        ...{ requestId, countryCode, deliveryKind: 'express' },
+        items: f.selections(customerAuth),
+      },
     })
     expect(reserved.status()).toBe(200)
     const hold = await reserved.json()
@@ -274,7 +259,10 @@ test('store operations DB: country/service quote->hold->order snapshots; legacy 
       (
         await request.post('/v1/checkout/reservations', {
           headers: customerAuth,
-          data: { requestId, countryCode, deliveryKind: 'standard' },
+          data: {
+            ...{ requestId, countryCode, deliveryKind: 'standard' },
+            items: f.selections(customerAuth),
+          },
         })
       ).status(),
     ).toBe(409)

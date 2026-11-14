@@ -65,18 +65,14 @@ test('orders real DB: order allocation, immutable snapshot, replay, competition,
       },
     })
     for (const user of [first, second]) {
-      expect(
-        (
-          await request.put('/v1/cart/items', {
-            headers: bearer(user.token),
-            data: { productId, quantity: 3 },
-          })
-        ).status(),
-      ).toBe(200)
+      f.selectItems(bearer(user.token), { productId, quantity: 3 })
     }
     const reservation = await request.post('/v1/checkout/reservations', {
       headers: bearer(first.token),
-      data: { requestId: randomUUID(), countryCode },
+      data: {
+        ...{ requestId: randomUUID(), countryCode },
+        items: f.selections(bearer(first.token)),
+      },
     })
     expect(reservation.status()).toBe(200)
     const hold = await reservation.json()
@@ -154,7 +150,10 @@ test('orders real DB: order allocation, immutable snapshot, replay, competition,
       (
         await request.post('/v1/checkout/reservations', {
           headers: bearer(second.token),
-          data: { countryCode, requestId: randomUUID() },
+          data: {
+            ...{ countryCode, requestId: randomUUID() },
+            items: f.selections(bearer(second.token)),
+          },
         })
       ).status(),
     ).toBe(409)
@@ -210,7 +209,10 @@ test('orders real DB: order allocation, immutable snapshot, replay, competition,
     // Re-create a reservation/order using the newly unreserved availability.
     const nextHold = await request.post('/v1/checkout/reservations', {
       headers: bearer(second.token),
-      data: { countryCode, requestId: randomUUID() },
+      data: {
+        ...{ countryCode, requestId: randomUUID() },
+        items: f.selections(bearer(second.token)),
+      },
     })
     expect(nextHold.status()).toBe(200)
     const next = await request.post('/v1/orders', {

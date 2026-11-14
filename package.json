@@ -26,7 +26,6 @@
     "test:api:report": "node scripts/run-api-tests.cjs report",
     "test:api:visual:smoke": "npm run build && node scripts/run-api-tests.cjs visual-smoke",
     "test:api:visual:all": "npm run build && node scripts/run-api-tests.cjs visual-db",
-    "test:api:visual:guest": "npm run build && node scripts/run-api-tests.cjs visual-guest",
     "test:api:visual:report": "node scripts/run-api-tests.cjs visual-report",
     "test:api:security": "npm run build && node scripts/run-api-tests.cjs security",
     "media:cleanup": "npm run build && node -r dotenv/config dist/tools/media-cleanup.js",
@@ -86,7 +85,7 @@
     "release:gate": "node scripts/release-acceptance-gate.cjs",
     "release:tooling:test": "node --test scripts/release-*.spec.cjs",
     "test:web:integration": "npm run build && npm run test:web:auth:types && node scripts/run-api-tests.cjs web-integration",
-    "test:api:cart-add": "npm run build && node scripts/run-api-tests.cjs cart-add"
+    "test:api:checkout": "npm run build && node scripts/run-api-tests.cjs checkout"
   },
   "engines": {
     "node": ">=24.11.0 <25"

@@ -183,13 +183,10 @@ export async function openSwagger(page: Page): Promise<void> {
   await expect(page.locator('.swagger-ui .opblock').first()).toBeVisible()
 }
 
-/** Authorize only the named security scheme. The UI now has two schemes:
- * customer JWT and an independent guest API-key capability. Never assume
- * that the first modal input is the intended security scheme.
- */
+/** Authorize the customer/staff bearer scheme. */
 async function authorizeSchemeInSwagger(
   page: Page,
-  schemeName: 'access-token' | 'guest-cart-token',
+  schemeName: 'access-token',
   token: string,
 ): Promise<void> {
   await page.locator('.swagger-ui .scheme-container button.authorize').click()
@@ -230,11 +227,4 @@ export async function authorizeInSwagger(
   token: string,
 ): Promise<void> {
   await authorizeSchemeInSwagger(page, 'access-token', token)
-}
-
-export async function authorizeGuestCartInSwagger(
-  page: Page,
-  token: string,
-): Promise<void> {
-  await authorizeSchemeInSwagger(page, 'guest-cart-token', token)
 }

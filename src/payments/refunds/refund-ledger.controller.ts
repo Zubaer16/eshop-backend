@@ -21,7 +21,7 @@ import {
 } from '@nestjs/swagger'
 import { AccessGuard } from '../../auth/access.guard'
 import { AdminGuard } from '../../auth/admin.guard'
-import { CustomerCartGuard } from '../../cart/cart.customer.guard'
+import { CustomerGuard } from '../../auth/customer.guard'
 import { AuthenticatedRequest } from '../../auth/auth.types'
 import { RefundLedgerService } from './refund-ledger.service'
 import {
@@ -72,7 +72,7 @@ export class RefundLedgerOwnerController {
 @ApiTags('Payments / Customer')
 @ApiBearerAuth('access-token')
 @Controller('payments/orders')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 export class RefundLedgerCustomerController {
   constructor(private readonly refunds: RefundLedgerService) {}
 

@@ -25,7 +25,7 @@ import {
 } from '@nestjs/swagger'
 import { AccessGuard } from '../auth/access.guard'
 import type { AuthenticatedRequest } from '../auth/auth.types'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import { AccountService } from './account.service'
 import {
   CustomerAddressDeleteDto,
@@ -39,7 +39,7 @@ import {
 
 @ApiTags('Account / Customer')
 @Controller('account')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @ApiBearerAuth('access-token')
 @ApiUnauthorizedResponse({ description: 'Customer access JWT required' })
 @ApiForbiddenResponse({

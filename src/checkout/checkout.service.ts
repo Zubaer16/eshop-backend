@@ -6,8 +6,8 @@ import {
 import { PromotionsService } from '../promotions/promotions.service'
 import { DatabaseService } from '../database/database.service'
 import { Prisma } from '../generated/prisma/client'
-import { draftQuoteIncludes } from '../cart/cart.service'
-import { calculateCartQuote } from '../cart/cart.quote'
+import { loadCheckoutItems } from './checkout-items'
+import { calculateCartQuote } from './cart.quote'
 import { CheckoutEstimateDto, PutCheckoutRateDto } from './checkout.dto'
 import { estimateConfiguredCharges } from './checkout.pricing'
 import { DeliveryZonesService } from './delivery-zones.service'
@@ -25,16 +25,9 @@ export class CheckoutService {
   async estimate(customerId: string, input: CheckoutEstimateDto) {
     return this.database.client.$transaction(
       async (tx) => {
-        const cart = await tx.cart.findUnique({
-          where: { userId: customerId },
-          include: draftQuoteIncludes,
-        })
-        const quote = calculateCartQuote(
-          cart?.id ?? null,
-          cart?.items ?? [],
-          false,
-        )
-        if (!quote.checkoutReady || !quote.cartId || !quote.currency)
+        const items = await loadCheckoutItems(tx, input.items, false)
+        const quote = calculateCartQuote(null, items, false)
+        if (!quote.checkoutReady || !quote.currency)
           throw new ConflictException({
             message: 'Cart is not checkout-ready',
             issues: quote.issues,
@@ -63,7 +56,7 @@ export class CheckoutService {
           customerId,
           quote.currency,
           quote.subtotalMinor,
-          cart!.items,
+          items,
           input.couponCode,
         )
         const charges = estimateConfiguredCharges(
@@ -74,7 +67,6 @@ export class CheckoutService {
           discount.discountMinor,
         )
         return {
-          cartId: quote.cartId,
           countryCode: input.countryCode,
           currency: quote.currency,
           subtotalMinor: quote.subtotalMinor,
@@ -102,20 +94,13 @@ export class CheckoutService {
    */
   async deliveryOptions(
     customerId: string,
-    countryCode: string,
-    couponCode?: string,
+    input: CheckoutEstimateDto,
   ): Promise<AvailableDeliveryOptionsDto> {
+    const { countryCode, couponCode } = input
     return this.database.client.$transaction(
       async (tx) => {
-        const cart = await tx.cart.findUnique({
-          where: { userId: customerId },
-          include: draftQuoteIncludes,
-        })
-        const quote = calculateCartQuote(
-          cart?.id ?? null,
-          cart?.items ?? [],
-          false,
-        )
+        const items = await loadCheckoutItems(tx, input.items, false)
+        const quote = calculateCartQuote(null, items, false)
         if (!quote.checkoutReady || !quote.currency)
           throw new ConflictException('Cart is not checkout-ready')
         const currency = quote.currency
@@ -131,7 +116,7 @@ export class CheckoutService {
           customerId,
           currency,
           quote.subtotalMinor,
-          cart!.items,
+          items,
           couponCode,
         )
         const available = await this.zones.options(

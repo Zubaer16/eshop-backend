@@ -82,11 +82,9 @@ function evaluate(roots) {
       roots.backend,
       'src/media/media.controller.ts',
     ),
-    backendCartController: read(roots.backend, 'src/cart/cart.controller.ts'),
-    backendGuestController: read(
-      roots.backend,
-      'src/cart/guest-cart.controller.ts',
-    ),
+    localCartStore: read(roots.storefront, 'lib/stores/shopping-store.ts'),
+    localCartModel: read(roots.storefront, 'lib/stores/local-cart.ts'),
+    checkoutItemsDto: read(roots.backend, 'src/checkout/checkout-items.dto.ts'),
     backendCheckoutController: read(
       roots.backend,
       'src/checkout/checkout.controller.ts',
@@ -137,7 +135,11 @@ function evaluate(roots) {
       'src/inventory/inventory.controller.ts',
       'src/auth/customer-auth.controller.ts',
     ],
-    admin: ['lib/api/catalog.ts', 'components/catalog/inventory.tsx', 'lib/admin-access.ts'],
+    admin: [
+      'lib/api/catalog.ts',
+      'components/catalog/inventory.tsx',
+      'lib/admin-access.ts',
+    ],
     storefront: [
       'lib/api/catalog.ts',
       'lib/api/client.ts',
@@ -184,7 +186,8 @@ function evaluate(roots) {
         source.backendInventoryController,
       ) &&
       /requestId!: string/.test(source.backendInventoryDto) &&
-      /requestId: crypto.randomUUID\(\)/.test(source.adminStore) && /\/adjustments/.test(source.adminStore) &&
+      /requestId: crypto.randomUUID\(\)/.test(source.adminStore) &&
+      /\/adjustments/.test(source.adminStore) &&
       /productId\?: string/.test(source.backendInventoryDto) &&
       /variantId\?: string/.test(source.backendInventoryDto),
     'catalog-stock-guard':
@@ -210,7 +213,8 @@ function evaluate(roots) {
       /accessToken!: string/.test(source.backendAuthDto) &&
       /authorization/i.test(source.backendAuthGuard),
     'staff-permissions':
-      /sectionAccess/.test(source.adminPermissions) && /user.permissions.includes/.test(source.adminPermissions) &&
+      /sectionAccess/.test(source.adminPermissions) &&
+      /user.permissions.includes/.test(source.adminPermissions) &&
       /model StaffRole\s*\{/.test(source.backendSchema) &&
       /model StaffRolePermission\s*\{/.test(source.backendSchema) &&
       /model StaffRoleAssignment\s*\{/.test(source.backendSchema),
@@ -221,19 +225,16 @@ function evaluate(roots) {
       /@Put\('products\/:id\/media'\)/.test(source.backendMediaController) &&
       /gallery/.test(source.backendCatalogPresentation),
     'customer-cart':
-      /@Controller\('cart'\)/.test(source.backendCartController) &&
-      /@Put\('items'\)/.test(source.backendCartController) &&
-      /@Get\('quote'\)/.test(source.backendCartController) &&
-      /model Cart\s*\{/.test(source.backendSchema) &&
-      /model CartItem\s*\{/.test(source.backendSchema) &&
-      /type CartQuote/.test(source.storefrontContracts),
+      /createStore/.test(source.localCartStore) &&
+      /localStorage/.test(source.localCartStore) &&
+      /cartStorageKey/.test(source.localCartModel) &&
+      /class CheckoutItemDto/.test(source.checkoutItemsDto) &&
+      !/model Cart\s*\{/.test(source.backendSchema),
     'guest-cart':
-      /@Controller\('guest-cart'\)/.test(source.backendGuestController) &&
-      /@Put\('items'\)/.test(source.backendGuestController) &&
-      /@Post\('merge'\)/.test(source.backendCartController) &&
-      /model GuestCart\s*\{/.test(source.backendSchema) &&
-      /model GuestCartItem\s*\{/.test(source.backendSchema) &&
-      /type CartQuote/.test(source.storefrontContracts),
+      /mergeGuest/.test(source.localCartStore) &&
+      /navigator.locks/.test(source.localCartStore) &&
+      /guest/.test(source.localCartModel) &&
+      !/model GuestCart\s*\{/.test(source.backendSchema),
     'commerce-future':
       /type CartQuote/.test(source.storefrontContracts) &&
       /@Controller\('checkout'\)/.test(source.backendCheckoutController) &&
@@ -284,8 +285,12 @@ function evaluate(roots) {
       /@Post\('collections'\)/.test(source.backendMerchandisingController) &&
       /model StoreBanner\s*\{/.test(source.backendSchema) &&
       /model FeaturedCollection\s*\{/.test(source.backendSchema) &&
-       /SaveStoreBannerDto/.test(read(roots.admin, 'lib/api/management-contract.ts')) &&
-      /SaveFeaturedCollectionDto/.test(read(roots.admin, 'lib/api/management-contract.ts')) &&
+      /SaveStoreBannerDto/.test(
+        read(roots.admin, 'lib/api/management-contract.ts'),
+      ) &&
+      /SaveFeaturedCollectionDto/.test(
+        read(roots.admin, 'lib/api/management-contract.ts'),
+      ) &&
       /type Home/.test(source.storefrontContentDraft) &&
       /\/v1\/store\/homepage/.test(source.storefrontContentDraft),
     'status-shape':
@@ -302,7 +307,9 @@ function evaluate(roots) {
       /readProduct/.test(source.storefrontCatalog) &&
       /validateSelection/.test(source.storefrontAdapters) &&
       !fs.existsSync(path.join(roots.storefront, 'lib/catalog.ts')) &&
-      !fs.existsSync(path.join(roots.admin, 'lib/fixtures.ts')) && !fs.existsSync(path.join(roots.admin, 'lib/store.ts')) && /isUuid/.test(source.adminCompatibilityDraft),
+      !fs.existsSync(path.join(roots.admin, 'lib/fixtures.ts')) &&
+      !fs.existsSync(path.join(roots.admin, 'lib/store.ts')) &&
+      /isUuid/.test(source.adminCompatibilityDraft),
   }
 
   const results = rules.findings.map((finding) => ({

@@ -35,26 +35,17 @@ async function login(
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page).toHaveURL(origin + next)
 }
-async function guestId(page: Page) {
-  return page.evaluate(async () => {
-    const response = await fetch('/api/cart/guest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-eShop-Cart': '1' },
-      body: JSON.stringify({ action: 'read' }),
-    })
-    const body = await response.json()
-    return typeof body.cart?.cartId === 'string' ? body.cart.cartId : null
-  })
-}
-test('guest cart persists, lost absolute-quantity acknowledgement retries safely, login merge and wishlist remain owned', async ({
+test('local guest cart persists, merges explicitly on login and remains isolated across accounts', async ({
   page,
   request,
 }) => {
   test.setTimeout(180000)
-  const f = new CatalogTestFixture(request),
-    guestIds: string[] = [],
-    errors: string[] = []
-  page.on('pageerror', (error) => errors.push(error.message))
+  const f = new CatalogTestFixture(request)
+  const cartRequests: string[] = []
+  page.on('request', (request) => {
+    if (/\/(?:v1\/(?:cart|guest-cart)|api\/cart)(?:[/?]|$)/.test(request.url()))
+      cartRequests.push(request.url())
+  })
   try {
     const owner = await f.account('OWNER'),
       customer = await register(f, request),
@@ -62,195 +53,64 @@ test('guest cart persists, lost absolute-quantity acknowledgement retries safely
     const category = await (
       await request.post('/v1/admin/categories', {
         headers: bearer(owner.token),
-        data: { name: 'Shopping ' + f.key, slug: f.slug('shop') },
+        data: { name: 'Local cart', slug: f.slug('shop') },
       })
     ).json()
-    const productResponse = await request.post('/v1/admin/products', {
-      headers: bearer(owner.token),
-      data: {
-        title: 'Shopping Item ' + f.key,
-        slug: f.slug('item'),
-        sku: f.sku('item'),
-        priceMinor: 125,
-        stockOnHand: 10,
-        status: 'ACTIVE',
-        categoryIds: [category.id],
-      },
-    })
-    expect(productResponse.status()).toBe(201)
-    const product = await productResponse.json()
-    const seeded = await (
-      await request.post('/v1/auth/login', {
-        data: { email: customer.email, password: customer.password },
+    const product = await (
+      await request.post('/v1/admin/products', {
+        headers: bearer(owner.token),
+        data: {
+          title: 'Local Item ' + f.key,
+          slug: f.slug('item'),
+          sku: f.sku('item'),
+          priceMinor: 125,
+          stockOnHand: 10,
+          status: 'ACTIVE',
+          categoryIds: [category.id],
+        },
       })
     ).json()
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(seeded.accessToken),
-          data: { productId: product.id, variantId: null, quantity: 9 },
-        })
-      ).status(),
-    ).toBe(200)
-    await request.post('/v1/auth/logout', {
-      data: { refreshToken: seeded.refreshToken },
-    })
     await page.goto(userOrigin + '/product/' + product.slug)
     await page.getByRole('button', { name: 'Add to cart', exact: true }).click()
     await expect(page.getByRole('dialog')).toContainText(product.title)
-    const firstGuest = await guestId(page)
-    expect(firstGuest).not.toBeNull()
-    guestIds.push(firstGuest!)
-    const cookies = await page.context().cookies(),
-      guest = cookies.find((cookie) => cookie.name === 'eshop-guest-cart')
-    expect(
-      Boolean(
-        guest?.httpOnly &&
-        guest.sameSite === 'Lax' &&
-        guest.expires > Date.now() / 1000,
-      ),
-    ).toBe(true)
-    expect(
-      await page.evaluate(() => document.cookie.includes('eshop-guest-cart')),
-    ).toBe(false)
     await page
       .getByRole('link', { name: 'Open full cart', exact: true })
       .click()
-    await expect(page).toHaveURL(userOrigin + '/cart')
-    await page.reload()
-    await expect(page.locator('main')).toContainText(product.title)
-    let dropped = false
-    await page.route('**/api/cart/guest', async (route) => {
-      const body = route.request().postDataJSON() as { action?: string }
-      if (!dropped && body.action === 'set') {
-        dropped = true
-        await route.fetch()
-        await route.abort('failed')
-      } else await route.continue()
-    })
     await page
       .getByLabel('Quantity for ' + product.sku, { exact: true })
-      .fill('2')
-    await page
-      .getByRole('button', { name: 'Update quantity', exact: true })
-      .click()
-    await expect(
-      page.getByRole('button', { name: 'Retry same cart change', exact: true }),
-    ).toBeVisible()
-    await page
-      .getByRole('button', { name: 'Retry same cart change', exact: true })
-      .click()
-    await expect(
-      page.getByRole('button', { name: 'Retry same cart change', exact: true }),
-    ).toHaveCount(0)
+      .fill('12')
     await page.reload()
     await expect(
       page.getByLabel('Quantity for ' + product.sku, { exact: true }),
-    ).toHaveValue('2')
-    await page
-      .getByRole('link', { name: 'Sign in to continue', exact: true })
-      .click()
-    await page.getByLabel('Email', { exact: true }).fill(customer.email)
-    await page.getByLabel('Password', { exact: true }).fill(customer.password)
-    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await expect(
-      page.getByRole('heading', {
-        name: 'Guest items waiting to merge',
-        exact: true,
-      }),
-    ).toBeVisible()
-    await page
-      .getByRole('button', { name: 'Merge guest cart', exact: true })
-      .click()
-    await expect(page.locator('main').getByRole('alert')).toBeVisible()
-    const waiting = page
-      .getByRole('heading', {
-        name: 'Guest items waiting to merge',
-        exact: true,
-      })
-      .locator('..')
-    await expect(
-      waiting.getByLabel('Quantity for ' + product.sku, { exact: true }),
-    ).toHaveValue('2')
-    await waiting
-      .getByLabel('Quantity for ' + product.sku, { exact: true })
-      .fill('1')
-    await waiting
-      .getByRole('button', { name: 'Update quantity', exact: true })
-      .click()
-    await expect(
-      waiting.getByLabel('Quantity for ' + product.sku, { exact: true }),
-    ).toHaveValue('1')
+    ).toHaveValue('12')
+    await login(page, userOrigin, customer, '/cart')
     await page
       .getByRole('button', { name: 'Merge guest cart', exact: true })
       .click()
     await expect(
-      page.getByRole('heading', {
-        name: 'Guest items waiting to merge',
-        exact: true,
-      }),
+      page.getByLabel('Quantity for ' + product.sku, { exact: true }),
+    ).toHaveValue('12')
+    await expect(
+      page.getByRole('heading', { name: 'Guest items waiting to merge' }),
     ).toHaveCount(0)
-    await expect(
-      page.getByLabel('Quantity for ' + product.sku, { exact: true }),
-    ).toHaveValue('10')
-    expect(
-      (await page.context().cookies()).some(
-        (cookie) => cookie.name === 'eshop-guest-cart',
-      ),
-    ).toBe(false)
-    await page.reload()
-    await expect(
-      page.getByLabel('Quantity for ' + product.sku, { exact: true }),
-    ).toHaveValue('10')
-    await page.goto(userOrigin + '/product/' + product.slug)
-    await page.getByRole('button', { name: 'Save item', exact: true }).click()
-    await expect(
-      page.getByRole('button', { name: 'Remove saved item', exact: true }),
-    ).toBeVisible()
-    await page.goto(userOrigin + '/wishlist')
-    await expect(
-      page.getByRole('link', { name: product.title, exact: true }),
-    ).toBeVisible()
-    await page.reload()
-    await expect(
-      page.getByRole('link', { name: product.title, exact: true }),
-    ).toBeVisible()
     await page.goto(userOrigin + '/account')
-    await expect(page.getByText(customer.email, { exact: true })).toBeVisible()
+    const loggedOut = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === '/api/auth/session' &&
+        response.request().postDataJSON()?.action === 'logout',
+    )
     await page.getByRole('button', { name: 'Sign out', exact: true }).click()
-    await expect(page).toHaveURL(/\/sign-in/)
+    await (await loggedOut).finished()
     await login(page, userOrigin, other, '/cart')
     await expect(
       page.getByRole('heading', { name: 'Your cart is empty', exact: true }),
     ).toBeVisible()
-    await expect(page.getByText(product.title, { exact: true })).toHaveCount(0)
-    await page.goto(userOrigin + '/wishlist')
-    await expect(
-      page.getByText(
-        'No saved products yet. Save products from their detail pages.',
-        {
-          exact: true,
-        },
-      ),
-    ).toBeVisible()
-    expect(errors).toEqual([])
+    expect(cartRequests).toEqual([])
   } finally {
-    try {
-      const products = await f.db.product.findMany({
-        where: { slug: { startsWith: `qa-${f.key}-` } },
-        select: { id: true },
-      })
-      const references = await f.db.guestCartItem.findMany({
-        where: { productId: { in: products.map((product) => product.id) } },
-        select: { guestCartId: true },
-      })
-      guestIds.push(...references.map((item) => item.guestCartId))
-      await f.db.guestCart.deleteMany({ where: { id: { in: guestIds } } })
-    } finally {
-      await f.close()
-    }
+    await f.close()
   }
 })
+
 test('profile/address editing respects ownership and admin customer directory reveals no address contents or invented spend', async ({
   page,
   request,

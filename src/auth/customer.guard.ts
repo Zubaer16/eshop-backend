@@ -7,13 +7,13 @@ import {
 import { AuthenticatedRequest } from '../auth/auth.types'
 
 @Injectable()
-export class CustomerCartGuard implements CanActivate {
+export class CustomerGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const user = context
       .switchToHttp()
       .getRequest<AuthenticatedRequest>().authUser
     if (!user || user.role !== 'CUSTOMER')
-      throw new ForbiddenException('Customer cart requires a customer account')
+      throw new ForbiddenException('A customer account is required')
     return true
   }
 }

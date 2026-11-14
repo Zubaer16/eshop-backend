@@ -99,17 +99,10 @@ async function fixture(request: APIRequestContext) {
     expect(created.status()).toBe(201)
     const product = await created.json(),
       auth = bearer(customer.token)
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: auth,
-          data: { productId: product.id, quantity: 2 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(auth, { productId: product.id, quantity: 2 })
     const hold = await request.post('/v1/checkout/reservations', {
       headers: auth,
-      data: { requestId: randomUUID(), countryCode },
+      data: { requestId: randomUUID(), countryCode, items: f.selections(auth) },
     })
     expect(hold.status()).toBe(200)
     const orderResponse = await request.post('/v1/orders', {

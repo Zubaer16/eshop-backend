@@ -23,7 +23,7 @@ import {
 import { AccessGuard } from '../../auth/access.guard'
 import { AdminGuard } from '../../auth/admin.guard'
 import { AuthenticatedRequest } from '../../auth/auth.types'
-import { CustomerCartGuard } from '../../cart/cart.customer.guard'
+import { CustomerGuard } from '../../auth/customer.guard'
 import { FulfillmentManageGuard } from '../fulfillment/fulfillment.guard'
 import {
   CreateOrderReturnDto,
@@ -36,7 +36,7 @@ import { ReturnsService } from './returns.service'
 @ApiTags('Returns / Customer')
 @ApiBearerAuth('access-token')
 @Controller('orders/:id/returns')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @ApiUnauthorizedResponse({ description: 'Customer authentication required' })
 @ApiForbiddenResponse({ description: 'Only CUSTOMER role allowed' })
 export class ReturnsCustomerController {

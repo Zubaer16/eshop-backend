@@ -39,14 +39,7 @@ test('checkout estimate Swagger Chromium: owner policy configuration and custome
     })
     expect(product.status()).toBe(201)
     const productId = (await product.json()).id as string
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(customer.token),
-          data: { productId, quantity: 2 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(bearer(customer.token), { productId, quantity: 2 })
     await openSwagger(page)
     await authorizeInSwagger(page, owner.token)
     await swaggerExecute(page, 'PUT', '/v1/admin/checkout/rates', 200, {
@@ -68,7 +61,7 @@ test('checkout estimate Swagger Chromium: owner policy configuration and custome
       'POST',
       '/v1/checkout/estimate',
       200,
-      { countryCode },
+      { countryCode, items: f.selections(bearer(customer.token)) },
     )
     expect(await result.json()).toMatchObject({
       subtotalMinor: 5000,

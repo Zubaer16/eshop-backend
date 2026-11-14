@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { CouponSelectionDto } from '../promotions/promotions.dto'
+import { CheckoutItemsDto } from './checkout-items.dto'
 import { IsIn, IsOptional } from 'class-validator'
 import { DELIVERY_KINDS, type DeliveryKindInput } from './delivery-zones.dto'
 import { IsString, IsUUID, Matches } from 'class-validator'
 
-export class CreateReservationDto extends CouponSelectionDto {
+export class CreateReservationDto extends CheckoutItemsDto {
   @ApiProperty({
     format: 'uuid',
     description:
@@ -38,7 +38,6 @@ export class CheckoutReservationLineDto {
 
 export class CheckoutReservationResponseDto {
   @ApiProperty({ format: 'uuid' }) id!: string
-  @ApiProperty({ format: 'uuid' }) cartId!: string
   @ApiProperty({ format: 'uuid' }) requestId!: string
   @ApiProperty({ enum: ['ACTIVE', 'EXPIRED', 'RELEASED', 'CONSUMED'] })
   status!: 'ACTIVE' | 'EXPIRED' | 'RELEASED' | 'CONSUMED'

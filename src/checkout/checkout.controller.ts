@@ -10,13 +10,11 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
-  ApiProperty,
   ApiBearerAuth,
   ApiConflictResponse,
   ApiForbiddenResponse,
@@ -30,7 +28,7 @@ import {
 import { AccessGuard } from '../auth/access.guard'
 import { AdminGuard } from '../auth/admin.guard'
 import { AuthenticatedRequest } from '../auth/auth.types'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import {
   CheckoutEstimateDto,
   CheckoutEstimateResponseDto,
@@ -38,8 +36,6 @@ import {
   PutCheckoutRateDto,
 } from './checkout.dto'
 import { AvailableDeliveryOptionsDto } from './delivery-zones.dto'
-import { Matches, IsString } from 'class-validator'
-import { CouponSelectionDto } from '../promotions/promotions.dto'
 import { CheckoutOwnerGuard } from './checkout.owner.guard'
 import { CheckoutService } from './checkout.service'
 import { ReservationService } from './reservation.service'
@@ -49,20 +45,10 @@ import {
   CheckoutRecoveryResponseDto,
 } from './reservation.dto'
 
-class DeliveryCountryQueryDto extends CouponSelectionDto {
-  @ApiProperty({
-    example: 'US',
-    description: 'ISO 3166-1 alpha-2 country; cart currency is server-owned',
-  })
-  @IsString()
-  @Matches(/^[A-Z]{2}$/)
-  countryCode!: string
-}
-
 @ApiTags('Checkout / Customer')
 @ApiBearerAuth('access-token')
 @Controller('checkout')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @ApiUnauthorizedResponse({ description: 'Customer JWT required' })
 @ApiForbiddenResponse({ description: 'Not a customer account' })
 export class CheckoutCustomerController {
@@ -103,7 +89,8 @@ export class CheckoutCustomerController {
     return this.checkout.estimate(req.authUser!.id, dto)
   }
 
-  @Get('delivery-options')
+  @Post('delivery-options')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
       'List live standard/express options for owned cart; legacy flat rate if no zone; JWT required',
@@ -114,13 +101,9 @@ export class CheckoutCustomerController {
   })
   deliveryOptions(
     @Req() req: AuthenticatedRequest,
-    @Query() query: DeliveryCountryQueryDto,
+    @Body() input: CheckoutEstimateDto,
   ) {
-    return this.checkout.deliveryOptions(
-      req.authUser!.id,
-      query.countryCode,
-      query.couponCode,
-    )
+    return this.checkout.deliveryOptions(req.authUser!.id, input)
   }
 
   @Post('reservations')

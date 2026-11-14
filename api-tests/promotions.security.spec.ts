@@ -162,9 +162,9 @@ test('promotions security: strict DTOs, UUID/revision bounds, forged totals/ledg
         )
     }
     await assertSafeError(
-      await request.get('/v1/checkout/delivery-options', {
+      await request.post('/v1/checkout/delivery-options', {
         headers: bearer(customer.token),
-        params: { countryCode: 'US', discountMinor: 100 },
+        data: { countryCode: 'US', discountMinor: 100 },
       }),
       400,
     )

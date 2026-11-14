@@ -137,24 +137,13 @@ export class OrdersService {
     try {
       return await this.database.client.$transaction(
         async (tx) => {
-          // Verify the reservation belongs to this customer before cart state, so
-          // a non-existent reservation returns 404 regardless of whether the
-          // customer has configured a cart yet. Lock order stays cart -> reservation.
           const reservationOwner = await tx.checkoutReservation.findFirst({
             where: { id: input.reservationId, customerId },
-            select: { id: true, cartId: true },
+            select: { id: true },
           })
           if (!reservationOwner)
             throw new NotFoundException('Reservation not found')
-          // Lock order creation against cart edits and fresh reservation creation.
-          const cart = await tx.cart.findUnique({
-            where: { userId: customerId },
-            select: { id: true },
-          })
-          if (!cart) throw new ConflictException('Cart is not checkout-ready')
-          if (cart.id !== reservationOwner.cartId)
-            throw new NotFoundException('Reservation not found')
-          await tx.$queryRaw`SELECT id FROM carts WHERE id = ${cart.id}::uuid FOR UPDATE`
+          await tx.$queryRaw`SELECT id FROM users WHERE id = ${customerId}::uuid FOR UPDATE`
           const racedReplay = await tx.order.findUnique({
             where: uniqueKey,
             include: includeOrder,
@@ -202,25 +191,6 @@ export class OrdersService {
           )
             throw new ConflictException(
               'Reservation total integrity check failed',
-            )
-          // Prevent silently converting stale/modified cart contents into an order.
-          const cartLines = await tx.cartItem.findMany({
-            where: { cartId: cart.id },
-          })
-          if (
-            cartLines.length !== reservation.lines.length ||
-            reservation.lines.some(
-              (line) =>
-                !cartLines.some(
-                  (item) =>
-                    item.productId === line.productId &&
-                    item.variantId === line.variantId &&
-                    item.quantity === line.quantity,
-                ),
-            )
-          )
-            throw new ConflictException(
-              'Cart no longer matches its reservation',
             )
           const productIds = [
             ...new Set(reservation.lines.map((line) => line.productId)),
@@ -297,7 +267,6 @@ export class OrdersService {
           const order = await tx.order.create({
             data: {
               customerId,
-              cartId: cart.id,
               reservationId: reservation.id,
               requestId: input.requestId,
               requestHash: hash,
@@ -417,7 +386,10 @@ export class OrdersService {
       where: {
         orderId: order.id,
         OR: [
-          { idempotencyKey: { startsWith: 'hosted-checkout-' }, status: { notIn: ['CANCELLED', 'SETTLED'] } },
+          {
+            idempotencyKey: { startsWith: 'hosted-checkout-' },
+            status: { notIn: ['CANCELLED', 'SETTLED'] },
+          },
           { status: { in: ['CONFIRMING', 'CAPTURING', 'AWAITING_WEBHOOK'] } },
           { status: 'REQUIRES_REVIEW', testCompletionAttempts: { gt: 0 } },
         ],

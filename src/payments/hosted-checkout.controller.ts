@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger'
 import { AccessGuard } from '../auth/access.guard'
 import type { AuthenticatedRequest } from '../auth/auth.types'
-import { CustomerCartGuard } from '../cart/cart.customer.guard'
+import { CustomerGuard } from '../auth/customer.guard'
 import { HostedCheckoutService } from './hosted-checkout.service'
 import {
   HostedCheckoutResponseDto,
@@ -32,7 +32,7 @@ import { PaymentSettlementService } from './payment-settlement.service'
 
 @ApiTags('Checkout / Customer')
 @ApiBearerAuth('access-token')
-@UseGuards(AccessGuard, CustomerCartGuard)
+@UseGuards(AccessGuard, CustomerGuard)
 @Controller('checkout')
 export class HostedCheckoutController {
   constructor(

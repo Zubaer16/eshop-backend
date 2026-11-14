@@ -52,17 +52,13 @@ test('returns and restock real DB: return quantity ceiling, inspection, exactly-
         freeOverSubtotalMinor: null,
       },
     })
-    expect(
-      (
-        await request.put('/v1/cart/items', {
-          headers: bearer(customer.token),
-          data: { productId, quantity: 2 },
-        })
-      ).status(),
-    ).toBe(200)
+    f.selectItems(bearer(customer.token), { productId, quantity: 2 })
     const held = await request.post('/v1/checkout/reservations', {
       headers: bearer(customer.token),
-      data: { requestId: randomUUID(), countryCode },
+      data: {
+        ...{ requestId: randomUUID(), countryCode },
+        items: f.selections(bearer(customer.token)),
+      },
     })
     expect(held.status()).toBe(200)
     const orderRes = await request.post('/v1/orders', {

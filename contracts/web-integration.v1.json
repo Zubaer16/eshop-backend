@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "1.12.0",
-  "date": "2026-11-13",
+  "version": "1.13.0",
+  "date": "2026-11-14",
   "purpose": "Source-grounded web integration contract; implementation is tracked here and current executed acceptance is tracked in docs/WEB_VALIDATION.md",
   "mediaStorage": {
     "uploadModule": "Optional: products (default), categories, brands, banners, branding, notifications",
@@ -275,41 +275,28 @@
     {
       "id": "cart",
       "step": 4,
-      "title": "Guest/customer cart and login merge",
+      "title": "Browser-local guest and customer carts",
       "userRoutes": [
         "/cart"
       ],
       "adminRoutes": [],
       "actions": [
-        "guest cart creation/token",
-        "add/update/remove/clear",
-        "quote",
-        "login merge and replay"
+        "local add/update/remove/clear",
+        "local persistence",
+        "explicit local guest merge"
       ],
-      "operationPrefixes": [
-        "/v1/cart",
-        "/v1/guest-cart"
-      ],
-      "authorization": "Guest capability in X-Guest-Cart-Token; customer Bearer JWT for owned cart/merge",
+      "operationPrefixes": [],
+      "authorization": "Browser-local per-customer/guest storage. Customer JWT required for checkout and wishlist.",
       "notes": [
-        "Cart read/add/set/remove/clear/merge accept optional view=draft. Draft responses set stockChecked=false and availableQuantity=null and select display fields with inventory joins omitted. Default live quote responses and explicit /quote support existing clients. Storefront uses draft requests for guest and account carts.",
-        "Live product actions, header counts, drawer and cart page use server quotes and canonical item/variant IDs; no preview store import.",
-        "Quantity edits recalculate display totals immediately and autosave absolute targets after 350ms, without an Update button. Slow writes serialize; latest unsent targets replace older targets, ambiguous writes pause for frozen-payload retry. Add/set/merge no longer reject insufficient stock: selection validation reads identity/publication/currency only. Existing quote responses still report live informational price/stock; checkout estimate/reservation/order enforce current prices and stock.",
-        "Guest capability persists only in a separate host-only HttpOnly SameSite=Lax cookie (Secure/__Host- in production) through a narrow same-origin guest bridge. Fixed expiry matches Backend 14 days; no guest token in JSON/URLs/browser storage.",
-        "After login, guest items stay separate until explicit merge into the current customer. Conflicts preserve items and allow guest quantity/removal while signed in. Successful merge consumes the guest capability.",
-        "Merge restores the current customer through the existing session handler under the same auth Web Lock, verifies expected customer UUID, and sends only server-owned Bearer/capability to Backend. Cookie rotation/expiry rules are preserved.",
-        "Checkout remains step 5. Guest checkout is not enabled. No tests/DB writes executed for this source delivery.",
-        "Optimistic item/quantity/estimated subtotal is display-only and owner-fenced. Add batches serialize and coalesce before dispatch; checkout remains blocked while pending. Confirmed canonical quotes alone authorize checkout.",
-        "POST /v1/cart/items/add and POST /v1/guest-cart/items/add accept {productId,variantId?,quantity,requestId}. Under the cart row lock, add delta, validation, scoped request-hash receipt and returned quote share one transaction. Identical retries do not increment twice; mismatched request reuse is 409. Existing PUT remains absolute quantity.",
-        "Ambiguous failures pause additions and retain the exact request ID/payload for explicit retry. Definitive rejections roll back local estimates. Existing IdempotencyRecord storage is reused with a 30-day retention timestamp; no migration/Redis required. Deploy Backend before the new Frontend."
+        "Provider-scoped Zustand store persists display previews and canonical product/variant IDs with quantities in browser localStorage. Add, manual quantity entry, plus/minus, removal and clear make zero cart requests.",
+        "Guest and each customer have separate browser storage keys. Guest items merge explicitly after sign-in. Browser Web Locks serialize same-device mutations and storage events refresh other tabs.",
+        "Cart and GuestCart APIs, capability bridge and Prisma tables are retired. Migration drops old saved carts and cart_id references while preserving orders, reservations, payments and reserved inventory allocations.",
+        "Stock validation and guarded atomic reservation occur at final checkout. Display prices are recalculated from catalog data on the server. Wishlist remains customer API-backed.",
+        "Live database migration applied on 2026-11-14. Updated frontend/backend application deployment remains pending. Browser-local carts do not synchronize across devices."
       ],
       "sourceFiles": [
-        "src/cart/cart.controller.ts",
-        "src/cart/guest-cart.controller.ts",
-        "src/cart/cart.dto.ts",
-        "../eshop-user-frontend/lib/api/guest-cart-server.ts",
-        "../eshop-user-frontend/lib/api/guest-cart-client.ts",
-        "../eshop-user-frontend/app/api/cart/guest/route.ts",
+        "../eshop-user-frontend/lib/stores/shopping-store.ts",
+        "../eshop-user-frontend/lib/stores/local-cart.ts",
         "../eshop-user-frontend/components/shopping/commerce-provider.tsx",
         "../eshop-user-frontend/components/shopping/cart.tsx",
         "../eshop-user-frontend/components/layout/header.tsx",
@@ -405,6 +392,7 @@
       ],
       "authorization": "Customer JWT; checkout rate and delivery-zone policies OWNER only",
       "notes": [
+        "Checkout requests contain items [{id,productId,variantId,quantity}]. Delivery options now use POST with the submitted items and destination/coupon. Draft delivery estimates omit inventory joins. Final reservation fingerprints freeze sorted selections and checkout policy. Customer row locks replace cart row locks.",
         "Final boundary POST /v1/checkout/start freezes requestId, country/service/coupon and shippingAddress, locks inventory balances in order, returns structured INSUFFICIENT_STOCK items or reserves stock and creates one order/Stripe TEST Checkout Session. Resume/cancel/reconcile live under /v1/checkout/orders/:orderId. Suggested quantity/removal actions require user choice. Delivery estimates select display data. Payment confirmation uses signed success receipts plus verified provider totals.",
         "Guest cart is supported, guest checkout is not. Require login before checkout and merge safely.",
         "UI standard/express delivery identifiers map to configured options. Other country is not an ISO country; unsupported/unconfigured destinations show a real error.",
@@ -426,7 +414,10 @@
         "src/payments/hosted-checkout.dto.ts",
         "src/payments/hosted-checkout.service.ts",
         "src/payments/providers/stripe-checkout-gateway.ts",
-        "api-tests/hosted-checkout.db.spec.ts"
+        "api-tests/hosted-checkout.db.spec.ts",
+        "../eshop-user-frontend/lib/stores/shopping-store.ts",
+        "src/checkout/checkout-items.dto.ts",
+        "src/checkout/checkout-items.ts"
       ]
     },
     {
@@ -1115,10 +1106,11 @@
     "model": "One API-backed admin workspace using the approved pre-Backend design and shared components; no runtime mock mode.",
     "apiStability": "No domain endpoint, DTO, permission, money, stock, fulfillment or provider rule changed. Source-evidence paths updated for removed mock files."
   },
-  "atomicCartAdd": {
-    "customer": "POST /v1/cart/items/add",
-    "guest": "POST /v1/guest-cart/items/add",
-    "request": "AddCartItemDto: productId, optional variantId, delta quantity 1..99, requestId UUID",
-    "rollout": "Backend first; old absolute PUT and all checkout validations remain intact."
+  "localCart": {
+    "storage": "Provider-scoped Zustand and versioned per-owner browser localStorage",
+    "checkout": "POST /v1/checkout/start with item identities/quantities, destination, coupon, shippingAddress and requestId",
+    "delivery": "POST /v1/checkout/delivery-options with submitted items, destination and optional coupon",
+    "migration": "20261114120000_local_cart_checkout; drops former saved carts, retains order/payment/reservation history",
+    "rollout": "Live migration 20261114120000_local_cart_checkout applied on 2026-11-14. Read-only audit verified 42 applied migrations with matching checksums, zero failures and zero pending migrations. One customer and five guest saved carts were removed. Updated frontend/backend application deployment and commit/push remain pending."
   }
 }

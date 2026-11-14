@@ -26,6 +26,7 @@ test('reservation OpenAPI exposes customer JWT-only stock holds and no payable p
     'countryCode',
     'couponCode',
     'deliveryKind',
+    'items',
     'requestId',
   ])
   expect(dto.required).not.toContain('deliveryKind')

@@ -41,6 +41,50 @@ export class CatalogTestFixture {
 
   constructor(private readonly request: APIRequestContext) {}
 
+  private readonly selectedItems = new Map<
+    string,
+    Array<{
+      id: string
+      productId: string
+      variantId: string | null
+      quantity: number
+    }>
+  >()
+  selectItems(
+    headers: Record<string, string>,
+    selection: {
+      productId: string
+      variantId?: string | null
+      quantity: number
+    },
+  ) {
+    const key = headers.Authorization ?? ''
+    const items = this.selectedItems.get(key) ?? []
+    const existing = items.find(
+      (item) =>
+        item.productId === selection.productId &&
+        item.variantId === (selection.variantId ?? null),
+    )
+    const line = {
+      ...selection,
+      id: existing?.id ?? randomUUID(),
+      variantId: selection.variantId ?? null,
+    }
+    this.selectedItems.set(
+      key,
+      existing
+        ? items.map((item) => (item.id === existing.id ? line : item))
+        : [...items, line],
+    )
+  }
+  selections(headers: Record<string, string>) {
+    return (
+      this.selectedItems
+        .get(headers.Authorization ?? '')
+        ?.map((item) => ({ ...item })) ?? []
+    )
+  }
+
   slug(label: string): string {
     return `qa-${this.key}-${label}`
   }

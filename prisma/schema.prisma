@@ -54,8 +54,6 @@ model User {
   sessions     AuthSession[]
   auditEvents  AuditEvent[]
   staffRoleAssignment StaffRoleAssignment?
-  cart Cart?
-  mergedGuestCarts GuestCart[]
   checkoutReservations CheckoutReservation[]
   orders Order[]
   wishlistItems WishlistItem[]
@@ -169,8 +167,6 @@ model Product {
   inventoryBalance InventoryBalance?
   categories     ProductCategory[]
   media          ProductMedia[]
-  cartItems     CartItem[]
-  guestCartItems GuestCartItem[]
   wishlistItems WishlistItem[]
   featuredLinks FeaturedCollectionProduct[]
   createdAt      DateTime       @default(now()) @map("created_at")
@@ -189,8 +185,6 @@ model ProductVariant {
   priceMinor  Int?     @map("price_minor")
   stockOnHand Int      @default(0) @map("stock_on_hand")
   inventoryBalance InventoryBalance?
-  cartItems   CartItem[]
-  guestCartItems GuestCartItem[]
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -436,72 +430,11 @@ model MediaDeletionJob {
 
 // CommerceA-1: customer-owned, persistent cart. A cart is not a stock hold.
 // Guest ownership, address, taxes, delivery and order creation arrive later.
-model Cart {
-  id        String     @id @default(uuid()) @db.Uuid
-  userId    String     @unique @map("user_id") @db.Uuid
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
-  checkoutReservations CheckoutReservation[]
-  orders Order[]
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
 
-  @@map("carts")
-}
-
-model CartItem {
-  id        String          @id @default(uuid()) @db.Uuid
-  cartId    String          @map("cart_id") @db.Uuid
-  cart      Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  productId String          @map("product_id") @db.Uuid
-  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variantId String?         @map("variant_id") @db.Uuid
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  quantity  Int
-  createdAt DateTime        @default(now()) @map("created_at")
-  updatedAt DateTime        @updatedAt @map("updated_at")
-
-  // For variant lines; SQL adds separate partial unique index for simple products.
-  @@unique([cartId, productId, variantId], map: "cart_items_cart_product_variant_key")
-  @@index([productId])
-  @@index([variantId])
-  @@map("cart_items")
-}
 
 // Anonymous cart capability: token is returned ONCE, only its SHA-256 hash is stored.
 // Guest ownership is never inferred from email, IP, User-Agent, or browser cookies.
-model GuestCart {
-  id           String    @id @default(uuid()) @db.Uuid
-  tokenHash    String    @unique @map("token_hash") @db.VarChar(64)
-  expiresAt    DateTime  @map("expires_at")
-  mergedUserId String?   @map("merged_user_id") @db.Uuid
-  mergedUser   User?     @relation(fields: [mergedUserId], references: [id], onDelete: SetNull)
-  mergedAt     DateTime? @map("merged_at")
-  items        GuestCartItem[]
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
 
-  @@index([expiresAt])
-  @@map("guest_carts")
-}
-
-model GuestCartItem {
-  id          String          @id @default(uuid()) @db.Uuid
-  guestCartId String          @map("guest_cart_id") @db.Uuid
-  guestCart   GuestCart       @relation(fields: [guestCartId], references: [id], onDelete: Cascade)
-  productId   String          @map("product_id") @db.Uuid
-  product     Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variantId   String?         @map("variant_id") @db.Uuid
-  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  quantity    Int
-  createdAt   DateTime        @default(now()) @map("created_at")
-  updatedAt   DateTime        @updatedAt @map("updated_at")
-
-  @@unique([guestCartId, productId, variantId], map: "guest_cart_items_line_key")
-  @@index([productId])
-  @@index([variantId])
-  @@map("guest_cart_items")
-}
 
 // checkout estimate: Explicit, owner-maintained country/currency checkout estimate policy.
 // No default jurisdiction, no implicit free shipping, no stock hold or order.
@@ -529,11 +462,10 @@ enum CheckoutReservationStatus {
 }
 
 model CheckoutReservation {
+  requestHash String? @map("request_hash") @db.VarChar(64)
   id                  String   @id @default(uuid()) @db.Uuid
   customerId          String   @map("customer_id") @db.Uuid
   customer            User     @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  cartId              String   @map("cart_id") @db.Uuid
-  cart                Cart     @relation(fields: [cartId], references: [id], onDelete: Restrict)
   requestId           String   @map("request_id") @db.Uuid
   status              CheckoutReservationStatus @default(ACTIVE)
   countryCode         String   @map("country_code") @db.VarChar(2)
@@ -588,8 +520,6 @@ model Order {
   id                String      @id @default(uuid()) @db.Uuid
   customerId        String      @map("customer_id") @db.Uuid
   customer          User        @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  cartId            String      @map("cart_id") @db.Uuid
-  cart              Cart        @relation(fields: [cartId], references: [id], onDelete: Restrict)
   reservationId     String      @unique @map("reservation_id") @db.Uuid
   reservation       CheckoutReservation @relation(fields: [reservationId], references: [id], onDelete: Restrict)
   requestId         String      @map("request_id") @db.Uuid

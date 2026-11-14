@@ -7,6 +7,8 @@ const root = path.resolve(__dirname, '..')
 const filename = path.join(root, 'artifacts', 'release', 'openapi.json')
 const required = [
   ['get', '/v1/health'],
+  ['post', '/v1/checkout/start'],
+  ['post', '/v1/checkout/delivery-options'],
   ['get', '/v1/auth/me'],
   ['get', '/v1/admin/jobs/status'],
   ['get', '/v1/admin/reports/financial'],
@@ -21,8 +23,11 @@ function checkDocument(doc) {
     failures.push('OpenAPI 3.x document required')
   if (!doc?.components?.securitySchemes?.['access-token'])
     failures.push('Missing bearer security scheme')
-  if (!doc?.components?.securitySchemes?.['guest-cart-token'])
-    failures.push('Missing separate guest capability scheme')
+  if (doc?.components?.securitySchemes?.['guest-cart-token'])
+    failures.push('Retired guest capability scheme is still present')
+  for (const route of Object.keys(doc?.paths || {}))
+    if (/^\/v1\/(cart|guest-cart)(\/|$)/.test(route))
+      failures.push('Retired cart API is still present')
   for (const [verb, route] of required)
     if (!doc?.paths?.[route]?.[verb])
       failures.push(`Missing ${verb.toUpperCase()} ${route}`)
@@ -52,7 +57,9 @@ if (require.main === module) {
       JSON.stringify({ status: 'STRUCTURAL_CONTRACT_OK', ...result }) + '\n',
     )
   } catch (error) {
-    process.stderr.write(`release acceptance contract gate blocked: ${error.message}\n`)
+    process.stderr.write(
+      `release acceptance contract gate blocked: ${error.message}\n`,
+    )
     process.exitCode = 1
   }
 }

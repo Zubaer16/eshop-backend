@@ -12,14 +12,13 @@ const { config } = require('dotenv')
 const root = path.resolve(__dirname, '..')
 const mode = process.argv[2]
 const allowed = [
-  'cart-add',
+  'checkout',
   'smoke',
   'db',
   'db-deploy',
   'report',
   'visual-smoke',
   'visual-db',
-  'visual-guest',
   'visual-checkout',
   'visual-reservation',
   'visual-orders',
@@ -50,6 +49,7 @@ const allowed = [
   'security',
   'web-auth',
   'web-integration',
+  'web-shopping',
 ]
 if (!allowed.includes(mode)) {
   process.stderr.write(
@@ -216,7 +216,11 @@ try {
     )
   }
   const safe = databaseEnv() // fails closed before any DB request
-  if (mode === 'web-auth' || mode === 'web-integration') {
+  if (
+    mode === 'web-auth' ||
+    mode === 'web-integration' ||
+    mode === 'web-shopping'
+  ) {
     safe.API_TEST_MODE = 'db'
     safe.CORS_ORIGINS = 'http://127.0.0.1:3300,http://127.0.0.1:3301'
     safe.MEDIA_PROVIDER = 'disk'
@@ -242,6 +246,9 @@ try {
         'test',
         '--config=playwright.web.config.mjs',
         ...(mode === 'web-auth' ? ['auth.spec.ts'] : []),
+        ...(mode === 'web-shopping'
+          ? ['shopping.spec.ts', 'checkout.spec.ts']
+          : []),
       ],
       safe,
     )
@@ -261,7 +268,6 @@ try {
   if (
     mode === 'db' ||
     mode === 'visual-db' ||
-    mode === 'visual-guest' ||
     mode === 'visual-checkout' ||
     mode === 'visual-reservation' ||
     mode === 'visual-orders' ||
@@ -303,7 +309,6 @@ try {
   run(
     cli,
     mode === 'visual-db' ||
-      mode === 'visual-guest' ||
       mode === 'visual-checkout' ||
       mode === 'visual-reservation' ||
       mode === 'visual-orders' ||
@@ -334,9 +339,6 @@ try {
           'test',
           '--config=playwright.swagger.config.mjs',
           '--project=visual-db',
-          ...(mode === 'visual-guest'
-            ? ['--grep', 'guest cart Swagger Chromium: guest capability']
-            : []),
           ...(mode === 'visual-checkout'
             ? [
                 '--grep',
@@ -449,12 +451,9 @@ try {
             'test',
             '--config=playwright.api.config.mjs',
             '--project=db',
-            ...(mode === 'cart-add'
+            ...(mode === 'checkout'
               ? [
-                  'cart-add.db.spec.ts',
                   'hosted-checkout.db.spec.ts',
-                  'cart.db.spec.ts',
-                  'guest-cart.db.spec.ts',
                   'checkout.db.spec.ts',
                   'reservation.db.spec.ts',
                 ]
