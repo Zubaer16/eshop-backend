@@ -1,5 +1,24 @@
 # Integrated web validation
 
+## Browser security headers and dependency remediation - 2026-11-14
+
+The owner approved implementing the focused security-audit findings. Both frontend Next configurations now send Content-Security-Policy, X-Content-Type-Options nosniff, X-Frame-Options DENY and Referrer-Policy strict-origin-when-cross-origin. CSP blocks inline event-handler attributes, foreign scripts, object embeds, frames, base elements and cross-origin form submissions. Connections permit the configured browser API origin and the Firebase installation/FCM registration endpoints. Images retain HTTPS provider support. Same-origin workers support the existing push worker. Production enables upgrade-insecure-requests. Development allows eval and WebSocket connections for development tooling.
+
+The CSP explicitly permits inline script blocks required by the current statically generated Next hydration and inline styles used by the UI/theme. This leaves residual inline-script injection exposure. It is a defense-in-depth policy with script-src-attr none. Existing JSX escaping, URL validation and server DTO checks remain relevant. Production builds retain static route generation and the current public-data caching behavior.
+
+Both frontends use Next and eslint-config-next 15.5.29. Their gRPC transitive dependency is overridden to patched 1.13.6 while existing Firebase app/messaging imports remain in use. Backend Nest common/core/platform-express/testing are 11.2.10 and Swagger is 11.4.8. Prisma CLI, client and PostgreSQL adapter are aligned at 7.10.1. body-parser and fast-uri resolve patched releases within their dependency ranges. Production-only npm audits report zero advisories in each repository. Development dependency audits still report 6 moderate entries in each frontend and 8 low plus 9 moderate entries in Backend.
+
+New production-browser tests in each frontend verify the response headers, production eval restriction and browser enforcement against an injected inline image event handler and a foreign script. Both probes remain unexecuted and the foreign script request is blocked before reaching the test route. Existing UI browser suites cover login, catalog/media presentation, owner settings, cart, stock correction and Stripe return flows. Firebase push unit tests cover registration ownership and worker privacy. Real external FCM delivery and live Stripe acceptance remain unverified for this batch.
+
+### Executed validation
+
+- Storefront production build, type checking, lint and verification passed with 63 unit tests and 38 production-browser tests.
+- Admin production build, type checking, lint and verification passed with 48 unit tests and 26 production-browser tests.
+- Backend Prisma generation/schema validation, type checking, Swagger syntax checks, lint and build passed. All 347 unit tests and 13 Jest HTTP tests passed. With the final fast-uri patch installed, the guarded local PostgreSQL database suite passed 84 tests, API security passed 67 tests and API smoke/contracts passed 62 tests.
+- All three production-only dependency audits report zero advisories. Git diff whitespace checks passed. Database regression execution used the guarded localhost kookaburra_api_test configuration.
+
+This implementation is local. Source commit/push and live application deployment remain pending.
+
 ## Tax removal and optional delivery defaults - 2026-11-14
 
 The owner requested removal of checkout tax and a delivery charge of zero when no amount is configured. New checkout estimates and reservations use taxMinor 0. Tax configuration fields and tax_bps columns are removed. Existing order and reservation tax snapshots retain their recorded amounts, including frozen payment retries.
