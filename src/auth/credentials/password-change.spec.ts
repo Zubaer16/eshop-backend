@@ -1,3 +1,4 @@
+import { ImmediateEmail } from '../../email/immediate-email.service'
 import {
   BadRequestException,
   ConflictException,
@@ -45,6 +46,7 @@ describe('password change customer password change transaction protections', () 
       { client } as unknown as DatabaseService,
       {} as JwtService,
       {} as ConfigService<Environment, true>,
+      { start: jest.fn() } as unknown as ImmediateEmail,
     )
     return { auth, tx, client, original }
   }

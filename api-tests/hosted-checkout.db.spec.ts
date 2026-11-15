@@ -41,6 +41,7 @@ test('hosted checkout isolated DB: final shortages, exclusive holds, uncertain r
     db,
     new DeliveryZonesService(db),
     new PromotionsService(db),
+    new OrdersService(db),
   )
   const orders = new OrdersService(db)
   const sessions = new Map<string, HostedSession>()

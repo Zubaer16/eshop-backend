@@ -14,9 +14,10 @@ export class EmailQueue {
   ) {
     this.content = new EmailContent(config)
   }
-  async queue(since: Date, limit = 50, apply = false) {
+  async queue(since: Date, limit = 50, apply = false, eventId?: string) {
     const candidates = await this.db.client.outboxEvent.findMany({
       where: {
+        id: eventId,
         eventType: { in: emailEventTypes },
         createdAt: { gte: since },
         OR: [

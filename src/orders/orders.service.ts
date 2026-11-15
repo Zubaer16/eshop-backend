@@ -532,9 +532,16 @@ export class OrdersService {
   }
 
   /** Idempotent, multi-worker-safe expiry. Select/lock order before inventory rows. */
-  async expireBatch(limit = 50) {
+  async expireBatch(limit = 50, productIds?: string[]) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 100)
       throw new ConflictException('Invalid order expiry batch size')
+    if (productIds?.length === 0) return { expired: 0 }
+    const products = productIds
+      ? Prisma.sql`AND EXISTS (
+      SELECT 1 FROM order_lines l WHERE l.order_id = o.id
+        AND l.product_id IN (${Prisma.join(productIds.map((id) => Prisma.sql`${id}::uuid`))})
+    )`
+      : Prisma.empty
     return this.database.client.$transaction(
       async (tx) => {
         const rows = await tx.$queryRaw<Array<{ id: string }>>`
@@ -552,6 +559,7 @@ export class OrdersService {
             WHERE pa.order_id = o.id AND r.event_type = 'payment_intent.succeeded'
               AND r.status IN ('RECEIVED', 'PROCESSING')
           )
+        ${products}
         ORDER BY o.payment_deadline_at, o.id
         LIMIT ${limit} FOR UPDATE SKIP LOCKED
       `

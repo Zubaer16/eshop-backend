@@ -1,3 +1,4 @@
+import { EmailDeliveryModule } from '../email/email-delivery.module'
 import { Module } from '@nestjs/common'
 import { JwtModule } from '@nestjs/jwt'
 import { AuthService } from './auth.service'
@@ -10,7 +11,7 @@ import { WorkspaceController } from './workspace/workspace.controller'
 import { WorkspaceService } from './workspace/workspace.service'
 
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [JwtModule.register({}), EmailDeliveryModule],
   controllers: [
     CustomerAuthController,
     AdminAuthController,

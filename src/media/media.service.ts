@@ -667,11 +667,12 @@ export class MediaService {
   }
 
   /** Durable, idempotent, batch processor. Run by scheduler/VPS worker, not in HTTP background. */
-  async cleanupBatch(limit = 20) {
+  async cleanupBatch(limit = 20, mediaId?: string) {
     const now = new Date()
     // Expired abandoned uploads may exist remotely; enqueue their known keys.
     const expired = await this.db.client.mediaAsset.findMany({
       where: {
+        id: mediaId,
         namespace: this.config.get('MEDIA_NAMESPACE', { infer: true }),
         status: 'PENDING_UPLOAD',
         uploadExpiresAt: { lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
@@ -697,13 +698,14 @@ export class MediaService {
     // Recover abandoned PROCESSING jobs only after their network call has timed out.
     await this.db.client.mediaDeletionJob.updateMany({
       where: {
+        mediaId,
         status: 'PROCESSING',
         claimedAt: { lt: new Date(Date.now() - 10 * 60 * 1000) },
       },
       data: { status: 'PENDING', claimedAt: null },
     })
     const jobs = await this.db.client.mediaDeletionJob.findMany({
-      where: { status: 'PENDING', availableAt: { lte: now } },
+      where: { mediaId, status: 'PENDING', availableAt: { lte: now } },
       orderBy: [{ availableAt: 'asc' }, { id: 'asc' }],
       take: limit,
     })

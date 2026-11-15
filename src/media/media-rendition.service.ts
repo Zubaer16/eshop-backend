@@ -10,7 +10,7 @@ import { renditionKey, widthsFor, type RenditionEntry } from './renditions'
 
 const MAX_SOURCE_BYTES = 10 * 1024 * 1024
 
-/** Durable outbox dispatcher. This must be run by a scheduler/worker: never fire-and-forget from HTTP. */
+/** Durable rendition processing, shared by scoped request work and recovery workers. */
 @Injectable()
 export class MediaRenditionService {
   constructor(
@@ -21,7 +21,7 @@ export class MediaRenditionService {
   ) {}
 
   /** Enqueue legacy already-verified assets without modifying existing provider identity. */
-  async backfill(limit = 50): Promise<number> {
+  async backfill(limit = 50, mediaId?: string): Promise<number> {
     const namespace = this.config.get('MEDIA_NAMESPACE', { infer: true })
     let inserted = 0
     let cursor: string | undefined
@@ -30,6 +30,7 @@ export class MediaRenditionService {
       // originals when the first page contains only completed/failed jobs.
       const candidates = await this.db.client.mediaAsset.findMany({
         where: {
+          id: mediaId,
           namespace,
           status: 'ACTIVE',
           provider: { in: ['s3', 'disk'] },
@@ -63,12 +64,13 @@ export class MediaRenditionService {
     return inserted
   }
 
-  async processBatch(limit = 10) {
+  async processBatch(limit = 10, eventId?: string) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 50)
       throw new Error('Invalid batch size')
     // Claim recovery only after the expected max worker execution window.
     await this.db.client.outboxEvent.updateMany({
       where: {
+        id: eventId,
         eventType: 'media.renditions',
         status: 'PROCESSING',
         updatedAt: { lt: new Date(Date.now() - 30 * 60_000) },
@@ -77,6 +79,7 @@ export class MediaRenditionService {
     })
     const queued = await this.db.client.outboxEvent.findMany({
       where: {
+        id: eventId,
         eventType: 'media.renditions',
         status: 'PENDING',
         availableAt: { lte: new Date() },

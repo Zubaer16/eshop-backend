@@ -22,6 +22,7 @@ import {
 } from './auth.dto'
 import { hashPassword, verifyPassword } from './credentials/password'
 import { SafeUser } from './auth.types'
+import { ImmediateEmail } from '../email/immediate-email.service'
 import { encryptEmailActionToken } from './credentials/email-verification.crypto'
 
 const REFRESH_MS = 30 * 24 * 60 * 60 * 1000
@@ -36,6 +37,7 @@ export class AuthService {
     private readonly database: DatabaseService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService<Environment, true>,
+    private readonly immediateEmail: ImmediateEmail,
   ) {}
 
   private async issue(
@@ -293,7 +295,7 @@ export class AuthService {
         'Email verification delivery is not configured',
       )
     const now = new Date()
-    await this.database.client.$transaction(async (tx) => {
+    const eventId = await this.database.client.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId}::uuid FOR UPDATE`
       const user = await tx.user.findUnique({ where: { id: userId } })
       if (!user || user.status !== 'ACTIVE' || user.role !== 'CUSTOMER')
@@ -335,7 +337,9 @@ export class AuthService {
           targetId: userId,
         },
       })
+      return eventId
     })
+    if (eventId) this.immediateEmail.start(eventId)
     return { accepted: true }
   }
 
@@ -355,7 +359,9 @@ export class AuthService {
       const current = await tx.emailVerificationChallenge.findUnique({
         where: { userId: challenge.userId },
       })
-      const user = await tx.user.findUnique({ where: { id: challenge.userId } })
+      const user = await tx.user.findUnique({
+        where: { id: challenge.userId },
+      })
       const now = new Date()
       if (
         !current ||
@@ -409,7 +415,7 @@ export class AuthService {
     })
     if (!user || user.role !== 'CUSTOMER' || user.status !== 'ACTIVE')
       return accepted
-    await this.database.client.$transaction(async (tx) => {
+    const eventId = await this.database.client.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM users WHERE id = ${user.id}::uuid FOR UPDATE`
       const currentUser = await tx.user.findUnique({
         where: { id: user.id },
@@ -474,7 +480,9 @@ export class AuthService {
           targetId: user.id,
         },
       })
+      return eventId
     })
+    if (eventId) this.immediateEmail.start(eventId)
     return accepted
   }
 

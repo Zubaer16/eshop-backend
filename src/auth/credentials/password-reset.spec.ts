@@ -1,3 +1,4 @@
+import { ImmediateEmail } from '../../email/immediate-email.service'
 import { BadRequestException } from '@nestjs/common'
 import { AuthService } from '../auth.service'
 import { DatabaseService } from '../../database/database.service'
@@ -15,6 +16,7 @@ describe('password recovery password recovery invariants', () => {
         Environment,
         true
       >,
+      { start: jest.fn() } as unknown as ImmediateEmail,
     )
   it('does not enumerate unknown accounts', async () => {
     const client = {

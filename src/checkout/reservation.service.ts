@@ -1,3 +1,4 @@
+import { OrdersService } from '../orders/orders.service'
 import { resolveCheckoutRate } from './checkout-rates'
 import {
   ConflictException,
@@ -14,7 +15,7 @@ import { estimateConfiguredCharges } from './checkout.pricing'
 import { CreateReservationDto } from './reservation.dto'
 import { DeliveryZonesService } from './delivery-zones.service'
 
-// A bounded hold; a scheduled checkout:expire run is required in deployment.
+// Bounded holds are released by checkout shortage recovery or expiry workers.
 export const RESERVATION_TTL_MS = 10 * 60 * 1000
 const includeLines = {
   lines: { orderBy: { balanceId: 'asc' as const } },
@@ -57,6 +58,7 @@ export class ReservationService {
     private readonly database: DatabaseService,
     private readonly zones: DeliveryZonesService,
     private readonly promotions: PromotionsService,
+    private readonly orders: OrdersService,
   ) {}
 
   /** Must run within one DB transaction. Locks reservation row before balances. */
@@ -94,6 +96,31 @@ export class ReservationService {
   }
 
   async reserve(customerId: string, input: CreateReservationDto) {
+    try {
+      return await this.reserveOnce(customerId, input)
+    } catch (error) {
+      const detail =
+        error instanceof ConflictException ? error.getResponse() : null
+      if (
+        !detail ||
+        typeof detail !== 'object' ||
+        !('code' in detail) ||
+        detail.code !== 'INSUFFICIENT_STOCK'
+      )
+        throw error
+      const productIds = [...new Set(input.items.map((item) => item.productId))]
+      let holds, orders
+      do {
+        holds = await this.expireBatch(50, productIds)
+        orders = await this.orders.expireBatch(50, productIds)
+      } while (holds.expired === 50 || orders.expired === 50)
+      // Another concurrent expiry may have released rows skipped by our lease
+      // scan. Recheck stock once under the normal balance locks.
+      return this.reserveOnce(customerId, input)
+    }
+  }
+
+  private async reserveOnce(customerId: string, input: CreateReservationDto) {
     const requestHash = reservationFingerprint(input)
     const key = {
       customerId_requestId: { customerId, requestId: input.requestId },
@@ -357,15 +384,24 @@ export class ReservationService {
   }
 
   /** Safe for concurrent schedulers: SKIP LOCKED, idempotent release. */
-  async expireBatch(limit = 50) {
+  async expireBatch(limit = 50, productIds?: string[]) {
     if (!Number.isInteger(limit) || limit < 1 || limit > 100)
       throw new ConflictException('Invalid expiry batch size')
+    if (productIds?.length === 0) return { expired: 0 }
+    const products = productIds
+      ? Prisma.sql`AND EXISTS (
+      SELECT 1 FROM checkout_reservation_lines l
+      WHERE l.reservation_id = r.id
+        AND l.product_id IN (${Prisma.join(productIds.map((id) => Prisma.sql`${id}::uuid`))})
+    )`
+      : Prisma.empty
     return this.database.client.$transaction(
       async (tx) => {
         const ids = await tx.$queryRaw<Array<{ id: string }>>`
-        SELECT id FROM checkout_reservations
-        WHERE status = 'ACTIVE' AND expires_at <= (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
-        ORDER BY expires_at ASC, id ASC
+        SELECT r.id FROM checkout_reservations r
+        WHERE r.status = 'ACTIVE' AND r.expires_at <= (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+        ${products}
+        ORDER BY r.expires_at ASC, r.id ASC
         LIMIT ${limit} FOR UPDATE SKIP LOCKED
       `
         for (const row of ids) await this.transition(tx, row.id, 'EXPIRED')

@@ -92,9 +92,10 @@ export class NotificationDispatcher {
           : body,
       )
   }
-  async dispatch(since: Date, limit = 50, apply = false) {
+  async dispatch(since: Date, limit = 50, apply = false, eventId?: string) {
     const candidates = await this.db.client.outboxEvent.findMany({
       where: {
+        id: eventId,
         eventType: { in: notificationEventTypes },
         createdAt: { gte: since },
         OR: [

@@ -3,7 +3,10 @@ import { ConfigService } from '@nestjs/config'
 import { Prisma } from '../generated/prisma/client'
 import { DatabaseService } from '../database/database.service'
 import { Environment } from '../config/environment'
-import { StripeTestGateway, VerifiedStripeIntentState } from './providers/stripe-gateway'
+import {
+  StripeTestGateway,
+  VerifiedStripeIntentState,
+} from './providers/stripe-gateway'
 
 const LEASE_MS = 90_000
 const MAX_ATTEMPTS = 7
@@ -30,12 +33,13 @@ export class PaymentCancellationService {
       )
   }
 
-  async cancelBatch(limit = 25) {
+  async cancelBatch(limit = 25, orderId?: string) {
     this.enabled()
     if (!Number.isInteger(limit) || limit < 1 || limit > MAX_BATCH)
       throw new Error('Invalid cancellation batch size')
     const attempts = await this.db.client.paymentAttempt.findMany({
       where: {
+        orderId,
         provider: 'STRIPE_TEST',
         providerIntentId: { not: null },
         order: { status: { in: [...CLOSED_STATUSES] } },

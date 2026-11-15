@@ -453,6 +453,7 @@ try {
             '--project=db',
             ...(mode === 'checkout'
               ? [
+                  'immediate-actions.db.spec.ts',
                   'hosted-checkout.db.spec.ts',
                   'checkout.db.spec.ts',
                   'checkout-defaults.db.spec.ts',

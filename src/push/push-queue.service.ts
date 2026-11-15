@@ -15,9 +15,10 @@ export class PushQueue {
   ) {
     this.content = new PushContent(config)
   }
-  async queue(since: Date, limit = 50, apply = false) {
+  async queue(since: Date, limit = 50, apply = false, eventId?: string) {
     const candidates = await this.db.client.outboxEvent.findMany({
       where: {
+        id: eventId,
         eventType: { in: notificationEventTypes },
         createdAt: { gte: since },
         OR: [

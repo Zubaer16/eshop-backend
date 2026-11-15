@@ -1,3 +1,4 @@
+import { OrdersModule } from '../orders/orders.module'
 import { Module } from '@nestjs/common'
 import { PromotionsModule } from '../promotions/promotions.module'
 import { AuthModule } from '../auth/auth.module'
@@ -13,7 +14,7 @@ import { DeliveryZonesAdminController } from './delivery-zones.controller'
 import { DeliveryZonesService } from './delivery-zones.service'
 
 @Module({
-  imports: [AuthModule, PromotionsModule],
+  imports: [AuthModule, PromotionsModule, OrdersModule],
   controllers: [
     CheckoutCustomerController,
     CheckoutAdminController,

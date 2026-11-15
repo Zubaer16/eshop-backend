@@ -106,7 +106,7 @@ export class CustomerAuthController {
   @ApiOperation({
     summary: 'Request email verification for the signed-in customer',
     description:
-      'Queues an encrypted, recipient-bound email event. Delivery requires configured email workers; token is never returned. 60-second resend cooldown.',
+      'Queues an encrypted, recipient-bound email event and starts a request-scoped background delivery attempt. Durable workers recover retryable failures. Token is never returned. 60-second resend cooldown.',
   })
   @ApiAcceptedResponse({ type: EmailVerificationResultDto })
   requestEmailVerification(

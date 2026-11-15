@@ -6,6 +6,7 @@ import {
 import { Prisma } from '../../generated/prisma/client'
 import { DatabaseService } from '../../database/database.service'
 import { CreateRefundRequestDto } from './refund-ledger.dto'
+import { recordRequestWork } from '../../jobs/request-work.context'
 
 const BLOCKING_STATUSES = [
   'REQUESTED',
@@ -43,7 +44,7 @@ export class RefundLedgerService {
   }
 
   async create(ownerId: string, orderId: string, dto: CreateRefundRequestDto) {
-    return this.db.client.$transaction(
+    const result = await this.db.client.$transaction(
       async (tx) => {
         // Serializes all requests for the same order across processes.
         const locked = await tx.$queryRaw<
@@ -138,6 +139,8 @@ export class RefundLedgerService {
         timeout: 15000,
       },
     )
+    recordRequestWork('refund', result.id)
+    return result
   }
 
   async listForOwner(orderId: string) {

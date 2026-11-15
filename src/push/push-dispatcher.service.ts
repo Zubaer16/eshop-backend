@@ -60,13 +60,14 @@ export class PushDispatcher {
       return true
     })
   }
-  async dispatch(since: Date, limit = 50, apply = false) {
+  async dispatch(since: Date, limit = 50, apply = false, eventId?: string) {
     const enabled =
       this.config.get('PUSH_DELIVERY_MODE', { infer: true }) !== 'disabled'
     if (apply && !enabled)
       throw new ServiceUnavailableException('Push delivery is disabled')
     const expired = await this.db.client.pushDelivery.findMany({
       where: {
+        eventId,
         status: 'PROCESSING',
         leaseExpiresAt: { lte: new Date() },
         event: { createdAt: { gte: since } },
@@ -95,6 +96,7 @@ export class PushDispatcher {
           )
     const jobs = await this.db.client.pushDelivery.findMany({
       where: {
+        eventId,
         status: { in: ['PENDING', 'FAILED'] },
         attempts: { lt: 5 },
         nextAttemptAt: { lte: new Date() },

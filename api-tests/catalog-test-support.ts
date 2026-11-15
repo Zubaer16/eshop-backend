@@ -285,6 +285,7 @@ export class CatalogTestFixture {
           cleanupDatabase,
           new DeliveryZonesService(cleanupDatabase),
           new PromotionsService(cleanupDatabase),
+          new OrdersService(cleanupDatabase),
         )
         for (const hold of active)
           await reservations.release(hold.customerId, hold.id)

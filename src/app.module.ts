@@ -1,4 +1,9 @@
 import { JobsModule } from './jobs/jobs.module'
+import { APP_INTERCEPTOR } from '@nestjs/core'
+import {
+  ImmediateActions,
+  RequestWorkInterceptor,
+} from './jobs/request-work.interceptor'
 import { ReportingModule } from './reporting/reporting.module'
 import { PushModule } from './push/push.module'
 import { EmailModule } from './email/email.module'
@@ -27,6 +32,10 @@ import { StoreBootstrapModule } from './store-bootstrap/store-bootstrap.module'
 import { StoreOperationsModule } from './store-operations/store-operations.module'
 
 @Module({
+  providers: [
+    ImmediateActions,
+    { provide: APP_INTERCEPTOR, useClass: RequestWorkInterceptor },
+  ],
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnvironment }),
     HealthModule,

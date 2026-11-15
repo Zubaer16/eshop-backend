@@ -312,12 +312,13 @@ export class PushCampaignsService {
       }
     })
   }
-  async fanout(limit = 50, apply = false) {
+  async fanout(limit = 50, apply = false, eventId?: string) {
     const clock = await this.db.client.$queryRaw<
       { now: Date }[]
     >`SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AS now`
     const rows = await this.db.client.pushCampaign.findMany({
       where: {
+        eventId,
         status: { in: ['SCHEDULED', 'FANOUT'] },
         scheduledAt: { lte: clock[0]!.now },
         retryAt: { lte: clock[0]!.now },

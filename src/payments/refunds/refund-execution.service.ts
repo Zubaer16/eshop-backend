@@ -19,7 +19,7 @@ const MAX_UNKNOWN_ID_AGE_MS = 22 * 60 * 60 * 1000
 type Outcome = 'SUCCEEDED' | 'FAILED' | 'REVIEW' | 'RETRY' | 'SKIPPED'
 
 /**
- * An explicit operator worker, never invoked by a browser request.
+ * Shared execution for committed owner requests and recovery workers.
  * Stripe is always queried outside DB transactions. The only source of truth
  * for SUCCEEDED / FAILED is a freshly retrieved provider refund object.
  */
