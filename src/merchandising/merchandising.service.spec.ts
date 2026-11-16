@@ -4,6 +4,45 @@ import { DatabaseService } from '../database/database.service'
 import { MerchandisingService } from './merchandising.service'
 
 describe('merchandising public projection safety (execution deferred to release acceptance)', () => {
+  it('uses a bounded cold-connection wait for both repeatable-read public snapshots', async () => {
+    const tx = {
+      $queryRaw: jest
+        .fn()
+        .mockResolvedValue([{ now: new Date('2026-11-16T00:00:00Z') }]),
+      storeBanner: { findMany: jest.fn().mockResolvedValue([]) },
+      featuredCollection: {
+        findMany: jest.fn().mockResolvedValue([]),
+        findFirst: jest
+          .fn()
+          .mockResolvedValue({
+            id: 'collection',
+            slug: 'new-arrivals',
+            products: [],
+          }),
+      },
+    }
+    const transaction = jest
+      .fn()
+      .mockImplementation((work: (client: typeof tx) => unknown) => work(tx))
+    const db = {
+      client: { $transaction: transaction },
+    } as unknown as DatabaseService
+    const config = { get: () => 'projects/eshop' } as unknown as ConfigService<
+      Environment,
+      true
+    >
+    const service = new MerchandisingService(db, config)
+    await service.homepage()
+    await service.collectionBySlug('new-arrivals')
+    expect(transaction).toHaveBeenCalledTimes(2)
+    for (const call of transaction.mock.calls) {
+      expect(call[1]).toEqual({
+        isolationLevel: 'RepeatableRead',
+        maxWait: 5000,
+        timeout: 8000,
+      })
+    }
+  })
   it('has a deterministic public-only revision and never exposes admin/storage fields', async () => {
     const tx = {
       $queryRaw: jest

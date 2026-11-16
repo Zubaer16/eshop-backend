@@ -611,7 +611,12 @@ export class MerchandisingService {
           ...data,
         }
       },
-      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+        // Cold database connections can exceed Prisma's default 2s acquire wait.
+        maxWait: 5000,
+        timeout: 8000,
+      },
     )
   }
 
@@ -632,7 +637,12 @@ export class MerchandisingService {
         if (!row) throw new NotFoundException('Published collection not found')
         return this.publicCollection(row, 50)
       },
-      { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+        // Cold database connections can exceed Prisma's default 2s acquire wait.
+        maxWait: 5000,
+        timeout: 8000,
+      },
     )
   }
 }
